@@ -93,7 +93,8 @@ const PostWidget = ({
  };
   
 
-  const handleEditComment = async (index, updatedText) => {
+ const handleEditComment = async (index, updatedText) => {
+  try {
     const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${index}`, {
       method: "PATCH",
       headers: {
@@ -102,9 +103,23 @@ const PostWidget = ({
       },
       body: JSON.stringify({ text: updatedText }),
     });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update comment: ${response.status} - ${response.statusText}`);
+    }
+
     const updatedPost = await response.json();
-    setPostComments(updatedPost.comments);
-  };
+
+    // Ensure the server response contains the expected structure
+    if (updatedPost && updatedPost.comments) {
+      setPostComments(updatedPost.comments);
+    } else {
+      console.error("Unexpected server response:", updatedPost);
+    }
+  } catch (error) {
+    console.error("Error updating comment:", error.message);
+  }
+};
 
   return (
     <WidgetWrapper m="2rem 0">
