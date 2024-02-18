@@ -1,6 +1,7 @@
 import Post from "../models/Post.js";
 import User from "../models/User.js";
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+
 
 
 /* CREATE */
@@ -128,23 +129,27 @@ export const deleteComment = async (req, res) => {
   
 
 /* UPDATE COMMENT */
-
 export const updateComment = async (req, res) => {
   try {
     const { postId, commentId } = req.params;
     const { text } = req.body;
+
     const post = await Post.findById(postId);
 
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
 
-    const comment = post.comments.id(commentId);
-    if (!comment) {
-      return res.status(404).json({ error: "Comment not found" });
+    // Check if commentId is a valid index (non-negative integer)
+    const commentIndex = parseInt(commentId, 10);
+    if (isNaN(commentIndex) || commentIndex < 0 || commentIndex >= post.comments.length) {
+      console.error("Invalid commentId:", commentId);
+      return res.status(400).json({ error: 'Invalid commentId' });
     }
 
-    comment.text = text;
+    // Update the text of the comment at the specified index
+    post.comments[commentIndex].text = text;
+
     const updatedPost = await post.save();
 
     res.json(updatedPost);
@@ -153,3 +158,8 @@ export const updateComment = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+
+
+
