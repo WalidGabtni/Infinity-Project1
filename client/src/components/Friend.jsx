@@ -22,6 +22,12 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
   const isFriend = friends.find((friend) => friend._id === friendId);
 
   const patchFriend = async () => {
+    // Add a check to ensure that the user is not trying to add themselves
+    if (_id === friendId) {
+      console.error("Cannot add yourself as a friend.");
+      return;
+    }
+
     const response = await fetch(
       `http://localhost:3001/users/${_id}/${friendId}`,
       {
@@ -32,8 +38,29 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
         },
       }
     );
+
     const data = await response.json();
     dispatch(setFriends({ friends: data }));
+  };
+
+  // Conditionally render the IconButton based on whether the friendId is the same as the user's _id
+  const renderAddFriendIcon = () => {
+    if (_id === friendId) {
+      return null; // Don't render the IconButton if it's the user's own profile
+    }
+
+    return (
+      <IconButton
+        onClick={() => patchFriend()}
+        sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
+      >
+        {isFriend ? (
+          <PersonRemoveOutlined sx={{ color: primaryDark }} />
+        ) : (
+          <PersonAddOutlined sx={{ color: primaryDark }} />
+        )}
+      </IconButton>
+    );
   };
 
   return (
@@ -64,16 +91,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
           </Typography>
         </Box>
       </FlexBetween>
-      <IconButton
-        onClick={() => patchFriend()}
-        sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
-      >
-        {isFriend ? (
-          <PersonRemoveOutlined sx={{ color: primaryDark }} />
-        ) : (
-          <PersonAddOutlined sx={{ color: primaryDark }} />
-        )}
-      </IconButton>
+      {renderAddFriendIcon()}
     </FlexBetween>
   );
 };
