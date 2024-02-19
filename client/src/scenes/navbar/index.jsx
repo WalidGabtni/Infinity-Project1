@@ -99,13 +99,13 @@ const Navbar = () => {
         
         <FlexBetween gap="2rem">
                             <Link to="/about-us" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <Typography sx={{ fontSize: '18px' }}>About Us</Typography>
+                    <Typography sx={{ fontSize: '18px' }}>À propos de nous</Typography>
                 </Link>
                 <Link to="/support" style={{ textDecoration: 'none', color: 'inherit' }}>
                     <Typography sx={{ fontSize: '18px' }}>Support</Typography>
                 </Link>
                 <Link to="/events" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <Typography sx={{ fontSize: '18px' }}>Events</Typography>
+                    <Typography sx={{ fontSize: '18px' }}>Événements</Typography>
                 </Link>
 
         { /* BROWSE MENU */} 
@@ -120,7 +120,7 @@ const Navbar = () => {
         }}
         {...bindTrigger(popupState)}
       >
-        Browse
+        Parcourir
       </Typography>
         <Popover
             {...bindPopover(popupState)}
@@ -157,7 +157,7 @@ const Navbar = () => {
                 },
                 }}
             >
-                Projects
+                Projets
             </MenuItem>
             <MenuItem
                 onClick={popupState.close}
@@ -169,7 +169,7 @@ const Navbar = () => {
                 },
                 }}
             >
-                News & Announcements
+                Nouvelles et Annonces
             </MenuItem>
             <MenuItem
                 onClick={popupState.close}
@@ -181,7 +181,7 @@ const Navbar = () => {
                 },
                 }}
             >
-                Web Stats
+                Statistiques Web
             </MenuItem>
             </Box>
         </Popover>

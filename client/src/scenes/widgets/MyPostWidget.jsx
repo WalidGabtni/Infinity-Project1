@@ -62,7 +62,7 @@ import {
         <FlexBetween gap="1.5rem">
           <UserImage image={picturePath} />
           <InputBase
-            placeholder="What's on your mind..."
+            placeholder="Qu'est-ce qui préoccupe votre esprit..."
             onChange={(e) => setPost(e.target.value)}
             value={post}
             sx={{
@@ -96,7 +96,7 @@ import {
                   >
                     <input {...getInputProps()} />
                     {!image ? (
-                      <p>Add Image Here</p>
+                      <p>Ajouter une image ici</p>
                     ) : (
                       <FlexBetween>
                         <Typography>{image.name}</Typography>
@@ -140,7 +140,7 @@ import {
   
               <FlexBetween gap="0.25rem">
                 <AttachFileOutlined sx={{ color: mediumMain }} />
-                <Typography color={mediumMain}>Attachment</Typography>
+                <Typography color={mediumMain}>Pièce jointe</Typography>
               </FlexBetween>
   
               <FlexBetween gap="0.25rem">
