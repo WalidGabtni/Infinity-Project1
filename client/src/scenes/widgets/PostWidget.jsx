@@ -185,12 +185,12 @@ const PostWidget = ({
 
             <Input
               type="text"
-              placeholder="Add a comment..."
+              placeholder="Ajouter un commentaire..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
             />
             {newComment && (
-              <button onClick={handleAddComment}>Add Comment</button>
+              <button onClick={handleAddComment}>Ajouter un commentaire</button>
             )}
           </Box>
         )}

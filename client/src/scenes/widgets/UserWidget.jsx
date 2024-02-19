@@ -72,7 +72,7 @@ import {
               >
                 {firstName} {lastName}
               </Typography>
-              <Typography color={medium}>{friends.length} friends</Typography>
+              <Typography color={medium}>{friends.length} ami(e)s</Typography>
             </Box>
           </FlexBetween>
           <ManageAccountsOutlined />
@@ -97,13 +97,13 @@ import {
         {/* THIRD ROW */}
         <Box p="1rem 0">
           <FlexBetween mb="0.5rem">
-            <Typography color={medium}>Who's viewed your profile</Typography>
+            <Typography color={medium}>Qui a consulté votre profil</Typography>
             <Typography color={main} fontWeight="500">
               {viewedProfile}
             </Typography>
           </FlexBetween>
           <FlexBetween>
-            <Typography color={medium}>Impressions of your post</Typography>
+            <Typography color={medium}>Impressions de votre messages</Typography>
             <Typography color={main} fontWeight="500">
               {impressions}
             </Typography>
@@ -125,7 +125,7 @@ import {
                 <Typography color={main} fontWeight="500">
                   Twitter
                 </Typography>
-                <Typography color={medium}>Social Network</Typography>
+                <Typography color={medium}>Réseau social</Typography>
               </Box>
             </FlexBetween>
             <EditOutlined sx={{ color: main }} />
@@ -138,7 +138,7 @@ import {
                 <Typography color={main} fontWeight="500">
                   Linkedin
                 </Typography>
-                <Typography color={medium}>Network Platform</Typography>
+                <Typography color={medium}>Réseau social</Typography>
               </Box>
             </FlexBetween>
             <EditOutlined sx={{ color: main }} />
