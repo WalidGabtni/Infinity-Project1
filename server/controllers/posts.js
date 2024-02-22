@@ -7,7 +7,13 @@ import mongoose from "mongoose";
 /* CREATE */
 export const createPost = async (req, res) => {
   try {
+    console.log("Request Body:", req.body);
+
     const { userId, picturePath, title, description } = req.body;
+
+    console.log("userId:", userId);
+    console.log("title:", title);
+    console.log("description:", description);
 
     // Validate if title is present
     if (!title) {
@@ -37,6 +43,7 @@ export const createPost = async (req, res) => {
     res.status(409).json({ message: err.message });
   }
 };
+
 
 /* READ */
 export const getFeedPosts = async (req, res) => {

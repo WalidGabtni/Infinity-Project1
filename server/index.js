@@ -34,6 +34,15 @@ app.use(cors());
 app.use("/assets",express.static(path.join(__dirname, 'public/assets')));
 app.use(cors());
 
+
+const corsOptions = {
+  origin: '*', 
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+app.use(cors(corsOptions));
+
 /* FILE STORAGE */
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {

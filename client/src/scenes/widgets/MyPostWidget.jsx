@@ -18,44 +18,36 @@ const MyPostWidget = ({ picturePath }) => {
   const { palette } = useTheme();
   const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
 
-
-  const handlePost = async () => {
+  const handlePost = async (formData) => {
     try {
-      const formData = new FormData();
-      formData.append("userId", _id);
-      formData.append("title", title);
-      formData.append("description", description);
+      const form = new FormData();
+      form.append("userId", _id);
+      form.append("title", formData.title);
+      form.append("description", formData.description);
       if (image) {
-        formData.append("picture", image);
-        formData.append("picturePath", image.name);
+        form.append("picture", image);
+        form.append("picturePath", image.name);
       }
-  
-      // Log form data to the console for verification
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ', ' + pair[1]);
-      }
-  
+
+      console.log("Form Data:", Object.fromEntries(form));
+
       const response = await fetch(`http://localhost:3001/posts`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+        body: form,
       });
-  
+
       if (!response.ok) {
         console.error(`Failed to create post. Server returned ${response.status}: ${response.statusText}`);
         const errorResponse = await response.json();
         console.error("Error details:", errorResponse);
         return;
       }
-  
+
       const posts = await response.json();
       dispatch(setPosts({ posts }));
       setImage(null);
-      setDescription("");
-      setTitle("");
     } catch (error) {
       console.error("An unexpected error occurred:", error);
     }
@@ -74,15 +66,14 @@ const MyPostWidget = ({ picturePath }) => {
       <FlexBetween gap="1.5rem" onClick={openForm}>
         <UserImage image={picturePath} />
         <InputBase
-            placeholder="Qu'est-ce qui préoccupe votre esprit..."
-            sx={{
-              width: "100%",
-              backgroundColor: palette.neutral.light,
-              borderRadius: "2rem",
-              padding: "1rem 2rem",
-            }}
-         />
-
+          placeholder="Qu'est-ce qui préoccupe votre esprit..."
+          sx={{
+            width: "100%",
+            backgroundColor: palette.neutral.light,
+            borderRadius: "2rem",
+            padding: "1rem 2rem",
+          }}
+        />
       </FlexBetween>
 
       {isFormOpen && (

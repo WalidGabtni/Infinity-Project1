@@ -15,15 +15,21 @@ import "react-quill/dist/quill.snow.css";
 const PostForm = ({ onClose, onPost, onImageChange }) => {
   const { palette } = useTheme();
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  
+  const [formData, setFormData] = useState({ title: "", description: "" });
 
   const closeOverlay = () => {
     setIsOverlayOpen(false);
     onClose();
   };
 
+  const handleInputChange = (field, value) => {
+    setFormData((prevData) => ({ ...prevData, [field]: value }));
+  };
+
+  const handlePostClick = () => {
+    onPost(formData);
+    closeOverlay();
+  };
 
   const modules = {
     toolbar: [
@@ -78,8 +84,8 @@ const PostForm = ({ onClose, onPost, onImageChange }) => {
             {/* Title input field */}
             <Input
               placeholder="Title"
-              onChange={(e) => setTitle(e.target.value)}
-              value={title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              value={formData.title}
               variant="outlined"
               fullWidth
               sx={{
@@ -91,19 +97,17 @@ const PostForm = ({ onClose, onPost, onImageChange }) => {
 
             {/* Rich Text Editor */}
             <ReactQuill
-                    theme="snow"
-                    value={description}
-                    onChange={(value) => setDescription(value)}
-                    modules={modules}
-                    formats={formats}
-                    style={{ height: "400px", marginTop: "1rem" }}
-                    />
-
-
+              theme="snow"
+              value={formData.description}
+              onChange={(value) => handleInputChange("description", value)}
+              modules={modules}
+              formats={formats}
+              style={{ height: "400px", marginTop: "1rem" }}
+            />
 
             {/* Post button */}
             <Button
-              onClick={onPost}
+              onClick={handlePostClick}
               sx={{
                 marginTop: "1rem",
                 color: palette.background.alt,
