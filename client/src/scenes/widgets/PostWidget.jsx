@@ -26,7 +26,6 @@ const PostWidget = ({
   comments = [] // Initialize comments as an empty array
 }) => {
 
-  /*COMENTS STATES*/
   const [isComments, setIsComments] = useState(false);
   const [postComments, setPostComments] = useState(comments);
   const [newComment, setNewComment] = useState("");
@@ -61,13 +60,13 @@ const PostWidget = ({
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId: loggedInUserId, text: newComment }), // Include userId in the request body
+      body: JSON.stringify({ userId: loggedInUserId, text: newComment }),
     });
     const updatedPost = await response.json();
     setPostComments(updatedPost.comments);
     setNewComment("");
   };
-  
+
   const handleDeleteComment = async (index) => {
     try {
       const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${index}`, {
@@ -76,11 +75,8 @@ const PostWidget = ({
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Delete comment response:", response);
 
-      // If the deletion was successful, update the local state
       const updatedPost = await response.json();
-      console.log("Updated post after delete:", updatedPost);
 
       setPostComments((prevComments) => {
         const newComments = [...prevComments];
@@ -90,36 +86,34 @@ const PostWidget = ({
     } catch (error) {
       console.error("Error deleting comment:", error);
     }
- };
-  
+  };
 
- const handleEditComment = async (index, updatedText) => {
-  try {
-    const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${index}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text: updatedText }),
-    });
+  const handleEditComment = async (index, updatedText) => {
+    try {
+      const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${index}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: updatedText }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`Failed to update comment: ${response.status} - ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Failed to update comment: ${response.status} - ${response.statusText}`);
+      }
+
+      const updatedPost = await response.json();
+
+      if (updatedPost && updatedPost.comments) {
+        setPostComments(updatedPost.comments);
+      } else {
+        console.error("Unexpected server response:", updatedPost);
+      }
+    } catch (error) {
+      console.error("Error updating comment:", error.message);
     }
-
-    const updatedPost = await response.json();
-
-    // Ensure the server response contains the expected structure
-    if (updatedPost && updatedPost.comments) {
-      setPostComments(updatedPost.comments);
-    } else {
-      console.error("Unexpected server response:", updatedPost);
-    }
-  } catch (error) {
-    console.error("Error updating comment:", error.message);
-  }
-};
+  };
 
   return (
     <WidgetWrapper m="2rem 0">
@@ -129,9 +123,7 @@ const PostWidget = ({
         subtitle={location}
         userPicturePath={userPicturePath}
       />
-      <Typography color={main} sx={{ mt: "1rem" }}>
-        {description}
-      </Typography>
+      <Typography color={main} sx={{ mt: "1rem" }} dangerouslySetInnerHTML={{ __html: description }} />
       {picturePath && (
         <img
           width="100%"
@@ -167,34 +159,32 @@ const PostWidget = ({
         </IconButton>
       </FlexBetween>
 
-              {isComments && postComments && (
-          <Box mt="1rem">
-            {console.log("postComments:", postComments)} {/* Add this line for debugging */}
-                        {postComments.map((comment, i) => (
-              <React.Fragment key={`${postId}-${i}`}>
-                <Comment
-                  key={`${postId}-${i}`}
-                  text={comment.text}
-                  color={main}
-                  onDelete={() => handleDeleteComment(i)}
-                  onEdit={(updatedText) => handleEditComment(i, updatedText)}
-                />
-                <Divider />
-              </React.Fragment>
-            ))}
+      {isComments && postComments && (
+        <Box mt="1rem">
+          {postComments.map((comment, i) => (
+            <React.Fragment key={`${postId}-${i}`}>
+              <Comment
+                key={`${postId}-${i}`}
+                text={comment.text}
+                color={main}
+                onDelete={() => handleDeleteComment(i)}
+                onEdit={(updatedText) => handleEditComment(i, updatedText)}
+              />
+              <Divider />
+            </React.Fragment>
+          ))}
 
-            <Input
-              type="text"
-              placeholder="Ajouter un commentaire..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-            />
-            {newComment && (
-              <button onClick={handleAddComment}>Ajouter un commentaire</button>
-            )}
-          </Box>
-        )}
-
+          <Input
+            type="text"
+            placeholder="Ajouter un commentaire..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
+          {newComment && (
+            <button onClick={handleAddComment}>Ajouter un commentaire</button>
+          )}
+        </Box>
+      )}
     </WidgetWrapper>
   );
 };

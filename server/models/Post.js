@@ -9,7 +9,7 @@ const CommentSchema = mongoose.Schema(
     text: {
       type: String,
       required: true,
-    },
+    }
   },
   {
     timestamps: true,
@@ -31,9 +31,13 @@ const PostSchema = mongoose.Schema(
       required: true,
     },
     location: String,
-    description: {
+    title: {
       type: String,
       required: true,
+    },
+    description: {
+      type: String,
+      required: false,
     },
     picturePath: String,
     userPicturePath: String,
