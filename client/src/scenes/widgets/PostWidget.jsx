@@ -1,18 +1,18 @@
+import React, { useState } from 'react';
 import {
   ChatBubbleOutlineOutlined,
   FavoriteBorderOutlined,
   FavoriteOutlined,
   ShareOutlined,
+  DeleteOutline,
 } from "@mui/icons-material";
 import { Box, Divider, IconButton, Input, Typography, useTheme } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 import Comment from "components/Comment";
-import React from 'react';
 
 const PostWidget = ({
   postId,
@@ -25,7 +25,6 @@ const PostWidget = ({
   likes,
   comments = [] // Initialize comments as an empty array
 }) => {
-
   const [isComments, setIsComments] = useState(false);
   const [postComments, setPostComments] = useState(comments);
   const [newComment, setNewComment] = useState("");
@@ -115,8 +114,29 @@ const PostWidget = ({
     }
   };
 
+  const handleDeletePost = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        console.log('Post deleted successfully');
+        // Perform any additional actions after successful deletion
+        // For example, redirect to a different page or update the state.
+      } else {
+        console.error('Failed to delete post:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    }
+  };
+
   return (
-    <WidgetWrapper m="2rem 0">
+    <WidgetWrapper m="2rem 0" position="relative">
       <Friend
         friendId={postUserId}
         name={name}
@@ -154,9 +174,14 @@ const PostWidget = ({
           </FlexBetween>
         </FlexBetween>
 
-        <IconButton>
-          <ShareOutlined />
-        </IconButton>
+        {loggedInUserId === postUserId && (
+          <IconButton
+            style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
+            onClick={handleDeletePost}
+          >
+            <DeleteOutline />
+          </IconButton>
+        )}
       </FlexBetween>
 
       {isComments && postComments && (
