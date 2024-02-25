@@ -2,6 +2,7 @@ import express from "express";
 import { getFeedPosts, getUserPosts, likePost, deletePost } from "../controllers/posts.js";
 import { verifyToken } from "../middleware/auth.js";
 import { addComment, deleteComment, updateComment } from "../controllers/posts.js";
+import { searchPosts } from "../controllers/posts.js";
 
 const router = express.Router();
 
@@ -23,5 +24,8 @@ router.patch("/:postId/comments/:commentId", verifyToken, updateComment);
 
 // Delete post
 router.delete("/:id", verifyToken, deletePost);
+
+// search
+router.get("/search", verifyToken, searchPosts);
 
 export default router;

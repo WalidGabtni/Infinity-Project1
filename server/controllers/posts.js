@@ -203,5 +203,20 @@ export const deletePost = async (req, res) => {
   }
 };
 
+/* SEARCH POSTS BY TITLE */
+export const searchPosts = async (req, res) => {
+  try {
+    const { title } = req.query;
+
+    // Perform a case-insensitive search on the title field
+    const posts = await Post.find({ title: { $regex: new RegExp(title, 'i') } });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 
 
