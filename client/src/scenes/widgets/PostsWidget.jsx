@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "state";
 import PostWidget from "./PostWidget";
 
-const PostsWidget = ({ userId, isProfile = false }) => {
+const PostsWidget = ({ userId, isProfile = false, searchResults }) => {
   const dispatch = useDispatch();
   const posts = useSelector((state) => state.posts);
   const token = useSelector((state) => state.token);
@@ -37,9 +37,12 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Use searchResults if available, otherwise use posts from the state
+  const postsToRender = searchResults.length > 0 ? searchResults : posts;
+
   return (
     <>
-      {Array.isArray(posts) && posts.map(
+      {Array.isArray(postsToRender) && postsToRender.map(
         ({
           _id,
           userId,

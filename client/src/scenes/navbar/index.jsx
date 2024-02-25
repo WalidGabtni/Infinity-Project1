@@ -20,7 +20,7 @@ import {
   Menu,
   Close,
 } from "@mui/icons-material";
-import SearchIcon from "@mui/icons-material/Search"; // Import the Search icon
+import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout } from "state";
 import { useNavigate } from "react-router-dom";
@@ -73,7 +73,6 @@ const Navbar = ({ updateSearchResults }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    // Fetch all posts initially
     const fetchAllPosts = async () => {
       try {
         const response = await fetch('http://localhost:3001/posts', {
@@ -98,11 +97,9 @@ const Navbar = ({ updateSearchResults }) => {
   }, [token]);
 
   const handleSearch = () => {
-    // Filter posts based on the search term
+    console.log("Searching with term:", searchTerm);
     const results = allPosts.filter(post => post.title.toLowerCase().includes(searchTerm.toLowerCase()));
     setSearchResults(results);
-
-    // Update the search results in the parent component
     updateSearchResults(results);
   };
 
@@ -136,16 +133,8 @@ const Navbar = ({ updateSearchResults }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <IconButton onClick={handleSearch}>
-              <SearchIcon /> {/* Use the SearchIcon component */}
+              <SearchIcon />
             </IconButton>
-            {/* Display search results or all posts if search term is empty */}
-            {(searchTerm === '' ? allPosts : searchResults).map((post) => (
-              <div key={post._id}>
-                <h2>{post.title}</h2>
-                <p>{post.description}</p>
-                {/* Other post details */}
-              </div>
-            ))}
           </FlexBetween>
         )}
       </FlexBetween>
@@ -196,8 +185,8 @@ const Navbar = ({ updateSearchResults }) => {
                   PaperProps={{
                     sx: {
                       boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-                      borderRadius: "0px", // No border radius
-                      width: "50%", // Full width
+                      borderRadius: "0px",
+                      width: "50%",
                       marginTop: "25px",
                     },
                   }}
@@ -205,14 +194,14 @@ const Navbar = ({ updateSearchResults }) => {
                   <Box
                     sx={{
                       display: "flex",
-                      flexDirection: "column", // Vertical arrangement
+                      flexDirection: "column",
                     }}
                   >
                     <MenuItem
                       onClick={popupState.close}
                       sx={{
-                        fontSize: "16px", // Font size
-                        padding: "10px 50px", // Padding
+                        fontSize: "16px",
+                        padding: "10px 50px",
                         "&:hover": {
                           backgroundColor: primaryLight,
                         },
