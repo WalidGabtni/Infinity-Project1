@@ -8,7 +8,7 @@ import {
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import { Box, Divider, IconButton, Input, Typography, useTheme } from "@mui/material";
+import { Box, Divider, IconButton, Button, InputBase, Typography, useTheme } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
@@ -17,6 +17,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 import Comment from "components/Comment";
 import React from 'react';
+import CommentForm from "components/CommentForm";
+
 
 const PostWidget = ({
   postId,
@@ -46,6 +48,8 @@ const PostWidget = ({
   const main = palette.neutral.main;
   const primary = palette.primary.main;
 
+  const [isCommentFormOpen, setIsCommentFormOpen] = useState(false);
+
   const handleShareHover = () => {
     // Set the hover state to true when the share button is hovered
     setIsShareHovered(true);
@@ -65,6 +69,11 @@ const PostWidget = ({
   };
 
   const handleAddComment = async () => {
+    if (!newComment.trim()) {
+      // You might want to display an error message or handle this case appropriately.
+      console.error('Comment text cannot be empty');
+      return;
+    }
     const response = await fetch(`http://localhost:3001/posts/${postId}/comments`, {
       method: "POST",
       headers: {
@@ -152,9 +161,9 @@ const PostWidget = ({
     }
   };
   
-  
-  
-  
+  const openForm = () => {
+    setIsCommentFormOpen(true);
+  };
 
 
 return (
@@ -244,8 +253,13 @@ return (
   )}
 </FlexBetween>
 
-
-          </FlexBetween>
+{isCommentFormOpen && (
+  <CommentForm
+    onClose={() => setIsCommentFormOpen(false)}
+    onComment={(commentData) => handleAddComment(commentData)} // Adjust the callback function accordingly
+  />
+)}
+ </FlexBetween>
 
     {isComments && postComments && (
       <Box mt="1rem">
@@ -261,16 +275,22 @@ return (
             <Divider />
           </React.Fragment>
         ))}
+        <FlexBetween gap="1.5rem" onClick={() => openForm()}>
+          <InputBase
+            type="text"
+            placeholder="Ajouter un commentaire..."
+            sx={{
+              width: '100%',
+              backgroundColor: palette.neutral.light,
+              borderRadius: '2rem',
+              padding: '1rem 2rem',
+            }} 
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
+        </FlexBetween>
 
-        <Input
-          type="text"
-          placeholder="Ajouter un commentaire..."
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-        />
-        {newComment && (
-          <button onClick={handleAddComment}>Ajouter un commentaire</button>
-        )}
+
       </Box>
     )}
   </WidgetWrapper>
