@@ -5,6 +5,8 @@ import {
   FavoriteOutlined,
   ShareOutlined,
   DeleteOutline,
+  BookmarkBorder,
+  Bookmark,
 } from "@mui/icons-material";
 import { Box, Divider, IconButton, Input, Typography, useTheme } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
@@ -18,6 +20,7 @@ const PostWidget = ({
   postId,
   postUserId,
   name,
+  title,
   description,
   location,
   picturePath,
@@ -28,6 +31,7 @@ const PostWidget = ({
   const [isComments, setIsComments] = useState(false);
   const [postComments, setPostComments] = useState(comments);
   const [newComment, setNewComment] = useState("");
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
@@ -135,6 +139,29 @@ const PostWidget = ({
     }
   };
 
+  const handleBookmark = async () => {
+    try {
+        const response = await fetch(`http://localhost:3001/users/${loggedInUserId}/bookmarks/${postId}`, {
+            method: "PATCH",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (response.ok) {
+            const updatedBookmarks = await response.json();
+            console.log("Updated Bookmarks:", updatedBookmarks);
+            setIsBookmarked(!isBookmarked);
+            // You can update local state or perform any other actions after successful bookmarking/unbookmarking
+        } else {
+            console.error("Failed to update bookmark:", response.status, response.statusText);
+        }
+    } catch (error) {
+        console.error("Error updating bookmark:", error.message);
+    }
+};
+
   return (
     <WidgetWrapper m="2rem 0" position="relative">
       <Friend
@@ -143,6 +170,12 @@ const PostWidget = ({
         subtitle={location}
         userPicturePath={userPicturePath}
       />
+      
+      {/* Render the title as an h2 heading without color */}
+      <Typography variant="h2" sx={{ mt: "1rem" }}>
+        {title}
+      </Typography>
+
       <Typography color={main} sx={{ mt: "1rem" }} dangerouslySetInnerHTML={{ __html: description }} />
       {picturePath && (
         <img
@@ -171,6 +204,13 @@ const PostWidget = ({
               <ChatBubbleOutlineOutlined />
             </IconButton>
             <Typography>{postComments.length}</Typography>
+          </FlexBetween>
+          
+          <FlexBetween gap="0.3rem">
+            <IconButton onClick={handleBookmark}>
+              {isBookmarked ? <Bookmark sx={{ color: primary }} /> : <BookmarkBorder />}
+            </IconButton>
+            {/* You can display the count of bookmarks here if needed */}
           </FlexBetween>
         </FlexBetween>
 

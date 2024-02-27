@@ -19,6 +19,7 @@ import {
   Help,
   Menu,
   Close,
+  Bookmark,
 } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
@@ -103,6 +104,12 @@ const Navbar = ({ updateSearchResults }) => {
     updateSearchResults(results);
   };
 
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   return (
     <FlexBetween padding="1rem 6%" backgroundColor={alt}>
       <FlexBetween gap="1.75rem">
@@ -131,6 +138,7 @@ const Navbar = ({ updateSearchResults }) => {
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleKeyPress}
             />
             <IconButton onClick={handleSearch}>
               <SearchIcon />
@@ -248,6 +256,7 @@ const Navbar = ({ updateSearchResults }) => {
           </IconButton>
           <Message sx={{ fontSize: "25px" }} />
           <Notifications sx={{ fontSize: "25px" }} />
+          <Bookmark sx={{ fontSize: "25px" }} />
           <Help sx={{ fontSize: "25px" }} />
           <FormControl variant="standard" value={fullName}>
             <Select
