@@ -8,7 +8,7 @@ import {
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import { Box, Divider, IconButton, Button, InputBase, Typography, useTheme } from "@mui/material";
+import { Box, Divider, IconButton, InputBase, Typography, useTheme } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
@@ -18,6 +18,7 @@ import { setPost } from "state";
 import Comment from "components/Comment";
 import React from 'react';
 import CommentForm from "components/CommentForm";
+
 
 
 const PostWidget = ({
@@ -68,23 +69,21 @@ const PostWidget = ({
     dispatch(setPost({ post: updatedPost }));
   };
 
-  const handleAddComment = async () => {
-    if (!newComment.trim()) {
-      // You might want to display an error message or handle this case appropriately.
-      console.error('Comment text cannot be empty');
-      return;
+  const handleAddComment = async (commentData) => {
+    try {
+      const response = await fetch(`http://localhost:3001/posts/${postId}/comments`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: loggedInUserId, text: commentData.text }),
+      });
+      const updatedPost = await response.json();
+      setPostComments(updatedPost.comments);
+    } catch (error) {
+      console.error("Error adding comment:", error);
     }
-    const response = await fetch(`http://localhost:3001/posts/${postId}/comments`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: loggedInUserId, text: newComment }),
-    });
-    const updatedPost = await response.json();
-    setPostComments(updatedPost.comments);
-    setNewComment("");
   };
 
   const handleDeleteComment = async (index) => {
@@ -166,136 +165,140 @@ const PostWidget = ({
   };
 
 
-return (
-  <WidgetWrapper m="2rem 0">
-    <Friend
-      friendId={postUserId}
-      name={name}
-      subtitle={location}
-      userPicturePath={userPicturePath}
-    />
-    <Typography color={main} sx={{ mt: "1rem" }} dangerouslySetInnerHTML={{ __html: description }} />
-    {picturePath && (
-      <img
-        width="100%"
-        height="auto"
-        alt="post"
-        style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
-        src={`http://localhost:3001/assets/${picturePath}`}
+  return (
+    <WidgetWrapper m="2rem 0">
+      <Friend
+        friendId={postUserId}
+        name={name}
+        subtitle={location}
+        userPicturePath={userPicturePath}
       />
-    )}
-    <FlexBetween mt="0.25rem">
-      <FlexBetween gap="1rem">
-        <FlexBetween gap="0.3rem">
-          <IconButton onClick={patchLike}>
-            {isLiked ? (
-              <FavoriteOutlined sx={{ color: primary }} />
-            ) : (
-              <FavoriteBorderOutlined />
-            )}
-          </IconButton>
-          <Typography>{likeCount}</Typography>
+      {/* Format the description using dangerouslySetInnerHTML */}
+      <Typography color={main} sx={{ mt: "1rem" }} dangerouslySetInnerHTML={{ __html: description }} />
+      {picturePath && (
+        <img
+          width="100%"
+          height="auto"
+          alt="post"
+          style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
+          src={`http://localhost:3001/assets/${picturePath}`}
+        />
+
+      )}
+
+      <Divider/>
+      <FlexBetween mt="0.25rem">
+        <FlexBetween gap="1rem">
+          <FlexBetween gap="0.3rem">
+            <IconButton onClick={patchLike}>
+              {isLiked ? (
+                <FavoriteOutlined sx={{ color: primary }} />
+              ) : (
+                <FavoriteBorderOutlined />
+              )}
+            </IconButton>
+            <Typography>{likeCount}</Typography>
+          </FlexBetween>
+
+          <FlexBetween gap="0.3rem">
+            <IconButton onClick={() => setIsComments(!isComments)}>
+              <ChatBubbleOutlineOutlined />
+            </IconButton>
+            <Typography>{postComments.length}</Typography>
+          </FlexBetween>
         </FlexBetween>
 
-        <FlexBetween gap="0.3rem">
-          <IconButton
-            onClick={() => setIsComments(!isComments)}
-          >
-            <ChatBubbleOutlineOutlined />
-          </IconButton>
-          <Typography>{postComments.length}</Typography>
-        </FlexBetween>
+
+
+        <FlexBetween gap="0.3rem" style={{ position: 'relative' }}>
+              <div
+                onMouseEnter={handleShareHover}
+                onMouseLeave={() => {
+                  if (!isShareClicked) {
+                    setIsShareHovered(false);
+                  }
+                }}
+                onClick={() => setIsShareClicked(!isShareClicked)}
+                style={{ display: 'inline-block' }}
+              >
+                <IconButton>
+                  <ShareOutlined />
+                </IconButton>
+              </div>
+
+              {isShareHovered && (isShareClicked || isShareHovered) && (
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  position="absolute"
+                  top="-6px"
+                  left="-8rem"
+                  onMouseEnter={handleShareHover}
+                  onMouseLeave={() => {
+                    // Set the hover state to false only if the share button is not clicked
+                    if (!isShareClicked) {
+                      setIsShareHovered(false);
+                    }
+                  }}
+                >
+                  <IconButton onClick={handleShare} style={{ margin: '5px' }}>
+                    <FacebookIcon style={{ color: '#1877f2' }} />
+                  </IconButton>
+
+                  <IconButton style={{ margin: '5px' }}>
+                    <InstagramIcon style={{ color: '#e4405f' }} />
+                  </IconButton>
+                  
+                  <IconButton style={{ margin: '5px' }}>
+                    <TwitterIcon style={{ color: '#1da1f2' }} />
+                  </IconButton>
+                </Box>
+              )}
+          </FlexBetween>
+
+
+
+        {isCommentFormOpen && (
+          <CommentForm
+            onClose={() => setIsCommentFormOpen(false)}
+            onComment={(commentData) => handleAddComment(commentData)} // Adjust the callback function accordingly
+          />
+        )}
       </FlexBetween>
 
-      <FlexBetween gap="0.3rem" style={{ position: 'relative' }}>
-  <div
-    onMouseEnter={handleShareHover}
-    onMouseLeave={() => {
-      if (!isShareClicked) {
-        setIsShareHovered(false);
-      }
-    }}
-    onClick={() => setIsShareClicked(!isShareClicked)}
-    style={{ display: 'inline-block' }}
-  >
-    <IconButton>
-      <ShareOutlined />
-    </IconButton>
-  </div>
-
-  {isShareHovered && (isShareClicked || isShareHovered) && (
-    <Box
-      display="flex"
-      alignItems="center"
-      position="absolute"
-      top="-6px"
-      left="-8rem"
-      onMouseEnter={handleShareHover}
-      onMouseLeave={() => {
-        // Set the hover state to false only if the share button is not clicked
-        if (!isShareClicked) {
-          setIsShareHovered(false);
-        }
-      }}
-    >
-      <IconButton onClick={handleShare} style={{ margin: '5px' }}>
-        <FacebookIcon style={{ color: '#1877f2' }} />
-      </IconButton>
-
-      <IconButton style={{ margin: '5px' }}>
-        <InstagramIcon style={{ color: '#e4405f' }} />
-      </IconButton>
-      
-      <IconButton style={{ margin: '5px' }}>
-        <TwitterIcon style={{ color: '#1da1f2' }} />
-      </IconButton>
-    </Box>
-  )}
-</FlexBetween>
-
-{isCommentFormOpen && (
-  <CommentForm
-    onClose={() => setIsCommentFormOpen(false)}
-    onComment={(commentData) => handleAddComment(commentData)} // Adjust the callback function accordingly
-  />
-)}
- </FlexBetween>
-
-    {isComments && postComments && (
-      <Box mt="1rem">
-        {postComments.map((comment, i) => (
-          <React.Fragment key={`${postId}-${i}`}>
-            <Comment
-              key={`${postId}-${i}`}
-              text={comment.text}
-              color={main}
-              onDelete={() => handleDeleteComment(i)}
-              onEdit={(updatedText) => handleEditComment(i, updatedText)}
+      {isComments && postComments && (
+        <Box mt="1rem">
+          {postComments.map((comment, i) => (
+            <React.Fragment key={`${postId}-${i}`}>
+              <Typography dangerouslySetInnerHTML={{ __html: comment.text}} />
+              <Comment
+                key={`${postId}-${i}`}
+                color={main}
+                userPicturePath={comment.userPicturePath}
+                onDelete={() => handleDeleteComment(i)}
+                onEdit={(updatedText) => handleEditComment(i, updatedText)}
+              />
+              <Divider />
+            </React.Fragment>
+          ))}
+          <FlexBetween gap="1.5rem" onClick={() => openForm()}>
+            <InputBase
+              type="text"
+              placeholder="Ajouter un commentaire..."
+              sx={{
+                width: '100%',
+                backgroundColor: palette.neutral.light,
+                borderRadius: '2rem',
+                padding: '1rem 2rem',
+              }} 
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
             />
-            <Divider />
-          </React.Fragment>
-        ))}
-        <FlexBetween gap="1.5rem" onClick={() => openForm()}>
-          <InputBase
-            type="text"
-            placeholder="Ajouter un commentaire..."
-            sx={{
-              width: '100%',
-              backgroundColor: palette.neutral.light,
-              borderRadius: '2rem',
-              padding: '1rem 2rem',
-            }} 
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-          />
-        </FlexBetween>
-
-
-      </Box>
-    )}
-  </WidgetWrapper>
-);
-
+          </FlexBetween>
+        </Box>
+      )}
+    </WidgetWrapper>
+  );
 };
 
 export default PostWidget;

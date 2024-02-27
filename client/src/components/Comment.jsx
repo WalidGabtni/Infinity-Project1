@@ -1,15 +1,16 @@
 // components/Comment.js
 
 import React, { useState } from 'react';
-import { IconButton, Input, Typography } from '@mui/material';
+import { IconButton, Input, Typography, Box } from '@mui/material';
 import {
   DeleteOutlineOutlined as DeleteIcon,
   EditOutlined as EditIcon,
-  Done as SaveIcon, // Replace with the appropriate icon
-  Close as CancelIcon, // Replace with the appropriate icon
+  Done as SaveIcon,
+  Close as CancelIcon,
 } from '@mui/icons-material';
+import UserImage from './UserImage'; // Import the UserImage component
 
-const Comment = ({ text, color, onDelete, onEdit }) => {
+const Comment = ({ text, color, onDelete, onEdit, userPicturePath }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(text);
 
@@ -28,7 +29,8 @@ const Comment = ({ text, color, onDelete, onEdit }) => {
   };
 
   return (
-    <div>
+    <Box display="flex" alignItems="center" mt={1}>
+      {userPicturePath && <UserImage image={userPicturePath} />} {/* Check if userPicturePath is defined */}
       {!isEditing ? (
         <>
           <Typography color={color}>{text}</Typography>
@@ -54,7 +56,7 @@ const Comment = ({ text, color, onDelete, onEdit }) => {
           </IconButton>
         </>
       )}
-    </div>
+    </Box>
   );
 };
 

@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Box, Typography, Button, IconButton, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  IconButton,
+  useTheme,
+} from "@mui/material";
 import { CloseOutlined } from "@mui/icons-material";
 import Overlay from "./Overlay";
 import ReactQuill from "react-quill";
@@ -19,11 +25,16 @@ const CommentForm = ({ onClose, onComment }) => {
     setFormData({ comment: value });
   };
 
-  const handleCommentClick = () => {
-    onComment(formData);
-    closeOverlay();
+  const handleCommentClick = async () => {
+    if (formData.comment.trim()) {
+      onComment({ text: formData.comment });
+      setFormData({ comment: "" });
+      closeOverlay(); // Close the overlay after adding the comment
+    } else {
+      console.error('Comment cannot be empty');
+    }
   };
-
+  
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, 4, false] }],
