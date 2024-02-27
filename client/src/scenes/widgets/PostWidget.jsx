@@ -31,7 +31,11 @@ const PostWidget = ({
   const [isComments, setIsComments] = useState(false);
   const [postComments, setPostComments] = useState(comments);
   const [newComment, setNewComment] = useState("");
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(() => {
+    // Initialize the bookmark state from local storage, or false if not available
+    const storedIsBookmarked = localStorage.getItem(`bookmark_${postId}`);
+    return storedIsBookmarked ? JSON.parse(storedIsBookmarked) : false;
+  });
 
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
@@ -141,26 +145,32 @@ const PostWidget = ({
 
   const handleBookmark = async () => {
     try {
-        const response = await fetch(`http://localhost:3001/users/${loggedInUserId}/bookmarks/${postId}`, {
-            method: "PATCH",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
-        });
+      const response = await fetch(`http://localhost:3001/users/${loggedInUserId}/bookmarks/${postId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-        if (response.ok) {
-            const updatedBookmarks = await response.json();
-            console.log("Updated Bookmarks:", updatedBookmarks);
-            setIsBookmarked(!isBookmarked);
-            // You can update local state or perform any other actions after successful bookmarking/unbookmarking
-        } else {
-            console.error("Failed to update bookmark:", response.status, response.statusText);
-        }
+      if (response.ok) {
+        const updatedBookmarks = await response.json();
+        console.log("Updated Bookmarks:", updatedBookmarks);
+
+        // Toggle the bookmark state
+        const newIsBookmarked = !isBookmarked;
+        setIsBookmarked(newIsBookmarked);
+
+        // Store the updated bookmark state in local storage
+        localStorage.setItem(`bookmark_${postId}`, JSON.stringify(newIsBookmarked));
+      } else {
+        console.error("Failed to update bookmark:", response.status, response.statusText);
+      }
     } catch (error) {
-        console.error("Error updating bookmark:", error.message);
+      console.error("Error updating bookmark:", error.message);
     }
-};
+  };
+  
 
   return (
     <WidgetWrapper m="2rem 0" position="relative">
