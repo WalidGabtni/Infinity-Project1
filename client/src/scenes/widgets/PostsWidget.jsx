@@ -37,12 +37,12 @@ const PostsWidget = ({ userId, isProfile = false, searchResults }) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Use searchResults if available, otherwise use posts from the state
-  const postsToRender = searchResults.length > 0 ? searchResults : posts;
+  // Use searchResults if available and it is an array, otherwise use posts from the state
+  const postsToRender = Array.isArray(searchResults) && searchResults.length > 0 ? searchResults : posts;
 
   return (
     <>
-      {Array.isArray(postsToRender) && postsToRender.map(
+      {postsToRender.map(
         ({
           _id,
           userId,

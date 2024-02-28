@@ -1,9 +1,9 @@
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setFriends } from "state";
 import { Box, Typography, useTheme } from "@mui/material";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setFriends } from "state";
 
 const FriendListWidget = ({ userId }) => {
   const dispatch = useDispatch();
@@ -38,7 +38,7 @@ const FriendListWidget = ({ userId }) => {
         Liste d'ami(e)s
       </Typography>
       <Box display="flex" flexDirection="column" gap="1.5rem">
-        {friends.map((friend) => (
+        {Array.isArray(friends) && friends.map((friend) => (
           <Friend
             key={friend._id}
             friendId={friend._id}
