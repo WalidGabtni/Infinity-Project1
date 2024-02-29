@@ -24,9 +24,8 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout } from "state";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import FlexBetween from "components/FlexBetween";
-import { Link } from "react-router-dom";
 import Popover from "@mui/material/Popover";
 import PopupState, { bindTrigger, bindPopover } from "material-ui-popup-state";
 
@@ -256,7 +255,9 @@ const Navbar = ({ updateSearchResults }) => {
           </IconButton>
           <Message sx={{ fontSize: "25px" }} />
           <Notifications sx={{ fontSize: "25px" }} />
-          <Bookmark sx={{ fontSize: "25px" }} />
+          <Link to="/bookmarks" style={{ textDecoration: "none", color: "inherit" }}>
+            <Bookmark sx={{ fontSize: "25px" }} />
+          </Link>
           <Help sx={{ fontSize: "25px" }} />
           <FormControl variant="standard" value={fullName}>
             <Select

@@ -190,6 +190,9 @@ export const deletePost = async (req, res) => {
       console.log("Deleting post with ID:", id);
       console.log("User ID from token:", userIdFromToken);
 
+      // Remove the post ID from the bookmark lists of all users
+      await User.updateMany({}, { $pull: { bookmarks: id } });
+
       await Post.findByIdAndDelete(id);
 
       return res.status(200).json({ message: "Post deleted successfully" });

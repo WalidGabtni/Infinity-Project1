@@ -31,10 +31,13 @@ const PostWidget = ({
   const [isComments, setIsComments] = useState(false);
   const [postComments, setPostComments] = useState(comments);
   const [newComment, setNewComment] = useState("");
+  
+  // Access user bookmarks from Redux state
+  const userBookmarks = useSelector((state) => state.user.bookmarks || []);
+  
   const [isBookmarked, setIsBookmarked] = useState(() => {
-    // Initialize the bookmark state from local storage, or false if not available
-    const storedIsBookmarked = localStorage.getItem(`bookmark_${postId}`);
-    return storedIsBookmarked ? JSON.parse(storedIsBookmarked) : false;
+    // Initialize the bookmark state based on whether postId is in the user's bookmarks
+    return userBookmarks.includes(postId);
   });
 
   const dispatch = useDispatch();
@@ -124,24 +127,40 @@ const PostWidget = ({
 
   const handleDeletePost = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+      // Make a request to delete the post
+      const postDeleteResponse = await fetch(`http://localhost:3001/posts/${postId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      if (response.ok) {
+  
+      if (postDeleteResponse.ok) {
         console.log('Post deleted successfully');
-        // Perform any additional actions after successful deletion
-        // For example, redirect to a different page or update the state.
+        
+        // Make a separate request to remove the post from the bookmark lists of all users
+        const bookmarkDeleteResponse = await fetch(`http://localhost:3001/posts/${postId}/delete-bookmark`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (bookmarkDeleteResponse.ok) {
+          console.log('Post removed from bookmark lists successfully');
+          // Perform any additional actions after successful deletion
+          // For example, redirect to a different page or update the state.
+        } else {
+          console.error('Failed to remove post from bookmark lists:', bookmarkDeleteResponse.status, bookmarkDeleteResponse.statusText);
+        }
       } else {
-        console.error('Failed to delete post:', response.status, response.statusText);
+        console.error('Failed to delete post:', postDeleteResponse.status, postDeleteResponse.statusText);
       }
     } catch (error) {
       console.error('Error deleting post:', error);
     }
   };
+  
 
   const handleBookmark = async () => {
     try {
@@ -154,15 +173,12 @@ const PostWidget = ({
       });
 
       if (response.ok) {
-        const updatedBookmarks = await response.json();
-        console.log("Updated Bookmarks:", updatedBookmarks);
-
         // Toggle the bookmark state
         const newIsBookmarked = !isBookmarked;
         setIsBookmarked(newIsBookmarked);
 
-        // Store the updated bookmark state in local storage
-        localStorage.setItem(`bookmark_${postId}`, JSON.stringify(newIsBookmarked));
+        // Remove the localStorage logic for debugging purposes
+        // localStorage.setItem(`bookmark_${postId}`, JSON.stringify(newIsBookmarked));
       } else {
         console.error("Failed to update bookmark:", response.status, response.statusText);
       }
@@ -181,7 +197,6 @@ const PostWidget = ({
         userPicturePath={userPicturePath}
       />
       
-      {/* Render the title as an h2 heading without color */}
       <Typography variant="h2" sx={{ mt: "1rem" }}>
         {title}
       </Typography>

@@ -4,6 +4,7 @@ import {
     getUserfriends,
     addRemovefriend,
     addRemoveBookmark,
+    getBookmarkedPosts, // Import the new function
 } from "../controllers/users.js";
 import { verifyToken } from "../middleware/auth.js";
 
@@ -12,6 +13,7 @@ const router = express.Router();
 /* READ */
 router.get("/:id", verifyToken, getUser);
 router.get("/:id/friends", verifyToken, getUserfriends);
+router.get("/:id/bookmarks", verifyToken, getBookmarkedPosts); // New endpoint for fetching bookmarked posts
 
 /* UPDATE */
 router.patch("/:id/:friendId", verifyToken, addRemovefriend);
