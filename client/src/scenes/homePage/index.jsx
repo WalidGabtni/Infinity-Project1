@@ -1,5 +1,6 @@
 import { Box, useMediaQuery } from "@mui/material";
 import { useSelector } from "react-redux";
+import React, { useState } from "react";
 import Navbar from "scenes/navbar";
 import UserWidget from "scenes/widgets/UserWidget";
 import MyPostWidget from "scenes/widgets/MyPostWidget";
@@ -11,9 +12,17 @@ const HomePage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
   const { _id, picturePath } = useSelector((state) => state.user);
 
+   // Add state for search results
+   const [searchResults, setSearchResults] = useState([]);
+
+   // Function to update search results
+   const updateSearchResults = (results) => {
+     setSearchResults(results);
+   };
+ 
   return (
     <Box>
-      <Navbar />
+      <Navbar updateSearchResults={updateSearchResults} />
       <Box
         width="100%"
         padding="2rem 6%"
@@ -28,8 +37,11 @@ const HomePage = () => {
           flexBasis={isNonMobileScreens ? "42%" : undefined}
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
-          <MyPostWidget picturePath={picturePath} />
-          <PostsWidget userId={_id} />
+           {/* Pass search results to MyPostWidget */}
+           <MyPostWidget picturePath={picturePath} searchResults={searchResults} />
+          
+          {/* Pass search results to PostsWidget */}
+          <PostsWidget userId={_id} searchResults={searchResults} />
         </Box>
         {isNonMobileScreens && (
           <Box flexBasis="26%">

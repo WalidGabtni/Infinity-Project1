@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from 'react';
 import {
     Box,
@@ -12,7 +12,6 @@ import {
     useMediaQuery,
 } from "@mui/material"
 import {
-    Search,
     Message,
     DarkMode,
     LightMode,
@@ -22,6 +21,7 @@ import {
     Close
 } from "@mui/icons-material"
 
+import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout} from "state";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +32,7 @@ import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
 
 
 
-const Navbar = () => {
+const Navbar = ({ updateSearchResults }) => {
     const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -45,8 +45,15 @@ const Navbar = () => {
     const background = theme.palette.background.default;
     const primaryLight = theme.palette.primary.light;
     const alt = theme.palette.background.alt;
+    const [allPosts, setAllPosts] = useState([]);
+    const token = useSelector((state) => state.token);
     
     const [popoverAnchor, setPopoverAnchor] = React.useState(null);
+
+    /*SEARCH*/
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const handleMenuClose = () => {
         setPopoverAnchor(null);
@@ -66,7 +73,45 @@ const Navbar = () => {
     const handleLogout = () => {
         dispatch(setLogout());
         navigate('/');
+    };
+
+    useEffect(() => {
+        const fetchAllPosts = async () => {
+          try {
+            const response = await fetch('http://localhost:3001/posts', {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+    
+            if (response.ok) {
+              const result = await response.json();
+              setAllPosts(result);
+            } else {
+              console.error('Failed to fetch all posts:', response.status, response.statusText);
+            }
+          } catch (error) {
+            console.error('Error fetching all posts:', error);
+          }
+        };
+    
+        fetchAllPosts();
+      }, [token]);
+
+    const handleSearch = () => {
+        console.log("Searching with term:", searchTerm);
+        const results = allPosts.filter(post => post.title.toLowerCase().includes(searchTerm.toLowerCase()));
+        setSearchResults(results);
+        updateSearchResults(results);
       };
+    
+      const handleKeyPress = (event) => {
+        if (event.key === "Enter") {
+          handleSearch();
+        }
+      };
+
     return <FlexBetween padding="1rem 6%" backgroundColor={alt}>
         <FlexBetween gap="1.75rem">
             <Typography
@@ -84,13 +129,23 @@ const Navbar = () => {
                 Infinity
             </Typography>
             {isNonMobileScreens && (
-                <FlexBetween backgroundColor={neutralLight} borderRadius="9px" gap="3rem" padding="0.1rem 1.5rem">
-                    <InputBase placeholder= "Search..." />
-                    <IconButton>
-                        <Search />
-                    </IconButton>
-                </FlexBetween>
-            )}
+          <FlexBetween
+            backgroundColor={neutralLight}
+            borderRadius="9px"
+            gap="3rem"
+            padding="0.1rem 1.5rem"
+          >
+            <InputBase
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleKeyPress}
+            />
+            <IconButton onClick={handleSearch}>
+              <SearchIcon />
+            </IconButton>
+          </FlexBetween>
+        )}
 
         </FlexBetween>
 
@@ -223,6 +278,9 @@ const Navbar = () => {
                 <MenuItem value ={fullName}>
                     <Typography>{fullName}</Typography>
                 </MenuItem>
+                <MenuItem>
+                    <Typography onClick={()=> navigate("/bookmarks")}>Bookmarks</Typography>
+                </MenuItem>
                 <MenuItem onClick={handleLogout}>Log Out</MenuItem>
                 </Select>
             </FormControl>
@@ -291,6 +349,7 @@ const Navbar = () => {
                 <MenuItem value ={fullName}>
                     <Typography>{fullName}</Typography>
                 </MenuItem>
+                
                 <MenuItem onClick= {()=> dispatch(setLogout())}>Log Out</MenuItem>
                 </Select>
             </FormControl>

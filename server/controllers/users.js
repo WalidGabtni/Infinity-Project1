@@ -65,3 +65,43 @@ export const addRemovefriend = async (req, res) => {
         res.status(404).json({ message: err.message });
     }
 }
+
+/*ADD AND REMOVE BOOKMLARK */
+
+export const addRemoveBookmark = async (req, res) => {
+    try {
+        const { id, postId } = req.params;
+        const user = await User.findById(id);
+
+        // Check if the post is already bookmarked
+        const isBookmarked = user.bookmarks.includes(postId);
+
+        if (isBookmarked) {
+            // If bookmarked, remove it
+            user.bookmarks = user.bookmarks.filter((bookmark) => bookmark.toString() !== postId);
+        } else {
+            // If not bookmarked, add it
+            user.bookmarks.push(postId);
+        }
+
+        await user.save();
+
+        res.status(200).json({ bookmarks: user.bookmarks });
+    } catch (err) {
+        res.status(404).json({ message: err.message });
+    }
+};
+
+/* READ - Get all bookmarked posts of the logged-in user */
+export const getBookmarkedPosts = async (req, res) => {
+    try {
+        const userId = req.params.id; // Assuming the user's ID is in the URL parameters
+        const user = await User.findById(userId);
+
+        const bookmarkedPosts = user.bookmarks || [];
+        
+        res.status(200).json(bookmarkedPosts);
+    } catch (err) {
+        res.status(404).json({ message: err.message });
+    }
+};

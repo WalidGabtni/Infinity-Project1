@@ -19,8 +19,8 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
   const main = palette.neutral.main;
   const medium = palette.neutral.medium;
 
-  const isFriend = friends.find((friend) => friend._id === friendId);
-
+  const isFriend = friends && friends.length > 0 && friends.find((friend) => friend._id === friendId);
+  
   const patchFriend = async () => {
     // Add a check to ensure that the user is not trying to add themselves
     if (_id === friendId) {

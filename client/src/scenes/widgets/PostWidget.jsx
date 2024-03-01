@@ -4,6 +4,9 @@ import {
   FavoriteBorderOutlined,
   FavoriteOutlined,
   ShareOutlined,
+  DeleteOutline,
+  BookmarkBorder,
+  Bookmark,
 } from "@mui/icons-material";
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
@@ -25,6 +28,7 @@ const PostWidget = ({
   postId,
   postUserId,
   name,
+  title,
   description,
   location,
   picturePath,
@@ -44,6 +48,14 @@ const PostWidget = ({
   const loggedInUserId = useSelector((state) => state.user._id);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
+
+    // Access user bookmarks from Redux state
+    const userBookmarks = useSelector((state) => state.user.bookmarks || []);
+  
+    const [isBookmarked, setIsBookmarked] = useState(() => {
+      // Initialize the bookmark state based on whether postId is in the user's bookmarks
+      return userBookmarks.includes(postId);
+    });
 
   const { palette } = useTheme();
   const main = palette.neutral.main;
@@ -164,8 +176,79 @@ const PostWidget = ({
     setIsCommentFormOpen(true);
   };
 
+  const handleDeletePost = async () => {
+    try {
+      // Make a request to delete the post
+      const postDeleteResponse = await fetch(`http://localhost:3001/posts/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (postDeleteResponse.ok) {
+        console.log('Post deleted successfully');
+        
+        // Make a separate request to remove the post from the bookmark lists of all users
+        const bookmarkDeleteResponse = await fetch(`http://localhost:3001/posts/${postId}/delete-bookmark`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (bookmarkDeleteResponse.ok) {
+          console.log('Post removed from bookmark lists successfully');
+          // Perform any additional actions after successful deletion
+          // For example, redirect to a different page or update the state.
+        } else {
+          console.error('Failed to remove post from bookmark lists:', bookmarkDeleteResponse.status, bookmarkDeleteResponse.statusText);
+        }
+      } else {
+        console.error('Failed to delete post:', postDeleteResponse.status, postDeleteResponse.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    }
+  };
+  
+
+  const handleBookmark = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/users/${loggedInUserId}/bookmarks/${postId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        // Toggle the bookmark state
+        const newIsBookmarked = !isBookmarked;
+        setIsBookmarked(newIsBookmarked);
+
+        // Remove the localStorage logic for debugging purposes
+        // localStorage.setItem(`bookmark_${postId}`, JSON.stringify(newIsBookmarked));
+      } else {
+        console.error("Failed to update bookmark:", response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error("Error updating bookmark:", error.message);
+    }
+  };
 
   return (
+    <Box position="relative">
+    {/* Move the delete icon inside the container */}
+    {loggedInUserId === postUserId && (
+      <IconButton
+        style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
+        onClick={handleDeletePost}
+      >
+        <DeleteOutline />
+      </IconButton>
+    )}
     <WidgetWrapper m="2rem 0">
       <Friend
         friendId={postUserId}
@@ -173,6 +256,11 @@ const PostWidget = ({
         subtitle={location}
         userPicturePath={userPicturePath}
       />
+
+      <Typography variant="h2" sx={{ mt: "1rem" }}>
+        {title}
+      </Typography>
+
       {/* Format the description using dangerouslySetInnerHTML */}
       <Typography color={main} sx={{ mt: "1rem" }} dangerouslySetInnerHTML={{ __html: description }} />
       {picturePath && (
@@ -206,9 +294,15 @@ const PostWidget = ({
             </IconButton>
             <Typography>{postComments.length}</Typography>
           </FlexBetween>
+          <FlexBetween gap="0.3rem">
+            <IconButton onClick={handleBookmark}>
+              {isBookmarked ? <Bookmark sx={{ color: primary }} /> : <BookmarkBorder />}
+            </IconButton>
+            {/* You can display the count of bookmarks here if needed */}
+            
+          </FlexBetween>
+          
         </FlexBetween>
-
-
 
         <FlexBetween gap="0.3rem" style={{ position: 'relative' }}>
               <div
@@ -254,9 +348,8 @@ const PostWidget = ({
                   </IconButton>
                 </Box>
               )}
+              
           </FlexBetween>
-
-
 
         {isCommentFormOpen && (
           <CommentForm
@@ -265,6 +358,8 @@ const PostWidget = ({
           />
         )}
       </FlexBetween>
+
+      
 
       {isComments && postComments && (
         <Box mt="1rem">
@@ -278,7 +373,7 @@ const PostWidget = ({
                 onDelete={() => handleDeleteComment(i)}
                 onEdit={(updatedText) => handleEditComment(i, updatedText)}
               />
-              <Divider />
+              <Divider /> 
             </React.Fragment>
           ))}
           <FlexBetween gap="1.5rem" onClick={() => openForm()}>
@@ -296,8 +391,10 @@ const PostWidget = ({
             />
           </FlexBetween>
         </Box>
+
       )}
     </WidgetWrapper>
+    </Box>
   );
 };
 

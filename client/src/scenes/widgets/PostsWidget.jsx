@@ -2,11 +2,13 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "state";
 import PostWidget from "./PostWidget";
+import { setBookmarkedPosts } from "state";
 
-const PostsWidget = ({ userId, isProfile = false }) => {
+const PostsWidget = ({userId, isProfile = false, searchResults, isBookmarkPage = false }) => {
   const dispatch = useDispatch();
   const posts = useSelector((state) => state.posts);
   const token = useSelector((state) => state.token);
+  const bookmarks = useSelector((state) => state.user.bookmarks) || [];
 
   const getPosts = async () => {
     const response = await fetch("http://localhost:3001/posts", {
@@ -29,17 +31,51 @@ const PostsWidget = ({ userId, isProfile = false }) => {
     dispatch(setPosts({ posts: data }));
   };
 
-  useEffect(() => {
-    if (isProfile) {
-      getUserPosts();
+    // New function to fetch bookmarked posts
+    const getBookmarkedPosts = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/users/${userId}/bookmarks`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        dispatch(setBookmarkedPosts({ bookmarkedPosts: data }));
+      } catch (error) {
+        console.error("Error fetching bookmarked posts:", error.message);
+      }
+    };
+
+    useEffect(() => {
+      if (isProfile) {
+        getUserPosts();
+      } else if (isBookmarkPage) {
+        // Fetch bookmarked posts if it's a bookmark page
+        getBookmarkedPosts();
+      } else {
+        getPosts();
+      }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  
+    // Use searchResults if available and it is an array, otherwise use posts from the state
+    let postsToRender;
+
+    if (isBookmarkPage) {
+      // Only display bookmarked posts on the bookmark page
+      postsToRender = bookmarks.map((bookmarkId) =>
+        posts.find((post) => post._id === bookmarkId)
+      );
     } else {
-      getPosts();
+      postsToRender = Array.isArray(searchResults) && searchResults.length > 0 ? searchResults : posts;
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
-      {Array.isArray(posts) && posts.map(
+      {Array.isArray(postsToRender) && postsToRender.map(
         ({
           _id,
           userId,

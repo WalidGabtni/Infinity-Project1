@@ -39,6 +39,10 @@ const UserSchema = new mongoose.Schema(
         occupation: String,
         viewedProfile: Number,
         impressions: Number,
+        bookmarks: {
+            type: Array,
+            default: [],
+          },
     }, { timestapms: true });
 
     const User = mongoose.model("User", UserSchema);

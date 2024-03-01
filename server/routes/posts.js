@@ -5,6 +5,8 @@ import {
   addComment,
   deleteComment,
   updateComment,
+  deletePost,
+  searchPosts,
 } from "../controllers/posts.js";
 
 const router = express.Router();
@@ -27,5 +29,11 @@ router.delete("/:postId/comments/:commentId", deleteComment);
 
 // Update comment in a post
 router.patch("/:postId/comments/:commentId", updateComment);
+
+// Delete post
+router.delete("/:id", verifyToken, deletePost);
+
+// search
+router.get("/search", verifyToken, searchPosts);
 
 export default router;

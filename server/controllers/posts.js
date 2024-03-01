@@ -215,6 +215,55 @@ export const sharePost = async (req, res) => {
 };
 
 
+/* DELETE POST*/
+export const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    // Check if the user is authorized to delete the post
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // Extract user ID from the decoded token
+    const userIdFromToken = req.user && req.user.id;
+
+    // Ensure post.userId is a valid string before comparison
+    if (userIdFromToken && String(post.userId) === String(userIdFromToken)) {
+      console.log("Deleting post with ID:", id);
+      console.log("User ID from token:", userIdFromToken);
+
+      // Remove the post ID from the bookmark lists of all users
+      await User.updateMany({}, { $pull: { bookmarks: id } });
+
+      await Post.findByIdAndDelete(id);
+
+      return res.status(200).json({ message: "Post deleted successfully" });
+    }
+
+    console.log("Unauthorized: You can only delete your own posts");
+    return res.status(403).json({ error: "Unauthorized: You can only delete your own posts" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/* SEARCH POSTS BY TITLE */
+export const searchPosts = async (req, res) => {
+  try {
+    const { title } = req.query;
+
+    // Perform a case-insensitive search on the title field
+    const posts = await Post.find({ title: { $regex: new RegExp(title, 'i') } });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 
