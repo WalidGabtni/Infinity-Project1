@@ -1,9 +1,9 @@
-// App.js
+// Import necessary components and libraries
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import HomePage from 'scenes/homePage';
 import LoginPage from 'scenes/loginPage';
 import ProfilePage from 'scenes/profilePage';
-import Bookmarks from 'scenes/bookmarks'; // Change the import to BookmarksPage
+import BookmarkPage from 'scenes/bookmarks'; // Import the BookmarkPage component
 import { useMemo } from "react";
 import { useSelector } from 'react-redux';
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -24,7 +24,7 @@ function App() {
             <Route path="/" element={<LoginPage />} />
             <Route path="/home" element={isAuth ? <HomePage /> : <Navigate to="/" />} />
             <Route path="/profile/:userId" element={isAuth ? <ProfilePage /> : <Navigate to="/" />} />
-            <Route path="/bookmarks" element={isAuth ? <Bookmarks /> : <Navigate to="/" />} />
+            <Route path="/bookmarks" element={isAuth ? <BookmarkPage /> : <Navigate to="/" />} /> {/* Add this route */}
           </Routes>
         </ThemeProvider>
       </BrowserRouter>

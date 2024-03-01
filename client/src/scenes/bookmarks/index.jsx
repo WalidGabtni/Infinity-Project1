@@ -1,69 +1,73 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setPosts } from "state";
+import React from "react";
+import { Box, useMediaQuery } from "@mui/material";
+import { useSelector, useDispatch } from "react-redux";
 import Navbar from "scenes/navbar";
 import UserWidget from "scenes/widgets/UserWidget";
-import MyPostWidget from "scenes/widgets/MyPostWidget";
-import PostsWidget from "scenes/widgets/PostsWidget";
+import PostsWidget from "scenes/widgets/PostsWidget"; // Update the import
 import AdvertWidget from "scenes/widgets/AdvertWidget";
 import FriendListWidget from "scenes/widgets/FriendListWidget";
-import { Box } from "@mui/material"; // Import Box from MUI
+import { useEffect } from "react";
+import { setBookmarkedPosts } from "state";
 
-const Bookmark = () => {
-  const dispatch = useDispatch();
-  const bookmarks = useSelector((state) => state.bookmarks);
+const BookmarkPage = () => {
+  const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
+  const { _id, picturePath } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
+  const bookmarkedPosts = useSelector((state) => state.user.bookmarkedPosts) || []; // Update to use state.user.bookmarkedPosts
+  const dispatch = useDispatch();
 
+  // Fetch bookmarked posts on component mount
   useEffect(() => {
-    const getBookmarkedPosts = async () => {
+    const fetchBookmarkedPosts = async () => {
       try {
-        const response = await fetch('http://localhost:3001/bookmarks/posts', {
-          method: 'GET',
+        const response = await fetch(`http://localhost:3001/api/users/${_id}/bookmarks`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          dispatch(setPosts({ posts: result })); // Update Redux state with bookmarked posts
-        } else {
-          console.error('Failed to fetch bookmarked posts:', response.status, response.statusText);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
+        const data = await response.json();
+        dispatch(setBookmarkedPosts({ bookmarkedPosts: data }));
       } catch (error) {
-        console.error('Error fetching bookmarked posts:', error);
+        console.error("Error fetching bookmarked posts:", error.message);
       }
     };
 
-    getBookmarkedPosts();
-  }, [token, dispatch]);
+    fetchBookmarkedPosts();
+  }, [_id, token, dispatch]);
 
   return (
-    <div>
-      <Navbar updateSearchResults={() => {}} />
+    <Box>
+      <Navbar />
+      
       <Box
         width="100%"
         padding="2rem 6%"
-        display="flex"
-        flexDirection="column" // Updated to column layout
+        display={isNonMobileScreens ? "flex" : "block"}
+        gap="0.5rem"
+        justifyContent="space-between"
       >
-        <Box>
-          <UserWidget /> {/* Place UserWidget here */}
+        <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
+          <UserWidget userId={_id} picturePath={picturePath} />
         </Box>
-        <Box style={{ flexDirection: "row" }} display="flex" gap="0.5rem" mt="1rem">
-          <Box flexBasis="42%">
-            <MyPostWidget searchResults={bookmarks} /> {/* Pass bookmarks as searchResults */}
-            <PostsWidget searchResults={bookmarks} /> {/* Pass bookmarks as searchResults */}
-          </Box>
-          <Box flexBasis="26%">
-            <AdvertWidget />
-            <Box m="2rem 0" />
-            <FriendListWidget /> {/* Assuming FriendListWidget automatically fetches data based on the logged-in user */}
-          </Box>
+        <Box
+          flexBasis={isNonMobileScreens ? "42%" : undefined}
+          mt={isNonMobileScreens ? undefined : "2rem"}
+        >
+          {/* Pass bookmarked posts to PostsWidget and set isBookmarkPage to true */}
+          <PostsWidget isBookmarkPage={true} />
+        </Box>
+        <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
+          <FriendListWidget />
+          <AdvertWidget />
         </Box>
       </Box>
-    </div>
+    </Box>
   );
 };
 
-export default Bookmark;
+export default BookmarkPage;

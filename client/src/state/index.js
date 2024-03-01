@@ -1,13 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-
 const initialState = {
   mode: "light",
   user: null,
   token: null,
   posts: [],
+  bookmarkedPosts: [], // Add bookmarkedPosts to initialState
 };
-
 
 export const authSlice = createSlice({
   name: "auth",
@@ -17,12 +16,16 @@ export const authSlice = createSlice({
       state.mode = state.mode === "light" ? "dark" : "light";
     },
     setLogin: (state, action) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token;
+      const { user, token } = action.payload;
+
+      state.user = user;
+      state.token = token;
+      state.bookmarkedPosts = user ? user.bookmarks : [];
     },
     setLogout: (state) => {
       state.user = null;
       state.token = null;
+      state.bookmarkedPosts = [];
     },
     setFriends: (state, action) => {
       if (state.user) {
@@ -41,9 +44,12 @@ export const authSlice = createSlice({
       });
       state.posts = updatedPosts;
     },
+    setBookmarkedPosts: (state, action) => {
+      state.bookmarkedPosts = action.payload.bookmarkedPosts;
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost } =
+export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost, setBookmarkedPosts } =
   authSlice.actions;
 export default authSlice.reducer;

@@ -11,9 +11,9 @@ import { verifyToken } from "../middleware/auth.js";
 const router = express.Router();
 
 /* READ */
-router.get("/:id", verifyToken, getUser);
 router.get("/:id/friends", verifyToken, getUserfriends);
-router.get("/:id/bookmarks", verifyToken, getBookmarkedPosts); // New endpoint for fetching bookmarked posts
+router.get("/:id/bookmarks", verifyToken, getBookmarkedPosts);
+router.get("/:id", verifyToken, getUser);
 
 /* UPDATE */
 router.patch("/:id/:friendId", verifyToken, addRemovefriend);
