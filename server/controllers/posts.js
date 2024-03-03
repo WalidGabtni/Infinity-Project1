@@ -2,6 +2,8 @@ import Post from "../models/Post.js";
 import User from "../models/User.js";
 import mongoose from "mongoose";
 
+
+
 /* CREATE */
 export const createPost = async (req, res) => {
   try {
@@ -41,6 +43,7 @@ export const createPost = async (req, res) => {
     res.status(409).json({ message: err.message });
   }
 };
+
 
 /* READ */
 export const getFeedPosts = async (req, res) => {
@@ -90,54 +93,55 @@ export const likePost = async (req, res) => {
 
 /* ADD COMMENT */
 export const addComment = async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const { userId, text } = req.body;
-    const post = await Post.findById(postId);
-
-    if (!post) {
-      return res.status(404).json({ error: "Post not found" });
+    try {
+      const { postId } = req.params;
+      const { userId, text } = req.body;
+      const post = await Post.findById(postId); // Use the Post model
+  
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+  
+      const newComment = { userId, text };
+      post.comments.push(newComment);
+      const updatedPost = await post.save();
+  
+      res.json(updatedPost);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error" });
     }
-
-    const newComment = { userId, text };
-    post.comments.push(newComment);
-    const updatedPost = await post.save();
-
-    res.json(updatedPost);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
 };
-
+  
 /* DELETE COMMENT */
 export const deleteComment = async (req, res) => {
-  try {
-    const { postId, commentId } = req.params;
-    const post = await Post.findById(postId);
-
-    if (!post) {
-      return res.status(404).json({ error: "Post not found" });
+    try {
+      const { postId, commentId } = req.params;
+      const post = await Post.findById(postId);
+  
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+  
+      // Check if commentId is a valid index (non-negative integer)
+      const commentIndex = parseInt(commentId, 10);
+      if (isNaN(commentIndex) || commentIndex < 0 || commentIndex >= post.comments.length) {
+        console.error("Invalid commentId:", commentId);
+        return res.status(400).json({ error: 'Invalid commentId' });
+      }
+  
+      // Remove the comment at the specified index
+      post.comments.splice(commentIndex, 1);
+  
+      const updatedPost = await post.save();
+  
+      res.json(updatedPost);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error" });
     }
-
-    // Check if commentId is a valid index (non-negative integer)
-    const commentIndex = parseInt(commentId, 10);
-    if (isNaN(commentIndex) || commentIndex < 0 || commentIndex >= post.comments.length) {
-      console.error("Invalid commentId:", commentId);
-      return res.status(400).json({ error: 'Invalid commentId' });
-    }
-
-    // Remove the comment at the specified index
-    post.comments.splice(commentIndex, 1);
-
-    const updatedPost = await post.save();
-
-    res.json(updatedPost);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+  };
+  
 
 /* UPDATE COMMENT */
 export const updateComment = async (req, res) => {
@@ -170,7 +174,48 @@ export const updateComment = async (req, res) => {
   }
 };
 
-/* DELETE */
+
+/*SHARE POST*/
+export const sharePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Find the post by ID
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Check if the post is already shared by the user
+    if (post.sharedBy.includes(userId)) {
+      return res.status(400).json({ error: 'Post already shared by the user' });
+    }
+
+    // Log firstName and lastName
+    console.log('Shared by:', user.firstName, user.lastName);
+
+    // Save the userId in the post document
+    post.sharedBy.push(userId);
+
+    const updatedPost = await post.save();
+
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+/* DELETE POST*/
 export const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
@@ -220,6 +265,5 @@ export const searchPosts = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 

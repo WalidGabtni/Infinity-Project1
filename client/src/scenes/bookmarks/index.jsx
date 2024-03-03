@@ -13,7 +13,7 @@ const BookmarkPage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
   const { _id, picturePath } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
-  const bookmarkedPosts = useSelector((state) => state.user.bookmarkedPosts) || []; // Update to use state.user.bookmarkedPosts
+  const bookmarkedPosts = useSelector((state) => state.user.bookmarkedPosts) || [];
   const dispatch = useDispatch();
 
   // Fetch bookmarked posts on component mount
@@ -43,7 +43,6 @@ const BookmarkPage = () => {
   return (
     <Box>
       <Navbar />
-      
       <Box
         width="100%"
         padding="2rem 6%"
@@ -62,8 +61,9 @@ const BookmarkPage = () => {
           <PostsWidget isBookmarkPage={true} />
         </Box>
         <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
-          <FriendListWidget />
           <AdvertWidget />
+          <Box m="2rem 0" />
+          <FriendListWidget userId={_id} />
         </Box>
       </Box>
     </Box>

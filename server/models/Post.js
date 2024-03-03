@@ -9,7 +9,7 @@ const CommentSchema = mongoose.Schema(
     text: {
       type: String,
       required: true,
-    }
+    },
   },
   {
     timestamps: true,
@@ -45,7 +45,11 @@ const PostSchema = mongoose.Schema(
       type: Map,
       of: Boolean,
     },
-    comments: [CommentSchema], // Include comments as an array of CommentSchema
+    comments: [CommentSchema],
+    sharedBy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', // Assuming you have a User model
+    }],
   },
   {
     timestamps: true,
