@@ -4,7 +4,7 @@ import {
     getUserfriends,
     addRemovefriend,
     addRemoveBookmark,
-    getBookmarkedPosts, // Import the new function
+    getBookmarkedPosts, 
 } from "../controllers/users.js";
 import { verifyToken } from "../middleware/auth.js";
 

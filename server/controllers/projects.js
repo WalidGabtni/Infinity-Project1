@@ -1,38 +1,40 @@
-import Project from "../models/project.js";
+import Project from "../models/Project.js";
+import User from "../models/User.js";
 
 
 /* CREATE */
 export const createProject = async (req, res) => {
   try {
-    console.log("Request Body:", req.body);
+    // Extract data from FormData
+    const { userId, name, description, startDate, endDate } = req.body;
 
-    const { name, description, startDate, endDate, currentStatus } = req.body;
+    // Find the user based on the userId
+    const user = await User.findById(userId);
 
-    console.log("name:", name);
-    console.log("description:", description);
-
-    // Validate if name is present
-    if (!name) {
-      return res.status(400).json({ message: "Name is required." });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
     }
 
-    const newProject = new Project({
+    // Create the project
+    const project = await Project.create({
+      userId: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
       name,
       description,
       startDate,
       endDate,
-      currentStatus,
+      // Add other fields as needed
     });
 
-    await newProject.save();
-
-    const projects = await Project.find();
-
-    res.status(201).json(projects);
-  } catch (err) {
-    res.status(409).json({ message: err.message });
+    // Respond with the created project
+    res.status(201).json(project);
+  } catch (error) {
+    console.error('Error creating project:', error);
+    res.status(500).json({ message: 'Error saving the project.' });
   }
 };
+
 
 /* READ */
 export const getAllProjects = async (req, res) => {

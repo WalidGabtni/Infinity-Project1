@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setProjects } from 'state';
 import { CloseOutlined } from '@mui/icons-material';
 
-const NewProjectForm = ({ onClose, onCreateProject }) => {
+const NewProjectForm = ({ onClose }) => {
   const [newProject, setNewProject] = useState({
     name: '',
     description: '',
@@ -16,6 +16,9 @@ const NewProjectForm = ({ onClose, onCreateProject }) => {
   const dispatch = useDispatch();
   const { palette } = useTheme();
   const token = useSelector((state) => state.token);
+  const { _id } = useSelector((state) => state.user);
+  const [image, setImage] = useState(null);
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,44 +26,48 @@ const NewProjectForm = ({ onClose, onCreateProject }) => {
   };
 
   const handleCreateProject = async () => {
-    // Validate if all required fields are filled
-    if (!newProject.name || !newProject.startDate || !newProject.endDate) {
-      console.error('Please fill in all required fields');
-      return;
-    }
-
     try {
-      // Assuming the server responds with the created project
-      const createdProject = await fetch('http://localhost:3001/projects', {
+      if (!newProject.name || !newProject.description || !newProject.startDate || !newProject.endDate) {
+        console.error('Please fill in all required fields', newProject);
+        return;
+      }
+  
+      const projectData = {
+        userId: _id,
+        name: newProject.name,
+        description: newProject.description,
+        startDate: newProject.startDate,
+        endDate: newProject.endDate,
+      };
+  
+      console.log('Request Data:', projectData);
+  
+      const response = await fetch('http://localhost:3001/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newProject),
-      }).then(response => response.json());
-
-      dispatch(setProjects([createdProject]));
-
-      // Clear the form after project creation
-      setNewProject({
-        name: '',
-        description: '',
-        startDate: '',
-        endDate: '',
+        body: JSON.stringify(projectData),
       });
-
-      // Optionally, you can perform any additional logic or state updates here
-
-      // Call the provided callback to handle closing the form
-      onClose();
-
+  
+      if (!response.ok) {
+        console.error(`Failed to create project. Server returned ${response.status}: ${response.statusText}`);
+        const errorResponse = await response.json();
+        console.error('Error details:', errorResponse);
+        return;
+      }
+  
+      const createdProject = await response.json();
+      dispatch(setProjects([createdProject]));
+      setImage(null);
+  
       console.log('Project created successfully:', createdProject);
     } catch (error) {
-      console.error('Error creating project:', error.message);
-      // Handle error scenarios
+      console.error('An unexpected error occurred:', error);
     }
   };
+  
 
   return (
     <>
