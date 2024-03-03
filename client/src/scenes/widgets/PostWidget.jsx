@@ -359,7 +359,6 @@ const PostWidget = ({
         )}
       </FlexBetween>
 
-      
 
       {isComments && postComments && (
         <Box mt="1rem">

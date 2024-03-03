@@ -3,6 +3,7 @@ import HomePage from 'scenes/homePage';
 import LoginPage from 'scenes/loginPage';
 import ProfilePage from 'scenes/profilePage';
 import BookmarkPage from 'scenes/bookmarks';
+import ProjectsPage from 'scenes/projectsPage';
 import { useMemo } from "react";
 import { useSelector } from 'react-redux';
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -28,6 +29,7 @@ function App() {
           <Route path="/home" element={isAuth ? <HomePage /> : <Navigate to="/" />}/>
           <Route path="/profile/:userId" element={isAuth ? <ProfilePage /> : <Navigate to="/" />} />
           <Route path="/bookmarks" element={isAuth ? <BookmarkPage /> : <Navigate to="/" />} />
+          <Route path="/projects" element={isAuth ? <ProjectsPage/> : <Navigate to="/" />} />
         </Routes>
       </ThemeProvider>
       </BrowserRouter>

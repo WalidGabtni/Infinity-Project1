@@ -203,7 +203,7 @@ const Navbar = ({ updateSearchResults }) => {
             }}
             >
             <MenuItem
-                onClick={popupState.close}
+                onClick={()=> navigate("/projects")}
                 sx={{
                 fontSize: '16px', // Font size
                 padding: '10px 50px', // Padding
