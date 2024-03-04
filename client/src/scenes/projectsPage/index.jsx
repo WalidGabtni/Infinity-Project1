@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Box ,useMediaQuery} from '@mui/material';
+import { Button, Typography, Box, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import NewProjectForm from './NewProjectForm';
 import Navbar from 'scenes/navbar';
 import UserWidget from 'scenes/widgets/UserWidget';
 import ProjectsList from './ProjectsList';
 import { setProjects } from 'state';
+
 
 const ProjectsPage = () => {
   const [showForm, setShowForm] = useState(false);
@@ -42,34 +43,53 @@ const ProjectsPage = () => {
   };
 
   return (
-    <Box>
-    <Navbar />
-    <Box
-        width="100%"
-        padding="2rem 6%"
-        display={isNonMobileScreens ? "flex" : "block"}
-        gap="0.5rem"
-        justifyContent="space-between"
-      >
-      <Box flexBasis="26%">
-        <UserWidget userId={_id} picturePath={picturePath} />
-      </Box>
-      <Box
-          flexBasis={isNonMobileScreens ? "42%" : undefined}
-          mt={isNonMobileScreens ? undefined : "2rem"}
-        >
-           <Button variant="contained" color="primary" onClick={handleToggleForm}>
-          Create Project
-        </Button>
+<Box>
+  <Navbar />
 
-        {showForm && (
-          <NewProjectForm token={token} onClose={() => setShowForm(false)} />
-        )}
-
-        <ProjectsList projects={projects} />
-        </Box>
+  <Box
+    position="relative"
+    width="100%"
+    padding="2rem 6%"
+    display={isNonMobileScreens ? 'flex' : 'block'}
+    gap="0.5rem"
+    justifyContent="space-between"
+  >
+    <Box flexBasis="26%">
+      <UserWidget userId={_id} picturePath={picturePath} />
     </Box>
+
+    <Box
+      sx={{
+        marginRight: 10
+      }}
+      flexBasis={isNonMobileScreens ? '70%' : undefined}
+      mt={isNonMobileScreens ? undefined : '2rem'}
+    >
+      {showForm && (
+        <NewProjectForm token={token} onClose={() => setShowForm(false)} />
+      )}
+
+      <ProjectsList projects={projects} />
+    </Box>
+
+    {/* Move the Create Project button inside the content container */}
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={handleToggleForm}
+      sx={{
+        position: 'absolute',
+        top: 35,
+        right: 25,
+        zIndex: 1000,
+      }}
+    >
+      Create Project
+    </Button>
   </Box>
+</Box>
+
+
   );
 };
 

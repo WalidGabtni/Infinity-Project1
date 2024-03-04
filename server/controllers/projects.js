@@ -4,6 +4,7 @@ import User from "../models/User.js";
 
 /* CREATE */
 export const createProject = async (req, res) => {
+  console.log('Received a create project request');
   try {
     // Extract data from FormData
     const { userId, name, description, startDate, endDate } = req.body;
@@ -15,6 +16,13 @@ export const createProject = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
+    // Handle the public/assets image upload
+    let projectImagePath = null;
+    if (req.file) {
+      projectImagePath = `/assets/${req.file.originalname}`;
+      // Save the public/assets image path to the project
+    }
+
     // Create the project
     const project = await Project.create({
       userId: user._id,
@@ -24,6 +32,7 @@ export const createProject = async (req, res) => {
       description,
       startDate,
       endDate,
+      projectImage: projectImagePath, // Use the correct field name
       // Add other fields as needed
     });
 

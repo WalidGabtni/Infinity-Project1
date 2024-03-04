@@ -2,6 +2,7 @@ import express from "express";
 import { createProject, getAllProjects, updateProject, deleteProject, searchProjects } from "../controllers/projects.js";
 import { verifyToken } from "../middleware/auth.js";
 
+
 const router = express.Router();
 
 /* CREATE */
