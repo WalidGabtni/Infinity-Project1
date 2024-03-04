@@ -1,4 +1,3 @@
-// ProjectsPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Box, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
@@ -10,6 +9,7 @@ import { setProjects } from 'state';
 
 const ProjectsPage = () => {
   const [showForm, setShowForm] = useState(false);
+  const [editProjectId, setEditProjectId] = useState(null); // Add state for editProjectId
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
   const { _id, picturePath } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
@@ -38,8 +38,9 @@ const ProjectsPage = () => {
     fetchProjects();
   }, [token, dispatch]);
 
-  const handleToggleForm = () => {
+  const handleToggleForm = (projectId = null) => {
     setShowForm(!showForm);
+    setEditProjectId(projectId); // Set the editProjectId based on the provided projectId
   };
 
   const handleDeleteProject = async (projectId) => {
@@ -48,14 +49,14 @@ const ProjectsPage = () => {
         console.error('Project ID is undefined');
         return;
       }
-  
+
       const response = await fetch(`http://localhost:3001/projects/${projectId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (response.ok) {
         console.log('Project deleted successfully');
         // You may want to refresh the projects list or update the state accordingly.
@@ -66,7 +67,6 @@ const ProjectsPage = () => {
       console.error('Error deleting project:', error);
     }
   };
-  
 
   return (
     <Box>
@@ -91,13 +91,14 @@ const ProjectsPage = () => {
           mt={isNonMobileScreens ? undefined : '2rem'}
         >
           {showForm && (
-            <NewProjectForm token={token} onClose={() => setShowForm(false)} />
+            <NewProjectForm token={token} onClose={() => handleToggleForm()} editProjectId={editProjectId} />
           )}
 
           <ProjectsList
             projects={projects}
             loggedInUserId={_id}
             onDeleteProject={handleDeleteProject}
+            onUpdateProject={handleToggleForm} // Pass the handleToggleForm function to update projects
           />
 
         </Box>
@@ -105,7 +106,7 @@ const ProjectsPage = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={handleToggleForm}
+          onClick={() => handleToggleForm()} // Create new project
           sx={{
             position: 'absolute',
             top: 35,

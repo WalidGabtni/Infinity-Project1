@@ -40,7 +40,7 @@ export const authSlice = createSlice({
         };
       } else {
         console.error("user friends non-existent :(");
-        return state; // Return the current state in case user is non-existent
+        return state; // Return the current state in case the user is non-existent
       }
     },
     setPosts: (state, action) => {
@@ -59,6 +59,15 @@ export const authSlice = createSlice({
     setProjects: (state, action) => {
       state.projects = action.payload.projects;
     },
+    updateProject: (state, action) => {
+      const updatedProject = action.payload;
+      const index = state.projects.findIndex((project) => project.id === updatedProject.id);
+
+      if (index !== -1) {
+        // Replace the existing project with the updated one
+        state.projects[index] = updatedProject;
+      }
+    },
   },
 });
 
@@ -71,5 +80,6 @@ export const {
   setPost,
   setBookmarkedPosts,
   setProjects,
+  updateProject,
 } = authSlice.actions;
 export default authSlice.reducer;

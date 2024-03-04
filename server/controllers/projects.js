@@ -1,6 +1,6 @@
 import Project from "../models/Project.js";
 import User from "../models/User.js";
-
+import mongoose from 'mongoose';
 
 /* CREATE */
 export const createProject = async (req, res) => {
@@ -59,17 +59,52 @@ export const getAllProjects = async (req, res) => {
 export const updateProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, startDate, endDate, currentStatus } = req.body;
-    const project = await Project.findByIdAndUpdate(
-      id,
-      { name, description, startDate, endDate, currentStatus },
-      { new: true }
-    );
-    res.status(200).json(project);
+    const { name, description, startDate, endDate } = req.body;
+
+    // Check if the project ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid project ID" });
+    }
+
+    // Check if the project exists
+    const existingProject = await Project.findById(id);
+
+    if (!existingProject) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    // Ensure user is authorized to update the project
+    const userIdFromToken = req.user && req.user.id;
+
+    // Ensure project.userId is a valid string before comparison
+    if (userIdFromToken && String(existingProject.userId) !== String(userIdFromToken)) {
+      console.log("Unauthorized: You can only update your own projects");
+      return res.status(403).json({ error: "Unauthorized: You can only update your own projects" });
+    }
+
+    // Update the project fields
+    existingProject.name = name || existingProject.name;
+    existingProject.description = description || existingProject.description;
+    existingProject.startDate = startDate || existingProject.startDate;
+    existingProject.endDate = endDate || existingProject.endDate;
+
+    // Handle project image update
+    if (req.file) {
+      existingProject.projectImage = `/assets/${req.file.originalname}`;
+    }
+
+    // Save the updated project
+    const updatedProject = await existingProject.save();
+
+    res.status(200).json(updatedProject);
   } catch (error) {
-    res.status(409).json({ message: error.message });
+    console.error("Error updating project:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+
 
 /* DELETE */
 export const deleteProject = async (req, res) => {
