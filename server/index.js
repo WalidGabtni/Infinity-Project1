@@ -55,12 +55,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+
 /* ROUTES WITH FILES */
 app.post("/auth/register", upload.single("picture"), register);
 app.post("/posts", verifyToken, upload.single("picture"), createPost);
 
 // Additional route for creating projects
-app.post("/projects", verifyToken, createProject);
+app.post("/projects", verifyToken, upload.single("projectImage"), createProject);
 
 /* ROUTES */
 app.use("/auth", authRoutes);
@@ -77,3 +78,5 @@ mongoose
     app.listen(PORT, () => console.log(`Server port: ${PORT}`));
   })
   .catch((error) => console.error("Error connecting to MongoDB:", error));
+
+

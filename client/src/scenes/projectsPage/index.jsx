@@ -1,5 +1,6 @@
+// ProjectsPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Box ,useMediaQuery} from '@mui/material';
+import { Button, Typography, Box, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import NewProjectForm from './NewProjectForm';
 import Navbar from 'scenes/navbar';
@@ -41,35 +42,81 @@ const ProjectsPage = () => {
     setShowForm(!showForm);
   };
 
+  const handleDeleteProject = async (projectId) => {
+    try {
+      if (!projectId) {
+        console.error('Project ID is undefined');
+        return;
+      }
+  
+      const response = await fetch(`http://localhost:3001/projects/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (response.ok) {
+        console.log('Project deleted successfully');
+        // You may want to refresh the projects list or update the state accordingly.
+      } else {
+        console.error('Failed to delete project:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    }
+  };
+  
+
   return (
     <Box>
-    <Navbar />
-    <Box
+      <Navbar />
+      <Box
+        position="relative"
         width="100%"
         padding="2rem 6%"
-        display={isNonMobileScreens ? "flex" : "block"}
+        display={isNonMobileScreens ? 'flex' : 'block'}
         gap="0.5rem"
         justifyContent="space-between"
       >
-      <Box flexBasis="26%">
-        <UserWidget userId={_id} picturePath={picturePath} />
-      </Box>
-      <Box
-          flexBasis={isNonMobileScreens ? "42%" : undefined}
-          mt={isNonMobileScreens ? undefined : "2rem"}
+        <Box flexBasis="26%">
+          <UserWidget userId={_id} picturePath={picturePath} />
+        </Box>
+
+        <Box
+          sx={{
+            marginRight: 10
+          }}
+          flexBasis={isNonMobileScreens ? '70%' : undefined}
+          mt={isNonMobileScreens ? undefined : '2rem'}
         >
-           <Button variant="contained" color="primary" onClick={handleToggleForm}>
+          {showForm && (
+            <NewProjectForm token={token} onClose={() => setShowForm(false)} />
+          )}
+
+          <ProjectsList
+            projects={projects}
+            loggedInUserId={_id}
+            onDeleteProject={handleDeleteProject}
+          />
+
+        </Box>
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleToggleForm}
+          sx={{
+            position: 'absolute',
+            top: 35,
+            right: 25,
+            zIndex: 1000,
+          }}
+        >
           Create Project
         </Button>
-
-        {showForm && (
-          <NewProjectForm token={token} onClose={() => setShowForm(false)} />
-        )}
-
-        <ProjectsList projects={projects} />
-        </Box>
+      </Box>
     </Box>
-  </Box>
   );
 };
 

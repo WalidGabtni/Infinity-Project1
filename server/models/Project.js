@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const ProjectSchema = mongoose.Schema(
   {
     userId: {
@@ -37,8 +36,8 @@ const ProjectSchema = mongoose.Schema(
       default: 'Not Started',
     },
     picturePath: String,
-    userPicturePath: String, 
-    
+    userPicturePath: String,
+    projectImage: String, // Add this field for the project image path
   },
   {
     timestamps: true,
