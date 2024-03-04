@@ -139,7 +139,7 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
       };
   
       const response = await fetch(`http://localhost:3001/projects/${editProjectId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -149,13 +149,11 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
   
       if (!response.ok) {
         console.error(`Failed to update project. Server returned ${response.status}: ${response.statusText}`);
-        try {
-          const errorResponse = await response.json();
-          console.error('Error details:', errorResponse);
-        } catch (error) {
-          console.error('Error parsing error response as JSON:', error);
-          console.log('Raw response:', await response.text());
-        }
+        
+        // Read the response text and log it
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+  
         return;
       }
   
