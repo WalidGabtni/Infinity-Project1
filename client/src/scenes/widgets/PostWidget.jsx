@@ -1,18 +1,16 @@
-// Import MUI icons
 import {
   ChatBubbleOutlineOutlined,
   FavoriteBorderOutlined,
   FavoriteOutlined,
   ShareOutlined,
-  DeleteOutline,
   BookmarkBorder,
   Bookmark,
-  EditOutlined
+  MoreVert
 } from "@mui/icons-material";
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import { Box, Divider, IconButton, InputBase, Typography, useTheme } from "@mui/material";
+import { Box, Divider, IconButton, InputBase, Typography, useTheme, Menu, MenuItem } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
@@ -44,6 +42,8 @@ const PostWidget = ({
   const [newComment, setNewComment] = useState("");
   const [isShareClicked, setIsShareClicked] = useState(false); // New state for tracking share button click
   const [isShareHovered, setIsShareHovered] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [editPostData, setEditPostData] = useState(null);
 
@@ -180,7 +180,16 @@ const PostWidget = ({
     setIsCommentFormOpen(true);
   };
 
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(false);
+  };
+
   const handleDeletePost = async () => {
+    handleMenuClose();
     try {
       // Make a request to delete the post
       const postDeleteResponse = await fetch(`http://localhost:3001/posts/${postId}`, {
@@ -217,6 +226,7 @@ const PostWidget = ({
   };
 
   const handleEditPost = () => {
+    handleMenuClose();
     // Set the post data to edit
     setEditPostData({
       title,
@@ -229,6 +239,7 @@ const PostWidget = ({
   };
 
   const handleUpdatePost = async (updatedPostData) => {
+    handleMenuClose();
     try {
       // Make a PATCH request to update the post
       const response = await fetch(`http://localhost:3001/posts/${postId}`, {
@@ -286,15 +297,21 @@ const PostWidget = ({
     <Box position="relative">
     {/* Move the delete icon inside the container */}
     {loggedInUserId === postUserId && (
-        <FlexBetween style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
-          <IconButton onClick={handleDeletePost}>
-            <DeleteOutline />
-          </IconButton>
-          <IconButton onClick={handleEditPost}>
-            <EditOutlined />
+        <FlexBetween style={{ position: "absolute", top: "0.5rem", right: "0.5rem" }}>
+          <IconButton id={`post-menu-${postId}`} onClick={handleMenuOpen}>
+            <MoreVert />
           </IconButton>
         </FlexBetween>
       )}
+      <Menu
+          id="post-menu"
+          anchorEl={isMenuOpen ? document.getElementById(`post-menu-${postId}`) : null}
+          open={isMenuOpen}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleEditPost}>Edit</MenuItem>
+          <MenuItem onClick={handleDeletePost}>Delete</MenuItem>
+        </Menu>
     <WidgetWrapper m="2rem 0">
       <Friend
         friendId={postUserId}
@@ -302,6 +319,24 @@ const PostWidget = ({
         subtitle={location}
         userPicturePath={userPicturePath}
       />
+      
+      <Menu
+          id={`post-menu-${postId}`}
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <MenuItem onClick={handleEditPost}>Edit</MenuItem>
+          <MenuItem onClick={handleDeletePost}>Delete</MenuItem>
+        </Menu>
 
       <Typography variant="h2" sx={{ mt: "1rem" }}>
         {title}
