@@ -7,6 +7,7 @@ import {
   updateComment,
   deletePost,
   searchPosts,
+  updatePost,
 } from "../controllers/posts.js";
 
 const router = express.Router();
@@ -35,5 +36,8 @@ router.delete("/:id", verifyToken, deletePost);
 
 // search
 router.get("/search", verifyToken, searchPosts);
+
+/* UPDATE */
+router.patch("/:id", verifyToken, updatePost);
 
 export default router;

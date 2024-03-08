@@ -7,6 +7,7 @@ import {
   DeleteOutline,
   BookmarkBorder,
   Bookmark,
+  EditOutlined
 } from "@mui/icons-material";
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
@@ -19,6 +20,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 import Comment from "components/Comment";
+import PostForm from 'components/PostForm';
 import React from 'react';
 import CommentForm from "components/CommentForm";
 
@@ -42,6 +44,8 @@ const PostWidget = ({
   const [newComment, setNewComment] = useState("");
   const [isShareClicked, setIsShareClicked] = useState(false); // New state for tracking share button click
   const [isShareHovered, setIsShareHovered] = useState(false);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [editPostData, setEditPostData] = useState(null);
 
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
@@ -211,6 +215,46 @@ const PostWidget = ({
       console.error('Error deleting post:', error);
     }
   };
+
+  const handleEditPost = () => {
+    // Set the post data to edit
+    setEditPostData({
+      title,
+      description,
+      // Include other post properties as needed
+    });
+
+    // Open the edit form
+    setIsEditFormOpen(true);
+  };
+
+  const handleUpdatePost = async (updatedPostData) => {
+    try {
+      // Make a PATCH request to update the post
+      const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedPostData),
+      });
+
+      if (!response.ok) {
+        console.error(`Failed to update post. Server returned ${response.status}: ${response.statusText}`);
+        const errorResponse = await response.json();
+        console.error('Error details:', errorResponse);
+        return;
+      }
+
+      // Handle the updated post data as needed
+      const updatedPost = await response.json();
+      // Dispatch an action or update the local state as needed
+      console.log('Post updated successfully:', updatedPost);
+    } catch (error) {
+      console.error('An unexpected error occurred:', error);
+    }
+  };
   
 
   const handleBookmark = async () => {
@@ -242,13 +286,15 @@ const PostWidget = ({
     <Box position="relative">
     {/* Move the delete icon inside the container */}
     {loggedInUserId === postUserId && (
-      <IconButton
-        style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
-        onClick={handleDeletePost}
-      >
-        <DeleteOutline />
-      </IconButton>
-    )}
+        <FlexBetween style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
+          <IconButton onClick={handleDeletePost}>
+            <DeleteOutline />
+          </IconButton>
+          <IconButton onClick={handleEditPost}>
+            <EditOutlined />
+          </IconButton>
+        </FlexBetween>
+      )}
     <WidgetWrapper m="2rem 0">
       <Friend
         friendId={postUserId}
@@ -393,6 +439,13 @@ const PostWidget = ({
 
       )}
     </WidgetWrapper>
+    {isEditFormOpen && (
+        <PostForm
+          onClose={() => setIsEditFormOpen(false)}
+          onPost={(postData) => handleUpdatePost(postData)}  // Use a different handler for updating the post
+          postData={editPostData}  // Pass the post data to the PostForm
+        />
+      )}
     </Box>
   );
 };

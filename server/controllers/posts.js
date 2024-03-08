@@ -266,4 +266,49 @@ export const searchPosts = async (req, res) => {
   }
 };
 
+/* UPDATE POST */
+export const updatePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description } = req.body;
 
+    // Check if the post ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid post ID" });
+    }
+
+    // Check if the post exists
+    const existingPost = await Post.findById(id);
+
+    if (!existingPost) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // Ensure user is authorized to update the post
+    const userIdFromToken = req.user && req.user.id;
+
+    // Ensure post.userId is a valid string before comparison
+    if (userIdFromToken && String(existingPost.userId) !== String(userIdFromToken)) {
+      console.log("Unauthorized: You can only update your own posts");
+      return res.status(403).json({ error: "Unauthorized: You can only update your own posts" });
+    }
+
+    // Update the post fields
+    existingPost.title = title || existingPost.title;
+    existingPost.description = description || existingPost.description;
+    
+
+    // Handle post image update
+    if (req.file) {
+      existingPost.postImage = `/assets/${req.file.originalname}`;
+    }
+
+    // Save the updated post
+    const updatedPost = await existingPost.save();
+
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    console.error("Error updating post:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
