@@ -13,8 +13,6 @@ import {
   MenuItem,
   Button,
 } from '@mui/material';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from "@mui/material/styles";
@@ -118,7 +116,7 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
                   </div>
                 )}
 
-                {!project.members || (loggedInUserId !== project.userId && !project.members.some((member) => member.userId === loggedInUserId)) && (
+                {(!project.members || (loggedInUserId !== project.userId && !project.members.some((member) => member.userId === loggedInUserId))) && (
                   <Button
                     variant="outlined"
                     color="primary"
