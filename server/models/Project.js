@@ -36,6 +36,19 @@ const ProjectSchema = mongoose.Schema(
       enum: ['Not Started', 'In Progress', 'Completed'],
       default: 'Not Started',
     },
+<<<<<<< Updated upstream
+=======
+    picturePath: String,
+    userPicturePath: String,
+    projectImage: String,
+    members: [
+      {
+        userId: String,
+        firstName: String,
+        lastName: String,
+      },
+    ],
+>>>>>>> Stashed changes
   },
   {
     timestamps: true,

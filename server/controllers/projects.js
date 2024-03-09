@@ -86,3 +86,47 @@ export const searchProjects = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+/* JOIN PROJECT */
+export const joinProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { userId, firstName, lastName } = req.body;
+
+    // Find the user based on the userId
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Find the project based on the projectId
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found.' });
+    }
+
+    // Check if the user is already a member of the project
+    const isMember = project.members.some((member) => member.userId === userId);
+    if (isMember) {
+      return res.status(400).json({ message: 'User is already a member of the project.' });
+    }
+
+    // Add the user to the members list
+    project.members.push({
+      userId: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
+
+    // Save the updated project
+    await project.save();
+
+    res.status(200).json(project);
+  } catch (error) {
+    console.error('Error joining project:', error);
+    res.status(500).json({ message: 'Error joining the project.' });
+  }
+};
