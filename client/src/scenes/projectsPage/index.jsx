@@ -1,20 +1,24 @@
+// ProjectsPage.js
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Box, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import NewProjectForm from './NewProjectForm';
+import { Route, Routes, useNavigate } from 'react-router-dom'; // Updated import
 import Navbar from 'scenes/navbar';
 import UserWidget from 'scenes/widgets/UserWidget';
+import NewProjectForm from './NewProjectForm';
 import ProjectsList from './ProjectsList';
 import { setProjects } from 'state';
+import IndividualProjectPage from './IndividualProjectPage';
 
 const ProjectsPage = () => {
   const [showForm, setShowForm] = useState(false);
-  const [editProjectId, setEditProjectId] = useState(null); // Add state for editProjectId
-  const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
+  const [editProjectId, setEditProjectId] = useState(null);
+  const isNonMobileScreens = useMediaQuery('(min-width:1000px)');
   const { _id, picturePath } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const projects = useSelector((state) => state.projects);
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // Added useNavigate hook
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -40,7 +44,7 @@ const ProjectsPage = () => {
 
   const handleToggleForm = (projectId = null) => {
     setShowForm(!showForm);
-    setEditProjectId(projectId); // Set the editProjectId based on the provided projectId
+    setEditProjectId(projectId);
   };
 
   const handleDeleteProject = async (projectId) => {
@@ -59,7 +63,6 @@ const ProjectsPage = () => {
 
       if (response.ok) {
         console.log('Project deleted successfully');
-        // You may want to refresh the projects list or update the state accordingly.
       } else {
         console.error('Failed to delete project:', response.status, response.statusText);
       }
@@ -94,19 +97,27 @@ const ProjectsPage = () => {
             <NewProjectForm token={token} onClose={() => handleToggleForm()} editProjectId={editProjectId} />
           )}
 
-          <ProjectsList
-            projects={projects}
-            loggedInUserId={_id}
-            onDeleteProject={handleDeleteProject}
-            onUpdateProject={handleToggleForm} // Pass the handleToggleForm function to update projects
-          />
-
+          <Routes>
+            <Route
+              path="/"
+              element={<ProjectsList
+                projects={projects}
+                loggedInUserId={_id}
+                onDeleteProject={handleDeleteProject}
+                onUpdateProject={(projectId) => {
+                  handleToggleForm(projectId);
+                  navigate(`/${projectId}`); // Navigate to the project page after updating
+                }}
+              />}
+            />
+            <Route path="/:projectId" element={<IndividualProjectPage />} />
+          </Routes>
         </Box>
 
         <Button
           variant="contained"
           color="primary"
-          onClick={() => handleToggleForm()} // Create new project
+          onClick={() => handleToggleForm()}
           sx={{
             position: 'absolute',
             top: 35,
@@ -122,5 +133,3 @@ const ProjectsPage = () => {
 };
 
 export default ProjectsPage;
-
-

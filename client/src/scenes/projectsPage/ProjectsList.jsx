@@ -13,12 +13,18 @@ import {
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useNavigate, Link } from 'react-router-dom';
+import { useTheme } from "@mui/material/styles";
+
 
 const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUserId }) => {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
+  const theme = useTheme();
 
   const handleMenuOpen = (event, project) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setSelectedProject(project);
   };
@@ -26,6 +32,10 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedProject(null);
+  };
+
+  const handleProjectClick = (projectId) => {
+    navigate(`/projects/${projectId}`);
   };
 
   return (
@@ -42,9 +52,20 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
               }}
             >
               <CardContent>
-              <Typography variant="h5" component="div">
-                Project Name: {project.name}
-              </Typography>
+              <Link
+                to={`/projects/${project._id}`}
+                style={{
+                  textDecoration: 'none',
+                  color: theme.palette.text.primary,
+                  padding: '10px',       
+                  borderRadius: '5px',  
+                  display: 'inline-block', 
+                }}
+              >
+                <Typography variant="h5" component="div" style={{ fontWeight: 'bold' }}>
+                  Project Name: {project.name}
+                </Typography>
+              </Link>
               <Box m="0.2rem 0" />
               <Divider />
               <Box m="1rem 0" />

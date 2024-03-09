@@ -9,6 +9,8 @@ import { useSelector } from 'react-redux';
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { themeSettings } from 'theme';
+import IndividualProjectPage from 'scenes/projectsPage/IndividualProjectPage';
+
 
 
 
@@ -30,6 +32,7 @@ function App() {
           <Route path="/profile/:userId" element={isAuth ? <ProfilePage /> : <Navigate to="/" />} />
           <Route path="/bookmarks" element={isAuth ? <BookmarkPage /> : <Navigate to="/" />} />
           <Route path="/projects" element={isAuth ? <ProjectsPage/> : <Navigate to="/" />} />
+          <Route path="/projects/:projectId" element={isAuth ? <IndividualProjectPage /> : <Navigate to="/" />} />
         </Routes>
       </ThemeProvider>
       </BrowserRouter>
