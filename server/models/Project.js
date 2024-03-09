@@ -37,7 +37,14 @@ const ProjectSchema = mongoose.Schema(
     },
     picturePath: String,
     userPicturePath: String,
-    projectImage: String, // Add this field for the project image path
+    projectImage: String,
+    members: [
+      {
+        userId: String,
+        firstName: String,
+        lastName: String,
+      },
+    ],
   },
   {
     timestamps: true,

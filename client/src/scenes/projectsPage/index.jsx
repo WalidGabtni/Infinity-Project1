@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, Box, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { Route, Routes, useNavigate } from 'react-router-dom'; // Updated import
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import Navbar from 'scenes/navbar';
 import UserWidget from 'scenes/widgets/UserWidget';
 import NewProjectForm from './NewProjectForm';
@@ -18,7 +18,7 @@ const ProjectsPage = () => {
   const token = useSelector((state) => state.token);
   const projects = useSelector((state) => state.projects);
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Added useNavigate hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -71,6 +71,31 @@ const ProjectsPage = () => {
     }
   };
 
+  const handleJoinProject = async (projectId, userId, firstName, lastName) => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId,
+          firstName,
+          lastName,
+        }),
+      });
+  
+      if (response.ok) {
+        console.log(`User ${userId} joined project ${projectId}`);
+      } else {
+        console.error('Failed to join project:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error joining project:', error);
+    }
+  };
+
   return (
     <Box>
       <Navbar />
@@ -104,10 +129,8 @@ const ProjectsPage = () => {
                 projects={projects}
                 loggedInUserId={_id}
                 onDeleteProject={handleDeleteProject}
-                onUpdateProject={(projectId) => {
-                  handleToggleForm(projectId);
-                  navigate(`/${projectId}`); // Navigate to the project page after updating
-                }}
+                onUpdateProject={(projectId) => handleToggleForm(projectId)}
+                onJoinProject={handleJoinProject} // Pass the function here
               />}
             />
             <Route path="/:projectId" element={<IndividualProjectPage />} />
