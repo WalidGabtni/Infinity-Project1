@@ -43,6 +43,8 @@ const ProjectSchema = mongoose.Schema(
         userId: String,
         firstName: String,
         lastName: String,
+        picturePath: String,
+        userPicturePath: String,
       },
     ],
   },

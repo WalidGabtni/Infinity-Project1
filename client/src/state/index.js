@@ -7,6 +7,7 @@ const initialState = {
   posts: [],
   bookmarkedPosts: [],
   projects: [], // Add projects to initialState
+  members: [],
 };
 
 export const authSlice = createSlice({
@@ -68,6 +69,9 @@ export const authSlice = createSlice({
         state.projects[index] = updatedProject;
       }
     },
+    setMembers: (state, action) => {
+      state.members = action.payload.members;
+    },
   },
 });
 
@@ -81,5 +85,6 @@ export const {
   setBookmarkedPosts,
   setProjects,
   updateProject,
+  setMembers,
 } = authSlice.actions;
 export default authSlice.reducer;

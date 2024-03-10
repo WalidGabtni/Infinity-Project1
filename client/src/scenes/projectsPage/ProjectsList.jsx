@@ -16,6 +16,7 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from "@mui/material/styles";
+import WidgetWrapper from 'components/WidgetWrapper';
 
 const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUserId, onJoinProject }) => {
   const navigate = useNavigate();
@@ -55,6 +56,7 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
   };
 
   return (
+    <WidgetWrapper>
     <Grid container spacing={2}>
       {projects && projects.length > 0 ? (
         projects.map((project) => (
@@ -154,6 +156,8 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
         </Grid>
       )}
     </Grid>
+    </WidgetWrapper>
+
   );
 };
 
