@@ -1,3 +1,4 @@
+// ProjectMember.jsx
 import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -15,10 +16,7 @@ const ProjectMember = ({ userId, firstName, lastName, occupation, picturePath })
     <FlexBetween>
       <FlexBetween gap="1rem" style={{ cursor: 'pointer' }}>
         <UserImage image={picturePath} size="55px" userId={userId} />
-        <Box onClick={() => {
-          navigate(`/profile/${userId}`);
-          navigate(0);
-        }}>
+        <Box onClick={() => { navigate(`/profile/${userId}`); navigate(0); }}>
           <Typography
             color={main}
             variant="h5"

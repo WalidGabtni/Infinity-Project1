@@ -155,11 +155,13 @@ export const searchProjects = async (req, res) => {
 };
 
 
+
+
 /* JOIN PROJECT */
 export const joinProject = async (req, res) => {
   try {
     const { projectId } = req.params;
-    const { userId, firstName, lastName } = req.body;
+    const { userId } = req.body;
 
     // Find the user based on the userId
     const user = await User.findById(userId);
@@ -186,6 +188,9 @@ export const joinProject = async (req, res) => {
       userId: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
+      picturePath: user.picturePath,
+      userPicturePath: user.userPicturePath,
+      occupation: user.occupation,
     });
 
     // Save the updated project
@@ -197,6 +202,7 @@ export const joinProject = async (req, res) => {
     res.status(500).json({ message: 'Error joining the project.' });
   }
 };
+
 
 /* GET PROJECT MEMBERS */
 export const getProjectMembers = async (req, res) => {
@@ -210,12 +216,21 @@ export const getProjectMembers = async (req, res) => {
       return res.status(404).json({ message: 'Project not found.' });
     }
 
-    // Extract and return the members of the project
-    const members = project.members;
+    // Extract and return the members of the project with additional information
+    const members = project.members.map((member) => ({
+      userId: member.userId,
+      firstName: member.firstName,
+      lastName: member.lastName,
+      picturePath: member.picturePath,
+      userPicturePath: member.userPicturePath,
+      occupation: member.occupation,
+    }));
+
     res.status(200).json(members);
   } catch (error) {
     console.error('Error fetching project members:', error);
     res.status(500).json({ message: 'Error fetching project members.' });
   }
 };
+
 

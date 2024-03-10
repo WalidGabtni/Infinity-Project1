@@ -40,11 +40,21 @@ const ProjectSchema = mongoose.Schema(
     projectImage: String,
     members: [
       {
-        userId: String,
-        firstName: String,
-        lastName: String,
+        userId: {
+          type: String,
+          required: true,
+        },
+        firstName: {
+          type: String,
+          required: true,
+        },
+        lastName: {
+          type: String,
+          required: true,
+        },
         picturePath: String,
         userPicturePath: String,
+        occupation: String, // Add the occupation field
       },
     ],
   },

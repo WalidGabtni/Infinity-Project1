@@ -71,7 +71,7 @@ const ProjectsPage = () => {
     }
   };
 
-  const handleJoinProject = async (projectId, userId, firstName, lastName) => {
+  const handleJoinProject = async (projectId, userId, firstName, lastName, picturePath) => {
     try {
       const response = await fetch(`http://localhost:3001/projects/${projectId}/join`, {
         method: 'POST',
@@ -83,6 +83,7 @@ const ProjectsPage = () => {
           userId,
           firstName,
           lastName,
+          picturePath,
         }),
       });
   
