@@ -10,7 +10,7 @@ const ProjectMemberWidget = ({ projectId }) => {
   const dispatch = useDispatch();
   const { palette } = useTheme();
   const token = useSelector((state) => state.token);
-  const members = useSelector((state) => state.members); // Add this line to declare members
+  const members = useSelector((state) => state.members);
 
   const getMembers = useCallback(async () => {
     try {
