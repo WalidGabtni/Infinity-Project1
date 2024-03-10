@@ -54,7 +54,7 @@ const ProjectSchema = mongoose.Schema(
         },
         picturePath: String,
         userPicturePath: String,
-        occupation: String, // Add the occupation field
+        occupation: String, 
       },
     ],
   },

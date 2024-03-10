@@ -86,36 +86,34 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
         console.error('Please fill in all required fields', newProject);
         return;
       }
-
-      const projectData = {
-        userId: _id,
-        name: newProject.name,
-        description: newProject.description,
-        startDate: newProject.startDate,
-        endDate: newProject.endDate,
-        projectImage: projectImage,  // Use projectImage directly
-      };
-
+  
+      const formData = new FormData();
+      formData.append('userId', _id);
+      formData.append('name', newProject.name);
+      formData.append('description', newProject.description);
+      formData.append('startDate', newProject.startDate);
+      formData.append('endDate', newProject.endDate);
+      formData.append('projectImage', projectImage);
+  
       const response = await fetch('http://localhost:3001/projects', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(projectData),
+        body: formData,
       });
-
+  
       if (!response.ok) {
         console.error(`Failed to create project. Server returned ${response.status}: ${response.statusText}`);
         const errorResponse = await response.json();
         console.error('Error details:', errorResponse);
         return;
       }
-
+  
       const createdProject = await response.json();
       dispatch(setProjects([createdProject]));
       setImage(null);
-
+  
       console.log('Project created successfully:', createdProject);
       onClose(); // Close the form after creating a project
     } catch (error) {
@@ -167,6 +165,9 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
       console.error('An unexpected error occurred:', error);
     }
   };
+  
+  
+  
 
   const handleImageUpload = () => {
     if (editor && image) {
