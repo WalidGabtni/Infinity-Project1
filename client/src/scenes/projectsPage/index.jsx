@@ -1,11 +1,12 @@
 // ProjectsPage.js
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Box, useMediaQuery } from '@mui/material';
+import { Button, Box, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import Navbar from 'scenes/navbar';
 import UserWidget from 'scenes/widgets/UserWidget';
 import NewProjectForm from './NewProjectForm';
+import MyProjectsWidget from 'scenes/widgets/MyProjectsWidget';
 import ProjectsList from './ProjectsList';
 import { setProjects } from 'state';
 import IndividualProjectPage from './IndividualProjectPage';
@@ -103,20 +104,21 @@ const ProjectsPage = () => {
       <Box
         position="relative"
         width="100%"
-        padding="2rem 6%"
+        padding="2rem 2%"
         display={isNonMobileScreens ? 'flex' : 'block'}
+        flexDirection={isNonMobileScreens ? 'row' : 'column'}
         gap="0.5rem"
         justifyContent="space-between"
       >
-        <Box flexBasis="26%">
+        <Box flexBasis={isNonMobileScreens ? '26%' : '100%'}>
           <UserWidget userId={_id} picturePath={picturePath} />
         </Box>
 
         <Box
           sx={{
-            marginRight: 10
+            marginRight: isNonMobileScreens ? 0.5 : 0,
           }}
-          flexBasis={isNonMobileScreens ? '70%' : undefined}
+          flexBasis={isNonMobileScreens ? '70%' : '100%'}
           mt={isNonMobileScreens ? undefined : '2rem'}
         >
           {showForm && (
@@ -126,31 +128,47 @@ const ProjectsPage = () => {
           <Routes>
             <Route
               path="/"
-              element={<ProjectsList
-                projects={projects}
-                loggedInUserId={_id}
-                onDeleteProject={handleDeleteProject}
-                onUpdateProject={(projectId) => handleToggleForm(projectId)}
-                onJoinProject={handleJoinProject} // Pass the function here
-              />}
+              element={<>
+                <ProjectsList
+                  projects={projects}
+                  loggedInUserId={_id}
+                  onDeleteProject={handleDeleteProject}
+                  onUpdateProject={(projectId) => handleToggleForm(projectId)}
+                  onJoinProject={handleJoinProject}
+                />
+                {!isNonMobileScreens && (
+                  <MyProjectsWidget />
+                )}
+              </>}
             />
             <Route path="/:projectId" element={<IndividualProjectPage />} />
           </Routes>
         </Box>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleToggleForm()}
-          sx={{
-            position: 'absolute',
-            top: 35,
-            right: 25,
-            zIndex: 1000,
-          }}
-        >
-          Create Project
-        </Button>
+        {isNonMobileScreens && !showForm && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleToggleForm()}
+            sx={{
+              position: 'absolute',
+              top: 12,
+              right: 180,
+              zIndex: 1000,
+            }}
+          >
+            Create Project
+          </Button>
+        )}
+
+        {isNonMobileScreens && (
+          <Box
+            flexBasis="20%"
+            mt={isNonMobileScreens ? 3 : '2rem'}
+          >
+            <MyProjectsWidget />
+          </Box>
+        )}
       </Box>
     </Box>
   );

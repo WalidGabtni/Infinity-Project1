@@ -1,5 +1,5 @@
 import express from "express";
-import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers} from "../controllers/projects.js";
+import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers, getUserProjects} from "../controllers/projects.js";
 import { verifyToken } from "../middleware/auth.js";
 
 
@@ -25,5 +25,8 @@ router.post('/:projectId/join', joinProject);
 
 // Fetch members for a project
 router.get('/:projectId/members', verifyToken, getProjectMembers);
+
+// Fetch projects for a user
+router.get('/projects/user/:userId', getUserProjects);
 
 export default router;

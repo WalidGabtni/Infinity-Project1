@@ -242,3 +242,19 @@ export const getProjectMembers = async (req, res) => {
 };
 
 
+/* MY PROJECTS */
+export const getUserProjects = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find projects where the user is a member
+    const projects = await Project.find({
+      'members.userId': userId,
+    });
+
+    res.status(200).json(projects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

@@ -6,7 +6,7 @@ const ProjectCover = ({ image, size = '100px' }) => {
   const imageUrl = imageName ? `http://localhost:3001/assets/${imageName}` : null;
 
   const coverStyle = {
-    width: '500px', // Adjust the width as needed
+    width: '475px', // Adjust the width as needed
     height: size,
     backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
     backgroundSize: 'cover', // Maintain aspect ratio and cover the container
