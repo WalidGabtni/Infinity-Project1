@@ -100,9 +100,33 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
                   </Box>
                   
                   <Box m="3.5rem 0"/>
-                  <Typography variant="body2" color="text.secondary" style={{ marginLeft: '20px' }}>
-                    Project Description: {project.description}
+
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    style={{
+                      marginLeft: '20px',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitBoxOrient: 'vertical',
+                      WebkitLineClamp: 3, // Adjust the number of lines as needed
+                      width: '460px', // Adjust the width to your desired maximum character limit
+                    }}
+                  >
+                    {project.description.trim().length > 200 ? (
+                      <>
+                        {`${project.description.trim().slice(0, 200)}... `}
+                        <Link to={`/projects/${project._id}`} style={{ textDecoration: 'underline', color: 'white', cursor: 'pointer' }}>
+                          Click to check rest
+                        </Link>
+                      </>
+                    ) : (
+                      project.description.trim()
+                    )}
                   </Typography>
+
+
+
                   <Box m="3rem 0" />
                   <Typography variant="body2" color="text.secondary">
                     Start Date: {new Date(project.startDate).toLocaleDateString()}
@@ -133,7 +157,7 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
 
                   {(!project.members || (loggedInUserId !== project.userId && !project.members.some((member) => member.userId === loggedInUserId))) && (
                     <Button
-                      variant="outlined"
+                      variant="contained"
                       color="primary"
                       onClick={() => handleJoinProjectClick(project._id)}
                       style={{ top: '1rem', width: '500px'}}
