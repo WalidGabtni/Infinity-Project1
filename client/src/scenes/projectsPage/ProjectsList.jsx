@@ -143,7 +143,11 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
                           <UserImage image={member.picturePath} size="40px" userId={member.userId} />
                         </Link>
                       ))}
-                    </AvatarGroup>
+                    </AvatarGroup>    
+
+                    <Box m="1rem 0" />
+                    
+                    <Divider/>
 
 
                   {loggedInUserId === project.userId && (
@@ -162,11 +166,12 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
                       variant="contained"
                       color="primary"
                       onClick={() => handleJoinProjectClick(project._id)}
-                      style={{ top: '1rem', width: '500px'}}
+                      style={{ top: '1rem', width: '100%'}}
                     >
                       Join Project
                     </Button>
                   )}
+                  <Box m="1rem 0" />
                 </CardContent>
               </Card>
               <Menu
