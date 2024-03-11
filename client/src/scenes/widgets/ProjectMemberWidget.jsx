@@ -1,6 +1,6 @@
 // ProjectMemberWidget.jsx
 import React, { useEffect, useCallback } from 'react';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography, useTheme, Divider} from '@mui/material';
 import WidgetWrapper from 'components/WidgetWrapper';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMembers } from 'state';
@@ -36,14 +36,16 @@ const ProjectMemberWidget = ({ projectId }) => {
 
   return (
     <WidgetWrapper>
-      <Typography
+            <Typography
         color={palette.neutral.dark}
-        variant="h5"
-        fontWeight="500"
-        sx={{ mb: '1.5rem' }}
+        variant="h4"
+        fontWeight="800"
+        sx={{ mb: '0.5rem' }}
       >
-        Members List
+        {members.length} members
       </Typography>
+      <Divider variant="fullWidth" />
+      <Box sx={{ mb: '1rem ' }}/>
       <Box display="flex" flexDirection="column" gap="1.5rem">
         {Array.isArray(members) && members.map((member) => (
           <ProjectMember

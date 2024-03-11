@@ -38,6 +38,7 @@ const ProjectSchema = mongoose.Schema(
     picturePath: String,
     userPicturePath: String,
     projectImage: String,
+    projectCover: String,
     members: [
       {
         userId: {

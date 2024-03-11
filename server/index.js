@@ -61,7 +61,9 @@ app.post("/auth/register", upload.single("picture"), register);
 app.post("/posts", verifyToken, upload.single("picture"), createPost);
 
 // Additional route for creating projects
-app.post("/projects", verifyToken, upload.single("projectImage"), createProject);
+app.post("/projects", verifyToken, upload.fields([{ name: 'projectImage', maxCount: 1 }, { name: 'projectCover', maxCount: 1 }]), createProject);
+
+
 
 /* ROUTES */
 app.use("/auth", authRoutes);

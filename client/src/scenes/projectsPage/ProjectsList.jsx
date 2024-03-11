@@ -17,6 +17,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from "@mui/material/styles";
 import WidgetWrapper from 'components/WidgetWrapper';
 import ProjectImage from 'components/ProjectImage'; 
+import ProjectCover from 'components/ProjectCover';
 
 const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUserId, onJoinProject }) => {
   const navigate = useNavigate();
@@ -71,25 +72,35 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
               >
                 <CardContent>
                   {/* ProjectImage component to display the project image */}
-                  <ProjectImage image={project.projectImage} size="60px" />
-                  <Link
-                    to={`/projects/${project._id}`}
-                    style={{
-                      textDecoration: 'none',
-                      color: theme.palette.text.primary,
-                      padding: '10px',
-                      borderRadius: '5px',
-                      display: 'inline-block',
-                    }}
+                  <ProjectCover image={project.projectCover} size="100px" />
+
+                  <Box
+                    position="absolute"
+                    top="70px"
+                    left="30px"
                   >
-                    <Typography variant="h5" component="div" style={{ fontWeight: 'bold', marginLeft: '10px' }}>
-                      Project Name: {project.name}
-                    </Typography>
-                  </Link>
-                  <Box m="0.2rem 0" />
-                  <Divider />
-                  <Box m="1rem 0" />
-                  <Typography variant="body2" color="text.secondary">
+                    <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: 'white' }}>
+                    <ProjectImage image={project.projectImage} size="80px" />
+                    </Link>
+                  </Box>
+
+                  <Box
+                    position="absolute"
+                    top="75px"
+                    left="130px"
+                    style={{ background: 'rgba(0, 0, 0, 0.5)', padding: '5px' }}
+                  >
+                    
+                    <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: 'white' }}>
+                      <Typography variant="h5" component="div" style={{ fontWeight: 'bold'}}>
+                        {project.name}
+                      </Typography>
+                      
+                    </Link>
+                  </Box>
+                  
+                  <Box m="3.5rem 0"/>
+                  <Typography variant="body2" color="text.secondary" style={{ marginLeft: '20px' }}>
                     Project Description: {project.description}
                   </Typography>
                   <Box m="3rem 0" />
@@ -125,7 +136,7 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
                       variant="outlined"
                       color="primary"
                       onClick={() => handleJoinProjectClick(project._id)}
-                      style={{ position: 'absolute', top: '1rem', right: '2rem' }}
+                      style={{ top: '1rem', width: '500px'}}
                     >
                       Join Project
                     </Button>

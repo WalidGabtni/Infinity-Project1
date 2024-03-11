@@ -26,6 +26,10 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
   const [editor, setEditor] = useState(null);
   const [projectImage, setProjectImage] = useState(null);
 
+  const [projectCover, setProjectCover] = useState(null);
+  const [projectCoverPreview, setProjectCoverPreview] = useState('');
+  const [coverEditor, setCoverEditor] = useState(null);
+
   useEffect(() => {
     console.log('Fetching project for editing with ID:', editProjectId);
     const fetchProjectForEdit = async () => {
@@ -50,6 +54,8 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
             });
             setProjectImage(data.projectImage);
             setImagePreview(data.projectImage); // Assuming projectImage is the URL
+            setProjectCover(data.projectCover);
+            setProjectCoverPreview(data.projectCover);
           } else {
             console.error('Failed to fetch project for editing:', response.status, response.statusText);
           }
@@ -82,7 +88,7 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
 
   const handleCreateProject = async () => {
     try {
-      if (!newProject.name || !newProject.description || !newProject.startDate || !newProject.endDate || !projectImage) {
+      if (!newProject.name || !newProject.description || !newProject.startDate || !newProject.endDate || !projectImage || !projectCover) {
         console.error('Please fill in all required fields', newProject);
         return;
       }
@@ -94,7 +100,8 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
       formData.append('startDate', newProject.startDate);
       formData.append('endDate', newProject.endDate);
       formData.append('projectImage', projectImage);
-  
+      formData.append('projectCover', projectCover);
+
       const response = await fetch('http://localhost:3001/projects', {
         method: 'POST',
         headers: {
@@ -123,7 +130,7 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
 
   const handleUpdateProject = async () => {
     try {
-      if (!editProjectId || !newProject.name || !newProject.description || !newProject.startDate || !newProject.endDate || !projectImage) {
+      if (!editProjectId || !newProject.name || !newProject.description || !newProject.startDate || !newProject.endDate || !projectImage || !projectCover) {
         console.error('Please provide a valid project ID and fill in all required fields', newProject);
         return;
       }
@@ -134,6 +141,7 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
         startDate: newProject.startDate,
         endDate: newProject.endDate,
         projectImage: newProject.projectImage,
+        projectCover: newProject.projectCover,
       };
   
       const response = await fetch(`http://localhost:3001/projects/${editProjectId}`, {
@@ -167,12 +175,29 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
   };
   
   
-  
-
   const handleImageUpload = () => {
     if (editor && image) {
       const canvas = editor.getImage();
       // You can now send the canvas data to the server along with other project details
+    }
+  };
+
+  const handleCoverChange = (acceptedFiles) => {
+    const selectedCover = acceptedFiles[0];
+    if (selectedCover) {
+      setProjectCover(selectedCover);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setProjectCoverPreview(reader.result);
+      };
+      reader.readAsDataURL(selectedCover);
+    }
+  };
+
+  const handleCoverUpload = () => {
+    if (coverEditor && projectCover) {
+      const coverCanvas = coverEditor.getImage();
+      // You can now send the coverCanvas data to the server along with other project details
     }
   };
 
@@ -269,6 +294,33 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
               </div>
             )}
           </Box>
+          <Box mb={1}>
+        <Typography variant="subtitle1">Project Cover</Typography>
+        <Dropzone onDrop={handleCoverChange}>
+          {({ getRootProps, getInputProps }) => (
+            <div {...getRootProps()} style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '4px' }}>
+              <input {...getInputProps()} />
+              <Typography variant="body2">Drag 'n' drop an image here, or click to select one.</Typography>
+            </div>
+          )}
+        </Dropzone>
+        {projectCover && (
+          <div>
+            <Box m="1rem 0" />
+            <Typography variant="body2">Preview:</Typography>
+            <AvatarEditor
+              ref={(editor) => setCoverEditor(editor)}
+              image={projectCoverPreview}
+              width={500}
+              height={500}
+              border={50}
+              borderRadius={100}
+              color={[255, 255, 255, 0.6]}
+              scale={1.2}
+            />
+          </div>
+        )}
+      </Box>
           <Button
             variant="contained"
             color="primary"

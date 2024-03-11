@@ -16,10 +16,17 @@ export const createProject = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Handle the public/assets image upload
+    // Handle the public/assets image upload for projectImage
     let projectImagePath = null;
-    if (req.file) {
-      projectImagePath = `/assets/${req.file.originalname}`;
+    if (req.files && req.files['projectImage']) {
+      projectImagePath = `/assets/${req.files['projectImage'][0].originalname}`;
+      // Save the public/assets image path to the project
+    }
+
+    // Handle the public/assets image upload for projectCover
+    let projectCoverPath = null;
+    if (req.files && req.files['projectCover']) {
+      projectCoverPath = `/assets/${req.files['projectCover'][0].originalname}`;
       // Save the public/assets image path to the project
     }
 
@@ -32,7 +39,8 @@ export const createProject = async (req, res) => {
       description,
       startDate,
       endDate,
-      projectImage: projectImagePath, // Use the correct field name
+      projectImage: projectImagePath,
+      projectCover: projectCoverPath,
       // Add other fields as needed
     });
 
