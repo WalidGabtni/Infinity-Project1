@@ -18,6 +18,9 @@ import { useTheme } from "@mui/material/styles";
 import WidgetWrapper from 'components/WidgetWrapper';
 import ProjectImage from 'components/ProjectImage'; 
 import ProjectCover from 'components/ProjectCover';
+import Avatar from '@mui/material/Avatar';
+import AvatarGroup from '@mui/material/AvatarGroup';
+import UserImage from 'components/UserImage';
 
 const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUserId, onJoinProject }) => {
   const navigate = useNavigate();
@@ -68,6 +71,7 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
                   margin: '0 auto',
                   border: '1px solid black',
                   position: 'relative',
+                  height: '100%',
                 }}
               >
                 <CardContent>
@@ -127,22 +131,20 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
 
 
 
-                  <Box m="3rem 0" />
-                  <Typography variant="body2" color="text.secondary">
-                    Start Date: {new Date(project.startDate).toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    End Date: {new Date(project.endDate).toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Current Status: {project.currentStatus}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Created At: {new Date(project.createdAt).toLocaleString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Updated At: {new Date(project.updatedAt).toLocaleString()}
-                  </Typography>
+                  <Box m="1rem 0" />
+                  <Divider/>
+                  <Box m="1rem 0" />
+
+                
+                    {/* Display avatars of project members using AvatarGroup */}
+                    <AvatarGroup max={12} sx={{ display: 'flex', gap: '8px', flexDirection: 'row' }}>
+                      {project.members && project.members.map((member) => (
+                        <Link to={`/profile/${member.userId}`} key={member.userId} style={{ textDecoration: 'none', color: 'white' }}>
+                          <UserImage image={member.picturePath} size="40px" userId={member.userId} />
+                        </Link>
+                      ))}
+                    </AvatarGroup>
+
 
                   {loggedInUserId === project.userId && (
                     <div>
