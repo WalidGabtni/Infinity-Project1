@@ -48,6 +48,7 @@ const MyPostWidget = ({ picturePath }) => {
       const posts = await response.json();
       dispatch(setPosts({ posts }));
       setImage(null);
+
     } catch (error) {
       console.error("An unexpected error occurred:", error);
     }

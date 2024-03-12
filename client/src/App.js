@@ -31,7 +31,7 @@ function App() {
           <Route path="/home" element={isAuth ? <HomePage /> : <Navigate to="/" />}/>
           <Route path="/profile/:userId" element={isAuth ? <ProfilePage /> : <Navigate to="/" />} />
           <Route path="/bookmarks" element={isAuth ? <BookmarkPage /> : <Navigate to="/" />} />
-          <Route path="/projects" element={isAuth ? <ProjectsPage/> : <Navigate to="/" />} />
+          <Route path="/projects/*" element={isAuth ? <ProjectsPage/> : <Navigate to="/" />} />
           <Route path="/projects/:projectId" element={isAuth ? <IndividualProjectPage /> : <Navigate to="/" />} />
         </Routes>
       </ThemeProvider>

@@ -41,6 +41,8 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
 
     const data = await response.json();
     dispatch(setFriends({ friends: data }));
+              // Reload the page
+              window.location.reload();
   };
 
   // Conditionally render the IconButton based on whether the friendId is the same as the user's _id

@@ -258,3 +258,23 @@ export const getUserProjects = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+/* GET PROJECT DESCRIPTION */
+export const getProjectDescription = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    // Find the project based on the projectId
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found.' });
+    }
+
+    // Respond with the project description
+    res.status(200).json({ description: project.description });
+  } catch (error) {
+    console.error('Error fetching project description:', error);
+    res.status(500).json({ message: 'Error fetching project description.' });
+  }
+};
