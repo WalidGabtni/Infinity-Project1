@@ -23,12 +23,13 @@ const MyProjectsWidget = () => {
   );
 
   return (
-    <WidgetWrapper>
+   
+    <WidgetWrapper sx={{border: '1px solid black'}}>
       <Typography color={theme.palette.neutral.dark} variant="h4" fontWeight="800" sx={{ mb: '0.5rem' }}>
         My Projects
       </Typography>
       <Divider variant="fullWidth" />
-      <Box sx={{ mb: '1rem' }} />
+      <Box sx={{ mb: '1rem'}} />
 
       {userProjects.length > 0 ? (
         userProjects.map((project) => (

@@ -122,7 +122,9 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
       setImage(null);
   
       console.log('Project created successfully:', createdProject);
-      onClose(); // Close the form after creating a project
+      onClose(); // Close the form after creating a Project
+      // Reload the page after creating the project
+       window.location.reload();
     } catch (error) {
       console.error('An unexpected error occurred:', error);
     }
@@ -169,6 +171,8 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
   
       console.log('Project updated successfully:', updatedProject);
       onClose(); // Close the form after updating a project
+       // Reload the page after creating the project
+       window.location.reload();
     } catch (error) {
       console.error('An unexpected error occurred:', error);
     }

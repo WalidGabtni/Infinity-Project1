@@ -1,5 +1,5 @@
 // Inside ProjectsList component
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import {
   Card,
   Box,
@@ -11,6 +11,9 @@ import {
   Menu,
   MenuItem,
   Button,
+  Alert,
+  AlertTitle,
+  Stack,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate, Link } from 'react-router-dom';
@@ -18,9 +21,13 @@ import { useTheme } from "@mui/material/styles";
 import WidgetWrapper from 'components/WidgetWrapper';
 import ProjectImage from 'components/ProjectImage'; 
 import ProjectCover from 'components/ProjectCover';
-import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import UserImage from 'components/UserImage';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
 
 const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUserId, onJoinProject }) => {
   const navigate = useNavigate();
@@ -58,6 +65,74 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
       onJoinProject(projectId, loggedInUserId /* Add other user information as needed */);
     }
   };
+
+  // New state for the confirmation dialog
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [selectedProjectForDeletion, setSelectedProjectForDeletion] = useState(null);
+  // State for the success alert
+  const [successAlert, setSuccessAlert] = useState(false);
+  // New state to track whether a project has been deleted
+const [isProjectDeleted, setIsProjectDeleted] = useState(false);
+
+  // Function to open the confirmation dialog
+  const handleDeleteConfirmationOpen = (project) => {
+    setDeleteConfirmationOpen(true);
+    setSelectedProjectForDeletion(project);
+  };
+
+  // Function to close the confirmation dialog
+  const handleDeleteConfirmationClose = () => {
+    setDeleteConfirmationOpen(false);
+    setSelectedProjectForDeletion(null);
+  };
+
+// Function to handle the actual project deletion
+const handleDeleteProject = () => {
+  if (selectedProjectForDeletion) {
+    onDeleteProject(selectedProjectForDeletion._id);
+    handleDeleteConfirmationClose();
+
+    // Store a flag in localStorage to indicate the need for an alert after reload
+    localStorage.setItem('showSuccessAlertAfterReload', 'true');
+
+    // Reload the page
+    window.location.reload();
+  }
+};
+
+// useEffect to handle the success alert after the page reloads
+useEffect(() => {
+  // Check if the flag is set in localStorage
+  const showSuccessAlertAfterReload = localStorage.getItem('showSuccessAlertAfterReload');
+
+  if (showSuccessAlertAfterReload === 'true') {
+    // Clear the flag in localStorage
+    localStorage.removeItem('showSuccessAlertAfterReload');
+
+    // Set success alert state to true after reloading the page
+    setSuccessAlert(true);
+
+    // Hide the success alert after a certain duration
+    const alertTimeoutId = setTimeout(() => {
+      setSuccessAlert(false);
+    }, 5000); // Adjust the duration of the alert as needed
+
+    // Clear the timeout on component unmount
+    return () => clearTimeout(alertTimeoutId);
+  }
+}, [setSuccessAlert]);
+
+// useEffect to hide the success alert after the page reloads
+useEffect(() => {
+  // Hide the success alert after a certain duration even after the page reload
+  const hideAlertTimeoutId = setTimeout(() => {
+    setSuccessAlert(false);
+  }, 5000); // Adjust the duration of the alert as needed
+
+  // Clear the timeout on component unmount
+  return () => clearTimeout(hideAlertTimeoutId);
+}, [setSuccessAlert]);
+
 
   return (
     <WidgetWrapper>
@@ -161,6 +236,7 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
                     </div>
                   )}
 
+                  
                   {(!project.members || (loggedInUserId !== project.userId && !project.members.some((member) => member.userId === loggedInUserId))) && (
                     <Button
                       variant="contained"
@@ -187,9 +263,10 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
                   horizontal: 'right',
                 }}
               >
-                <MenuItem onClick={() => onUpdateProject(selectedProject._id)}>Edit</MenuItem>
-                <MenuItem onClick={() => onDeleteProject(selectedProject._id)}>Delete</MenuItem>
+                <MenuItem onClick={() => { onUpdateProject(selectedProject._id); handleMenuClose(); }}>Edit</MenuItem>
+                <MenuItem onClick={() => { handleDeleteConfirmationOpen(selectedProject); handleMenuClose(); }}>Delete</MenuItem>
               </Menu>
+
             </Grid>
           ))
         ) : (
@@ -199,6 +276,37 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
             </Typography>
           </Grid>
         )}
+         {/* Confirmation dialog for project deletion */}
+      <Dialog
+        open={deleteConfirmationOpen}
+        onClose={handleDeleteConfirmationClose}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete the project "{selectedProjectForDeletion?.name}"?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteConfirmationClose}>Cancel</Button>
+          <Button sx={{color:"red" }} onClick={handleDeleteProject} autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success alert */}
+      <Stack sx={{ width: '500px', position: 'fixed', bottom: 28, right: '72%'}}>
+        {successAlert && (
+          <Alert severity="error" onClose={() => setSuccessAlert(false)}>
+            <AlertTitle>Delete</AlertTitle>
+            Project deleted successfully.
+          </Alert>
+        )}
+      </Stack>
+
       </Grid>
     </WidgetWrapper>
   );

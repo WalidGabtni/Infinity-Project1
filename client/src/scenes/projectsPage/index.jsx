@@ -144,7 +144,7 @@ const ProjectsPage = () => {
             <Route path="/:projectId" element={<IndividualProjectPage />} />
           </Routes>
         </Box>
-
+                  
         {isNonMobileScreens && !showForm && (
           <Button
             variant="contained"
@@ -153,8 +153,9 @@ const ProjectsPage = () => {
             sx={{
               position: 'absolute',
               top: 12,
-              right: 180,
+              right: 40,
               zIndex: 1000,
+              width: '300px',
             }}
           >
             Create Project
@@ -166,7 +167,7 @@ const ProjectsPage = () => {
             flexBasis="20%"
             mt={isNonMobileScreens ? 3 : '2rem'}
           >
-            <MyProjectsWidget />
+            <MyProjectsWidget/>
           </Box>
         )}
       </Box>
