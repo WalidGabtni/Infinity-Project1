@@ -55,7 +55,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-
 /* ROUTES WITH FILES */
 app.post("/auth/register", upload.single("picture"), register);
 app.post("/posts", verifyToken, upload.single("picture"), createPost);
@@ -63,7 +62,33 @@ app.post("/posts", verifyToken, upload.single("picture"), createPost);
 // Additional route for creating projects
 app.post("/projects", verifyToken, upload.fields([{ name: 'projectImage', maxCount: 1 }, { name: 'projectCover', maxCount: 1 }]), createProject);
 
+/* ROUTE FOR IMAGE UPLOAD */
+app.post("/upload-image", upload.single("projectImage"), (req, res) => {
+  try {
+    // Access the uploaded file details
+    const { filename } = req.file;
 
+    // Send a success response with the file details
+    res.status(200).json({ message: 'Image uploaded successfully', filename });
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    res.status(500).json({ error: `Internal server error: ${error.message}` });
+  }
+});
+
+/* ROUTE FOR COVER UPLOAD */
+app.post("/upload-cover", upload.single("projectCover"), (req, res) => {
+  try {
+    // Access the uploaded file details
+    const { filename } = req.file;
+
+    // Send a success response with the file details
+    res.status(200).json({ message: 'Cover uploaded successfully', filename });
+  } catch (error) {
+    console.error('Error uploading cover:', error);
+    res.status(500).json({ error: `Internal server error: ${error.message}` });
+  }
+});
 
 /* ROUTES */
 app.use("/auth", authRoutes);
@@ -80,5 +105,3 @@ mongoose
     app.listen(PORT, () => console.log(`Server port: ${PORT}`));
   })
   .catch((error) => console.error("Error connecting to MongoDB:", error));
-
-

@@ -19,24 +19,30 @@ const BookmarkPage = () => {
   // Fetch bookmarked posts on component mount
   useEffect(() => {
     const fetchBookmarkedPosts = async () => {
+      console.log("User ID:", _id);
       try {
+        // Check if _id is defined before making the request
+        if (!_id) {
+          return;
+        }
+  
         const response = await fetch(`http://localhost:3001/api/users/${_id}/bookmarks`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
+  
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
+  
         const data = await response.json();
         dispatch(setBookmarkedPosts({ bookmarkedPosts: data }));
       } catch (error) {
         console.error("Error fetching bookmarked posts:", error.message);
       }
     };
-
+  
     fetchBookmarkedPosts();
   }, [_id, token, dispatch]);
 

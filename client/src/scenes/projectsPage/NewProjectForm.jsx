@@ -1,5 +1,3 @@
-// NewProjectForm.jsx
-
 import React, { useState, useRef, useEffect } from 'react';
 import Dropzone from 'react-dropzone';
 import AvatarEditor from 'react-avatar-editor';
@@ -36,13 +34,12 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
       try {
         if (editProjectId) {
           const response = await fetch(`http://localhost:3001/projects/${editProjectId}`, {
-            method: 'PATCH', // Use PATCH method for updating projects
+            method: 'PATCH', // Use GET method for fetching project details
             headers: {
-              'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
           });
-  
+    
           if (response.ok) {
             const data = await response.json();
             // Set the project details for editing
@@ -53,7 +50,7 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
               endDate: data.endDate,
             });
             setProjectImage(data.projectImage);
-            setImagePreview(data.projectImage); // Assuming projectImage is the URL
+            setImagePreview(data.projectImage);
             setProjectCover(data.projectCover);
             setProjectCoverPreview(data.projectCover);
           } else {
@@ -69,8 +66,24 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
   }, [editProjectId, token]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewProject((prevProject) => ({ ...prevProject, [name]: value }));
+    const { name, value, type, files } = e.target;
+  
+    // Handle regular input fields
+    if (type !== 'file') {
+      setNewProject((prevProject) => ({ ...prevProject, [name]: value }));
+      return;
+    }
+  
+    // Handle file inputs (assuming single file inputs for simplicity)
+    const file = files && files.length > 0 ? files[0] : null;
+  
+    if (name === 'projectImage') {
+      setProjectImage(file);
+      handleImageChange(files); // Assuming handleImageChange accepts acceptedFiles
+    } else if (name === 'projectCover') {
+      setProjectCover(file);
+      handleCoverChange(files); // Assuming handleCoverChange accepts acceptedFiles
+    }
   };
 
   const handleImageChange = (acceptedFiles) => {
@@ -132,22 +145,87 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
 
   const handleUpdateProject = async () => {
     try {
-      if (!editProjectId || !newProject.name || !newProject.description || !newProject.startDate || !newProject.endDate || !projectImage || !projectCover) {
-        console.error('Please provide a valid project ID and fill in all required fields', newProject);
+      // Validate required fields
+      if (
+        !editProjectId ||
+        !newProject.name ||
+        !newProject.description ||
+        !newProject.startDate ||
+        !newProject.endDate ||
+        !projectImage ||
+        !projectCover
+      ) {
+        console.error('Please provide a valid project ID and fill in all required fields:', {
+          editProjectId,
+          projectName: newProject.name,
+          projectDescription: newProject.description,
+          startDate: newProject.startDate,
+          endDate: newProject.endDate,
+          projectImage,
+          projectCover,
+        });
         return;
       }
   
+      // Format dates to "yyyy-MM-dd"
+      const formattedStartDate = new Date(newProject.startDate).toISOString().split('T')[0];
+      const formattedEndDate = new Date(newProject.endDate).toISOString().split('T')[0];
+  
+      // Create a FormData object to handle file uploads for image
+      const imageFormData = new FormData();
+      imageFormData.append('projectImage', projectImage);
+  
+      // Make a POST request to the server for image upload
+      const imageUploadResponse = await fetch('http://localhost:3001/upload-image', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: imageFormData,
+      });
+  
+      if (!imageUploadResponse.ok) {
+        console.error('Failed to upload project image. Server returned:', imageUploadResponse.status, imageUploadResponse.statusText);
+        return;
+      }
+  
+      // Get the new image path from the response
+      const newImagePath = await imageUploadResponse.json();
+  
+      // Create a FormData object to handle file uploads for cover
+      const coverFormData = new FormData();
+      coverFormData.append('projectCover', projectCover);
+  
+      // Make a POST request to the server for cover upload
+      const coverUploadResponse = await fetch('http://localhost:3001/upload-cover', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: coverFormData,
+      });
+  
+      if (!coverUploadResponse.ok) {
+        console.error('Failed to upload project cover. Server returned:', coverUploadResponse.status, coverUploadResponse.statusText);
+        return;
+      }
+  
+      // Get the new cover path from the response
+      const newCoverPath = await coverUploadResponse.json();
+  
+      // Prepare the updated project data
       const updatedProjectData = {
         name: newProject.name,
         description: newProject.description,
-        startDate: newProject.startDate,
-        endDate: newProject.endDate,
-        projectImage: newProject.projectImage,
-        projectCover: newProject.projectCover,
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+        projectImage: newImagePath.filename, // Assuming your server responds with the new image path
+        projectCover: newCoverPath.filename, // Assuming your server responds with the new cover path
       };
   
+      // Make a PATCH request to update the project with new image paths
       const response = await fetch(`http://localhost:3001/projects/${editProjectId}`, {
-        method: 'PATCH',
+        method: 'PATCH', // Use PATCH for updating projects
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -157,34 +235,58 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
   
       if (!response.ok) {
         console.error(`Failed to update project. Server returned ${response.status}: ${response.statusText}`);
-        
-        // Read the response text and log it
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-  
         return;
       }
   
       const updatedProject = await response.json();
       dispatch(setProjects([updatedProject]));
-      setImage(null);
   
       console.log('Project updated successfully:', updatedProject);
       onClose(); // Close the form after updating a project
-       // Reload the page after creating the project
-       window.location.reload();
+      // Reload the page after updating the project
+      window.location.reload();
     } catch (error) {
-      console.error('An unexpected error occurred:', error);
+      console.error('An unexpected error occurred during project update:', error);
     }
   };
   
   
-  const handleImageUpload = () => {
-    if (editor && image) {
-      const canvas = editor.getImage();
-      // You can now send the canvas data to the server along with other project details
+  const handleImageUpload = async () => {
+    try {
+      if (editor && image) {
+        const canvas = editor.getImage();
+  
+        // Convert the canvas data to a Blob (image file)
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            // Create a FormData object to handle file uploads
+            const formData = new FormData();
+            formData.append('projectImage', blob);
+  
+            // Make a POST request to the server for image upload
+            const response = await fetch('http://localhost:3001/upload-image', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData,
+            });
+  
+            if (response.ok) {
+              const imagePath = await response.json();
+              setProjectImage(imagePath.filename);
+              console.log('Image uploaded successfully:', imagePath);
+            } else {
+              console.error(`Failed to upload image. Server returned ${response.status}: ${response.statusText}`);
+            }
+          }
+        }, 'image/jpeg'); // Adjust the format as needed
+      }
+    } catch (error) {
+      console.error('An unexpected error occurred during image upload:', error);
     }
   };
+  
 
   const handleCoverChange = (acceptedFiles) => {
     const selectedCover = acceptedFiles[0];
@@ -198,10 +300,39 @@ const NewProjectForm = ({ onClose, editProjectId }) => {
     }
   };
 
-  const handleCoverUpload = () => {
-    if (coverEditor && projectCover) {
-      const coverCanvas = coverEditor.getImage();
-      // You can now send the coverCanvas data to the server along with other project details
+  const handleCoverUpload = async () => {
+    try {
+      if (coverEditor && projectCover) {
+        const coverCanvas = coverEditor.getImage();
+  
+        // Convert the canvas data to a Blob (cover image file)
+        coverCanvas.toBlob(async (blob) => {
+          if (blob) {
+            // Create a FormData object to handle file uploads
+            const formData = new FormData();
+            formData.append('projectCover', blob);
+  
+            // Make a POST request to the server for cover image upload
+            const response = await fetch('http://localhost:3001/upload-cover', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData,
+            });
+  
+            if (response.ok) {
+              const coverPath = await response.json();
+              setProjectCover(coverPath.filename);
+              console.log('Cover image uploaded successfully:', coverPath);
+            } else {
+              console.error(`Failed to upload cover image. Server returned ${response.status}: ${response.statusText}`);
+            }
+          }
+        }, 'image/jpeg'); // Adjust the format as needed
+      }
+    } catch (error) {
+      console.error('An unexpected error occurred during cover image upload:', error);
     }
   };
 

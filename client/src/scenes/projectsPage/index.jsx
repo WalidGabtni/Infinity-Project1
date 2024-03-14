@@ -13,6 +13,7 @@ import IndividualProjectPage from './IndividualProjectPage';
 
 const ProjectsPage = () => {
   const [showForm, setShowForm] = useState(false);
+  const [newProject, setNewProject] = useState({});
   const [editProjectId, setEditProjectId] = useState(null);
   const isNonMobileScreens = useMediaQuery('(min-width:1000px)');
   const { _id, picturePath } = useSelector((state) => state.user);
@@ -44,8 +45,27 @@ const ProjectsPage = () => {
   }, [token, dispatch]);
 
   const handleToggleForm = (projectId = null) => {
+    const projectToEdit = projects.find((project) => project._id === projectId);
+  
+    // Create a newProject object with existing project data
+    const newProjectData = projectToEdit
+      ? {
+          name: projectToEdit.name || '',
+          description: projectToEdit.description || '',
+          startDate: projectToEdit.startDate || '',
+          endDate: projectToEdit.endDate || '',
+          projectImage: projectToEdit.projectImage || null, // You may need to adjust this based on your data structure
+          projectCover: projectToEdit.projectCover || null, // You may need to adjust this based on your data structure
+        }
+      : {};
+  
+    // Show the form and set the project ID to edit
     setShowForm(!showForm);
     setEditProjectId(projectId);
+  
+    // Pass the newProject data to the form component
+    // You may need to adjust the prop name based on your component implementation
+    setNewProject(newProjectData);
   };
 
   const handleDeleteProject = async (projectId) => {
@@ -131,10 +151,10 @@ const ProjectsPage = () => {
               element={<>
                 <ProjectsList
                   projects={projects}
-                  loggedInUserId={_id}
                   onDeleteProject={handleDeleteProject}
                   onUpdateProject={(projectId) => handleToggleForm(projectId)}
                   onJoinProject={handleJoinProject}
+                  loggedInUserId={_id}
                 />
                 {!isNonMobileScreens && (
                   <MyProjectsWidget />

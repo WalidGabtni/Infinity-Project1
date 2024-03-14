@@ -1,5 +1,4 @@
-// Inside ProjectsList component
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   Box,
@@ -30,7 +29,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 
 const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUserId, onJoinProject }) => {
-  console.log('Projects in ProjectsList:', projects); // Add this line
+  console.log('Projects in ProjectsList:', projects);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -73,7 +72,7 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
   // State for the success alert
   const [successAlert, setSuccessAlert] = useState(false);
   // New state to track whether a project has been deleted
-const [isProjectDeleted, setIsProjectDeleted] = useState(false);
+  const [isProjectDeleted, setIsProjectDeleted] = useState(false);
 
   // Function to open the confirmation dialog
   const handleDeleteConfirmationOpen = (project) => {
@@ -87,97 +86,97 @@ const [isProjectDeleted, setIsProjectDeleted] = useState(false);
     setSelectedProjectForDeletion(null);
   };
 
-// Function to handle the actual project deletion
-const handleDeleteProject = () => {
-  if (selectedProjectForDeletion) {
-    onDeleteProject(selectedProjectForDeletion._id);
-    handleDeleteConfirmationClose();
+  // Function to handle the actual project deletion
+  const handleDeleteProject = () => {
+    if (selectedProjectForDeletion) {
+      onDeleteProject(selectedProjectForDeletion._id);
+      handleDeleteConfirmationClose();
 
-    // Store a flag in localStorage to indicate the need for an alert after reload
-    localStorage.setItem('showSuccessAlertAfterReload', 'true');
+      // Store a flag in localStorage to indicate the need for an alert after reload
+      localStorage.setItem('showSuccessAlertAfterReload', 'true');
 
-    // Reload the page
-    window.location.reload();
-  }
-};
+      // Reload the page
+      window.location.reload();
+    }
+  };
 
-// useEffect to handle the success alert after the page reloads
-useEffect(() => {
-  // Check if the flag is set in localStorage
-  const showSuccessAlertAfterReload = localStorage.getItem('showSuccessAlertAfterReload');
+  // useEffect to handle the success alert after the page reloads
+  useEffect(() => {
+    // Check if the flag is set in localStorage
+    const showSuccessAlertAfterReload = localStorage.getItem('showSuccessAlertAfterReload');
 
-  if (showSuccessAlertAfterReload === 'true') {
-    // Clear the flag in localStorage
-    localStorage.removeItem('showSuccessAlertAfterReload');
+    if (showSuccessAlertAfterReload === 'true') {
+      // Clear the flag in localStorage
+      localStorage.removeItem('showSuccessAlertAfterReload');
 
-    // Set success alert state to true after reloading the page
-    setSuccessAlert(true);
+      // Set success alert state to true after reloading the page
+      setSuccessAlert(true);
 
-    // Hide the success alert after a certain duration
-    const alertTimeoutId = setTimeout(() => {
+      // Hide the success alert after a certain duration
+      const alertTimeoutId = setTimeout(() => {
+        setSuccessAlert(false);
+      }, 5000); // Adjust the duration of the alert as needed
+
+      // Clear the timeout on component unmount
+      return () => clearTimeout(alertTimeoutId);
+    }
+  }, [setSuccessAlert]);
+
+  // useEffect to hide the success alert after the page reloads
+  useEffect(() => {
+    // Hide the success alert after a certain duration even after the page reload
+    const hideAlertTimeoutId = setTimeout(() => {
       setSuccessAlert(false);
     }, 5000); // Adjust the duration of the alert as needed
 
     // Clear the timeout on component unmount
-    return () => clearTimeout(alertTimeoutId);
-  }
-}, [setSuccessAlert]);
-
-// useEffect to hide the success alert after the page reloads
-useEffect(() => {
-  // Hide the success alert after a certain duration even after the page reload
-  const hideAlertTimeoutId = setTimeout(() => {
-    setSuccessAlert(false);
-  }, 5000); // Adjust the duration of the alert as needed
-
-  // Clear the timeout on component unmount
-  return () => clearTimeout(hideAlertTimeoutId);
-}, [setSuccessAlert]);
-
+    return () => clearTimeout(hideAlertTimeoutId);
+  }, [setSuccessAlert]);
 
   return (
     <WidgetWrapper>
       <Grid container spacing={2}>
         {projects && projects.length > 0 ? (
-          projects.map((project) => (
-            <Grid item key={project._id} xs={12} sm={6} md={6} lg={6}>
-              <Card
-                sx={{
-                  maxWidth: 800,
-                  margin: '0 auto',
-                  border: '1px solid black',
-                  position: 'relative',
-                  height: '100%',
-                }}
-              >
-                <CardContent>
-                  {/* ProjectImage component to display the project image */}
-                  <ProjectCover image={project.projectCover} size="100px" />
+          projects.map((project) => {
+            console.log('Mapping project:', project);
+            return (
+              <Grid item key={project._id} xs={12} sm={6} md={6} lg={6}>
+                <Card
+                  sx={{
+                    maxWidth: 800,
+                    margin: '0 auto',
+                    border: '1px solid black',
+                    position: 'relative',
+                    height: '100%',
+                  }}
+                >
+                  <CardContent>
+                    {/* ProjectCover component with a unique key */}
+                    <ProjectCover key={`cover_${project._id}`} image={project.projectCover} size="100px" />
 
-                  <Box
-                    position="absolute"
-                    top="70px"
-                    left="30px"
-                  >
-                    <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: 'white' }}>
-                    <ProjectImage image={project.projectImage} size="80px" />
-                    </Link>
-                  </Box>
+                    <Box
+                      position="absolute"
+                      top="70px"
+                      left="30px"
+                    >
+                      <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: 'white' }}>
+                        {/* ProjectImage component with a unique key */}
+                        <ProjectImage key={`image_${project._id}`} image={project.projectImage} size="80px" />
+                      </Link>
+                    </Box>
 
-                  <Box
-                    position="absolute"
-                    top="75px"
-                    left="130px"
-                    style={{ background: 'rgba(0, 0, 0, 0.5)', padding: '5px' }}
-                  >
-                    
-                    <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: 'white' }}>
-                      <Typography variant="h5" component="div" style={{ fontWeight: 'bold'}}>
-                        {project.name}
-                      </Typography>
-                      
-                    </Link>
-                  </Box>
+                    <Box
+                      position="absolute"
+                      top="75px"
+                      left="130px"
+                      style={{ background: 'rgba(0, 0, 0, 0.5)', padding: '5px' }}
+                    >
+                      <Link to={`/projects/${project._id}`} style={{ textDecoration: 'none', color: 'white' }}>
+                        <Typography variant="h5" component="div" style={{ fontWeight: 'bold'}}>
+                          {project.name}
+                        </Typography>
+                      </Link>
+                    </Box>
                   
                   <Box m="3.5rem 0"/>
 
@@ -269,7 +268,9 @@ useEffect(() => {
               </Menu>
 
             </Grid>
-          ))
+            );
+          })
+          
         ) : (
           <Grid item xs={12}>
             <Typography variant="body2" color="textSecondary">
@@ -277,37 +278,36 @@ useEffect(() => {
             </Typography>
           </Grid>
         )}
-         {/* Confirmation dialog for project deletion */}
-      <Dialog
-        open={deleteConfirmationOpen}
-        onClose={handleDeleteConfirmationClose}
-        aria-labelledby="delete-dialog-title"
-        aria-describedby="delete-dialog-description"
-      >
-        <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete the project "{selectedProjectForDeletion?.name}"?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDeleteConfirmationClose}>Cancel</Button>
-          <Button sx={{color:"red" }} onClick={handleDeleteProject} autoFocus>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+        {/* Confirmation dialog for project deletion */}
+        <Dialog
+          open={deleteConfirmationOpen}
+          onClose={handleDeleteConfirmationClose}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description">
+              Are you sure you want to delete the project "{selectedProjectForDeletion?.name}"?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteConfirmationClose}>Cancel</Button>
+            <Button sx={{color:"red" }} onClick={handleDeleteProject} autoFocus>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      {/* Success alert */}
-      <Stack sx={{ width: '500px', position: 'fixed', bottom: 28, right: '72%'}}>
-        {successAlert && (
-          <Alert severity="error" onClose={() => setSuccessAlert(false)}>
-            <AlertTitle>Delete</AlertTitle>
-            Project deleted successfully.
-          </Alert>
-        )}
-      </Stack>
-
+        {/* Success alert */}
+        <Stack sx={{ width: '500px', position: 'fixed', bottom: 28, right: '72%' }}>
+          {successAlert && (
+            <Alert severity="error" onClose={() => setSuccessAlert(false)}>
+              <AlertTitle>Delete</AlertTitle>
+              Project deleted successfully.
+            </Alert>
+          )}
+        </Stack>
       </Grid>
     </WidgetWrapper>
   );

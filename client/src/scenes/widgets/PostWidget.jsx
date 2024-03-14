@@ -220,6 +220,7 @@ const PostWidget = ({
       } else {
         console.error('Failed to delete post:', postDeleteResponse.status, postDeleteResponse.statusText);
       }
+      window.location.reload();
     } catch (error) {
       console.error('Error deleting post:', error);
     }
@@ -262,6 +263,7 @@ const PostWidget = ({
       const updatedPost = await response.json();
       // Dispatch an action or update the local state as needed
       console.log('Post updated successfully:', updatedPost);
+      window.location.reload();
     } catch (error) {
       console.error('An unexpected error occurred:', error);
     }
