@@ -76,8 +76,19 @@ export const authSlice = createSlice({
     setDescription: (state, action) => {
       state.description = action.payload.description;
     },
+    joinProject: (state, action) => {
+      // Handle joining a project here
+      // For example, you can add the user to the project's members array
+      const { projectId, user } = action.payload;
+      const projectIndex = state.projects.findIndex(project => project.id === projectId);
+      if (projectIndex !== -1) {
+        state.projects[projectIndex].members.push(user);
+      }
+    },
   },
 });
+
+
 
 export const {
   setMode,
@@ -91,5 +102,6 @@ export const {
   updateProject,
   setMembers,
   setDescription,
+  joinProject,
 } = authSlice.actions;
 export default authSlice.reducer;

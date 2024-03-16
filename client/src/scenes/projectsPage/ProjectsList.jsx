@@ -27,6 +27,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
+import JoinProjectForm from 'components/JoinProjectForm'; 
+
 
 const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUserId, onJoinProject }) => {
   console.log('Projects in ProjectsList:', projects);
@@ -34,6 +36,10 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const theme = useTheme();
+
+   // State variables for managing the JoinProjectForm
+   const [showJoinProjectForm, setShowJoinProjectForm] = useState(false);
+   const [selectedProjectForJoin, setSelectedProjectForJoin] = useState(null);
 
   const handleMenuOpen = (event, project) => {
     event.stopPropagation();
@@ -62,8 +68,16 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
     const isUserAlreadyMember = project.members && project.members.some((member) => member.userId === loggedInUserId);
 
     if (!isUserProjectCreator && !isUserAlreadyMember) {
-      onJoinProject(projectId, loggedInUserId /* Add other user information as needed */);
+      // Open the JoinProjectForm for the selected project
+      setSelectedProjectForJoin(projectId);
+      setShowJoinProjectForm(true);
     }
+  };
+
+  // Function to handle closing the JoinProjectForm
+  const handleCloseJoinProjectForm = () => {
+    setShowJoinProjectForm(false);
+    setSelectedProjectForJoin(null);
   };
 
   // New state for the confirmation dialog
@@ -238,15 +252,26 @@ const ProjectsList = ({ projects, onDeleteProject, onUpdateProject, loggedInUser
 
                   
                   {(!project.members || (loggedInUserId !== project.userId && !project.members.some((member) => member.userId === loggedInUserId))) && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleJoinProjectClick(project._id)}
-                      style={{ top: '1rem', width: '100%'}}
-                    >
-                      Join Project
-                    </Button>
-                  )}
+                   <Button
+                   variant="contained"
+                   color="primary"
+                   onClick={() => handleJoinProjectClick(project._id)}
+                   style={{ top: '1rem', width: '100%'}}
+                 >
+                   Join Project
+                 </Button>
+               )}
+
+               {/* Render the JoinProjectForm */}
+               {showJoinProjectForm && selectedProjectForJoin === project._id && (
+                 <JoinProjectForm
+                   projectId={project._id}
+                   loggedInUserId={loggedInUserId}
+                   projects={projects}
+                   onClose={handleCloseJoinProjectForm}
+                   onJoinProject={onJoinProject}
+                 />
+               )}
                   <Box m="1rem 0" />
                 </CardContent>
               </Card>
