@@ -1,6 +1,8 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const ProjectSchema = mongoose.Schema(
+const { Schema } = mongoose;
+
+const ProjectSchema = new Schema(
   {
     userId: {
       type: String,
@@ -55,7 +57,31 @@ const ProjectSchema = mongoose.Schema(
         },
         picturePath: String,
         userPicturePath: String,
-        occupation: String, 
+        occupation: String,
+      },
+    ],
+    pendingRequests: [
+      {
+        userId: {
+          type: String,
+          required: true,
+        },
+        notificationId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Notification',
+          required: true,
+        },
+        firstName: {
+          type: String,
+          required: true,
+        },
+        lastName: {
+          type: String,
+          required: true,
+        },
+        picturePath: String,
+        userPicturePath: String,
+        occupation: String,
       },
     ],
   },
@@ -64,6 +90,6 @@ const ProjectSchema = mongoose.Schema(
   }
 );
 
-const Project = mongoose.model("Project", ProjectSchema);
+const Project = mongoose.model('Project', ProjectSchema);
 
 export default Project;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import React from 'react';
+import React, { useRef } from 'react';
 import {
     Box,
     IconButton,
@@ -22,6 +22,7 @@ import {
 } from "@mui/icons-material"
 
 import SearchIcon from "@mui/icons-material/Search";
+import NotificationMenu from 'components/NotificationMenu';
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout} from "state";
 import { useNavigate } from "react-router-dom";
@@ -49,6 +50,10 @@ const Navbar = ({ updateSearchResults }) => {
     const token = useSelector((state) => state.token);
     
     const [popoverAnchor, setPopoverAnchor] = React.useState(null);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const notificationButtonRef = useRef(null);
 
     /*SEARCH*/
     const [searchTerm, setSearchTerm] = useState('');
@@ -69,6 +74,53 @@ const Navbar = ({ updateSearchResults }) => {
       const openPopover = Boolean(popoverAnchor);
 
     const fullName = user ? `${user.firstName} ${user.lastName}` : '';
+    const handleNotification = async () => {
+        try {
+          const response = await fetch(`http://localhost:3001/notifications/${user._id}/notifications`, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+    
+          if (response.ok) {
+            const result = await response.json();
+            setNotifications(result);
+          } else {
+            console.error(
+              'Failed to fetch notifications:',
+              response.status,
+              response.statusText
+            );
+          }
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+        }
+      };
+
+
+      const handleNotificationClick = async () => {
+        // Call handleNotification to fetch notifications
+        await handleNotification();
+      
+        // Get the DOM element of the notification button using the ref
+        const buttonEl = notificationButtonRef.current;
+      
+        // Check if the button element exists before updating the anchorEl state
+        if (buttonEl) {
+          // Set the anchor element for the popover to the notification button element
+          setAnchorEl(buttonEl);
+      
+          // Open the popover
+          setIsPopoverOpen(true);
+        }
+      };
+
+
+    const handleClose = () => {
+      setAnchorEl(null);
+      setIsPopoverOpen(false); // Set 'isPopoverOpen' to false when the popover is closed
+  };
 
     const handleLogout = () => {
         dispatch(setLogout());
@@ -254,7 +306,28 @@ const Navbar = ({ updateSearchResults }) => {
                )} 
             </IconButton>
             <Message sx={{ fontSize: "25px" }} />
-            <Notifications sx={{ fontSize: "25px" }} />
+            {/* Notification icon */}
+            <IconButton
+              ref={notificationButtonRef} // Assign the ref to the IconButton
+              onClick={handleNotificationClick}
+            >
+              <Notifications sx={{ fontSize: '25px' }} />
+            </IconButton>
+            <Popover
+              open={isPopoverOpen}
+              anchorEl={anchorEl}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <NotificationMenu notifications={notifications} />
+            </Popover>
             <Help sx={{ fontSize: "25px" }} />
             <FormControl variant="standard" value={fullName}>
                 <Select

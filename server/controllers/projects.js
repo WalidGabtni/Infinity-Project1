@@ -1,4 +1,5 @@
 import Project from "../models/Project.js";
+import Notification from '../models/Notification.js';
 import User from "../models/User.js";
 import mongoose from 'mongoose';
 import fs from 'fs';
@@ -173,9 +174,17 @@ export const joinProject = async (req, res) => {
       return res.status(400).json({ message: 'User is already a member of the project.' });
     }
 
-    // Add the user to the members list
-    project.members.push({
-      userId: user._id,
+    // Create a new notification for the project owner
+    const notification = await Notification.create({
+      sender: userId,
+      recipient: project.userId, // Assuming project.userId is the owner's userId
+      project: projectId,
+    });
+
+    // Add the join request to the project's pendingRequests
+    project.pendingRequests.push({
+      userId: userId,
+      notificationId: notification._id,
       firstName: user.firstName,
       lastName: user.lastName,
       picturePath: user.picturePath,
@@ -186,7 +195,7 @@ export const joinProject = async (req, res) => {
     // Save the updated project
     await project.save();
 
-    res.status(200).json(project);
+    res.status(200).json({ message: 'Join request sent successfully.', notification });
   } catch (error) {
     console.error('Error joining project:', error);
     res.status(500).json({ message: 'Error joining the project.' });

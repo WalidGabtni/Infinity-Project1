@@ -6,9 +6,10 @@ const initialState = {
   token: null,
   posts: [],
   bookmarkedPosts: [],
-  projects: [], // Add projects to initialState
+  projects: [],
   members: [],
   description: '',
+  notifications: [], // Add notifications to initialState
 };
 
 export const authSlice = createSlice({
@@ -29,7 +30,8 @@ export const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.bookmarkedPosts = [];
-      state.projects = []; // Reset projects on logout
+      state.projects = [];
+      state.notifications = []; // Reset notifications on logout
     },
     setFriends: (state, action) => {
       if (state.user) {
@@ -42,7 +44,7 @@ export const authSlice = createSlice({
         };
       } else {
         console.error("user friends non-existent :(");
-        return state; // Return the current state in case the user is non-existent
+        return state;
       }
     },
     setPosts: (state, action) => {
@@ -66,7 +68,6 @@ export const authSlice = createSlice({
       const index = state.projects.findIndex((project) => project.id === updatedProject.id);
 
       if (index !== -1) {
-        // Replace the existing project with the updated one
         state.projects[index] = updatedProject;
       }
     },
@@ -77,18 +78,31 @@ export const authSlice = createSlice({
       state.description = action.payload.description;
     },
     joinProject: (state, action) => {
-      // Handle joining a project here
-      // For example, you can add the user to the project's members array
       const { projectId, user } = action.payload;
       const projectIndex = state.projects.findIndex(project => project.id === projectId);
+      
       if (projectIndex !== -1) {
         state.projects[projectIndex].members.push(user);
       }
     },
+    setNotifications: (state, action) => {
+      const { userId, notifications } = action.payload;
+      // Initialize state.notifications as an array if it's not already
+      if (!state.notifications) {
+        state.notifications = [];
+      }
+      // Find the user in the notifications array or create a new entry if not found
+      const userNotifications = state.notifications.find(entry => entry.userId === userId);
+      if (userNotifications) {
+        // If user notifications exist, update them
+        userNotifications.notifications = notifications;
+      } else {
+        // If user notifications don't exist, create a new entry
+        state.notifications.push({ userId, notifications });
+      }
+    },
   },
 });
-
-
 
 export const {
   setMode,
@@ -103,5 +117,6 @@ export const {
   setMembers,
   setDescription,
   joinProject,
+  setNotifications, // Export the new action
 } = authSlice.actions;
 export default authSlice.reducer;
