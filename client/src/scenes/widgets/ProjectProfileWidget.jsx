@@ -1,24 +1,28 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { useSelector } from "react-redux";
 import ProjectImage from 'components/ProjectImage';
 import ProjectCover from 'components/ProjectCover';
 import WidgetWrapper from 'components/WidgetWrapper';
 import { useDispatch } from 'react-redux';
 import { leaveProject } from 'state'; // Import the leaveProject action
 
-const ProjectProfileWidget = ({ project, userId }) => {
+const ProjectProfileWidget = ({ project }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const dispatch = useDispatch();
+  const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user);
   
-
   const handleLeaveProject = async () => {
     try {
       const { _id: projectId } = project;
+      const userId = user._id; // Assuming user contains the current user's information
       const response = await fetch(`http://localhost:3001/projects/${projectId}/leave`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ userId }), 
       });
@@ -48,7 +52,10 @@ const ProjectProfileWidget = ({ project, userId }) => {
     );
   }
 
-  const { _id: projectId, projectImage, projectCover, name } = project;
+  const { _id: projectId, projectImage, projectCover, name, members } = project;
+
+  // Check if the user is a member of the project
+  const isMember = members.some(member => member.userId === user._id);
 
   return (
     <WidgetWrapper>
@@ -81,9 +88,11 @@ const ProjectProfileWidget = ({ project, userId }) => {
             <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/archive`}>Archive</Button>
           </div>
 
-          <div style={{ position: 'absolute', right: '0' }}>
-            <Button variant="contained" color="error" size="medium" onClick={() => setOpenDialog(true)}>Leave Project</Button>
-          </div>
+          {isMember && (
+            <div style={{ position: 'absolute', right: '0' }}>
+              <Button variant="contained" color="error" size="medium" onClick={() => setOpenDialog(true)}>Leave Project</Button>
+            </div>
+          )}
         </Box>
       </Box>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Avatar } from '@mui/material';
+import { Typography, Avatar, Button, Box } from '@mui/material';
 import UserImage from './UserImage'; // Import the UserImage component
 
 const NotificationMenu = ({ notifications }) => {
@@ -7,22 +7,35 @@ const NotificationMenu = ({ notifications }) => {
     return <Typography>No notifications</Typography>;
   }
 
+  const handleAccept = (notificationId) => {
+    // Handle accept action here
+    console.log('Accepting notification:', notificationId);
+  };
+
   return (
-    <div>
+    <div style={{ padding: '16px' }}>
       {notifications.map((notification, index) => (
-        <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+        <Box key={index} display="flex" alignItems="flex-start" marginBottom="16px"> {/* Adjusted alignItems */}
           <Avatar>
-            <UserImage image={notification.sender.picturePath} size="40px" /> {/* Render the sender's image */}
+            <UserImage image={notification.sender.picturePath} size="40px" />
           </Avatar>
-          <div style={{ marginLeft: '8px' }}>
-            <Typography variant="body1">
+          <Box marginLeft="16px">
+            <Typography variant="h6" gutterBottom>
               {notification.sender.firstName} {notification.sender.lastName}
             </Typography>
-            <Typography variant="body2" color="textSecondary">
+            <Typography variant="body1" color="textSecondary">
               wants to join "{notification.project.name}"
             </Typography>
-          </div>
-        </div>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleAccept(notification.id)}
+              style={{ marginTop: '16px' }}
+            >
+              Accept
+            </Button>
+          </Box>
+        </Box>
       ))}
     </div>
   );
