@@ -1,11 +1,43 @@
-// ProjectProfileWidget.jsx
-import React from 'react';
-import { Box, Typography, Divider } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Link } from 'react-router-dom';
 import ProjectImage from 'components/ProjectImage';
 import ProjectCover from 'components/ProjectCover';
 import WidgetWrapper from 'components/WidgetWrapper';
+import { useDispatch } from 'react-redux';
+import { leaveProject } from 'state'; // Import the leaveProject action
 
-const ProjectProfileWidget = ({ project }) => {
+const ProjectProfileWidget = ({ project, userId }) => {
+  const [openDialog, setOpenDialog] = useState(false);
+  const dispatch = useDispatch();
+  
+
+  const handleLeaveProject = async () => {
+    try {
+      const { _id: projectId } = project;
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/leave`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }), 
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to leave the project');
+      }
+  
+      setOpenDialog(false); // Close the dialog upon success
+    } catch (error) {
+      console.error('Error leaving the project:', error);
+      // Handle error
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false); // Close the dialog
+  };
+
   if (!project) {
     return (
       <Box>
@@ -16,12 +48,12 @@ const ProjectProfileWidget = ({ project }) => {
     );
   }
 
-  const { projectImage, projectCover, name } = project;
+  const { _id: projectId, projectImage, projectCover, name } = project;
 
   return (
     <WidgetWrapper>
       <Box sx={{ position: 'relative', width: '100%' }}>
-        <ProjectCover image={projectCover} size="150px" width="100%" /> {/* Adjust width here */}
+        <ProjectCover image={projectCover} size="150px" width="100%" />
         <Box position="absolute" top="40px" left="40px">
           <ProjectImage image={projectImage} size="80px" />
         </Box>
@@ -32,7 +64,40 @@ const ProjectProfileWidget = ({ project }) => {
         </Box>
 
         <Box m="1rem 0" />
+        {/* PAGE Buttons */}
+        <Box
+          sx={{
+            position: 'relative',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%' // Ensure buttons fill the entire width of the container
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/members`}>Members</Button>
+            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/public-topics`}>Public Topics</Button>
+            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/private-topics`}>Private Topics</Button>
+            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/archive`}>Archive</Button>
+          </div>
+
+          <div style={{ position: 'absolute', right: '0' }}>
+            <Button variant="contained" color="error" size="medium" onClick={() => setOpenDialog(true)}>Leave Project</Button>
+          </div>
+        </Box>
       </Box>
+
+      {/* Leave Project Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Leave Project</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to leave this project?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleLeaveProject} color="error" variant="contained">Leave</Button>
+        </DialogActions>
+      </Dialog>
     </WidgetWrapper>
   );
 };

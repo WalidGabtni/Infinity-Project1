@@ -161,7 +161,7 @@ const ProjectsPage = () => {
                 )}
               </>}
             />
-            <Route path="/:projectId" element={<IndividualProjectPage />} />
+            <Route path="/:projectId" element={<IndividualProjectPage userId={_id} />} />
           </Routes>
         </Box>
                   

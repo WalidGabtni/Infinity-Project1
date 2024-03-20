@@ -101,7 +101,16 @@ export const authSlice = createSlice({
         state.notifications.push({ userId, notifications });
       }
     },
-  },
+    leaveProject: (state, action) => {
+      const { projectId, userId } = action.payload;
+      const projectIndex = state.projects.findIndex(project => project.id === projectId);
+      
+      if (projectIndex !== -1) {
+        // Remove the user from the members list of the project
+        state.projects[projectIndex].members = state.projects[projectIndex].members.filter(member => member.userId !== userId);
+      }
+    },
+    },
 });
 
 export const {
@@ -118,5 +127,7 @@ export const {
   setDescription,
   joinProject,
   setNotifications, // Export the new action
+  leaveProject,
 } = authSlice.actions;
+
 export default authSlice.reducer;
