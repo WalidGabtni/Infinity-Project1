@@ -32,6 +32,7 @@ const ProjectProfileWidget = ({ project }) => {
       }
   
       setOpenDialog(false); // Close the dialog upon success
+      window.location.reload(); // Reload the page
     } catch (error) {
       console.error('Error leaving the project:', error);
       // Handle error

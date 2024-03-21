@@ -28,13 +28,14 @@ const IndividualProjectPage = () => {
         justifyContent="space-between"
       >
         <Box flexBasis={isNonMobileScreens ? '70%' : undefined}>
-          <ProjectProfileWidget project={project} userId={userId} /> {/* Passing userId as a prop */}
+          <ProjectProfileWidget project={project} userId={userId} /> 
           <Box m="2rem 0" />
           <ProjectDescriptionWidget projectId={projectId} />
+          <Box m="2rem 0" />
         </Box>
 
         {isNonMobileScreens && (
-          <Box flexBasis="26%">
+          <Box flexBasis="28%">
             <ProjectMemberWidget projectId={projectId} />
           </Box>
         )}
