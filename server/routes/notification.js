@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/join-request/:projectId', verifyToken, sendJoinRequest);
 
 // Route to accept a join request
-router.patch('/accept-join-request/:notificationId', verifyToken, acceptJoinRequest);
+router.post('/:notificationId/accept', verifyToken,acceptJoinRequest);
 
 router.get('/:userId/notifications',verifyToken, getNotifications);
 

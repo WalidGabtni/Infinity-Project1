@@ -98,6 +98,33 @@ const Navbar = ({ updateSearchResults }) => {
         }
       };
 
+      const handleAccept = async (notificationId, projectId) => {
+        try {
+            // Check if the notification recipient ID matches the logged-in user ID
+            if (notifications.some(notification => notification._id === notificationId && notification.recipient === user._id)) {
+                const response = await fetch(`http://localhost:3001/notifications/${notificationId}/accept`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ projectId }), // Assuming projectId needs to be sent in the body
+                });
+    
+                if (response.ok) {
+                    // Handle success response
+                } else {
+                    console.error('Failed to accept notification request:', response.status, response.statusText);
+                }
+            } else {
+                console.error('User does not have permission to accept this notification.');
+            }
+        } catch (error) {
+            console.error('Failed to accept notification request:', error);
+        }
+    };
+    
+
 
       const handleNotificationClick = async () => {
         // Call handleNotification to fetch notifications
@@ -322,11 +349,11 @@ const Navbar = ({ updateSearchResults }) => {
                 horizontal: 'right',
               }}
               transformOrigin={{
-                vertical: 'top',
+               vertical: 'top',
                 horizontal: 'right',
               }}
-            >
-              <NotificationMenu notifications={notifications} />
+              >
+              <NotificationMenu notifications={notifications} handleAccept={handleAccept} loggedInUserId={user._id} />{/* Pass handleAccept as prop */}
             </Popover>
             <Help sx={{ fontSize: "25px" }} />
             <FormControl variant="standard" value={fullName}>

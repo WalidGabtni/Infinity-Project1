@@ -30,17 +30,45 @@ export const sendJoinRequest = async (req, res) => {
 export const acceptJoinRequest = async (req, res) => {
   try {
     const { notificationId } = req.params;
+    const { userId } = req.user; // Get the authenticated user's ID from the request object
 
-    // Find the notification by ID
+    // Find the notification to get the associated project and sender
     const notification = await Notification.findById(notificationId);
 
     if (!notification) {
       return res.status(404).json({ message: 'Notification not found.' });
     }
 
-    // Update the notification status to 'accepted'
-    notification.status = 'accepted';
-    await notification.save();
+    // Verify if the authenticated user is the intended recipient
+    if (notification.recipient.toString() !== userId) {
+      return res.status(403).json({ message: 'Unauthorized: User is not the recipient of this notification.' });
+    }
+
+    // Retrieve the associated project
+    const project = await Project.findById(notification.project);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found.' });
+    }
+
+    // Add the sender to the project's members list
+    const senderInfo = {
+      userId: notification.sender,
+      firstName: req.body.senderFirstName,
+      lastName: req.body.senderLastName,
+      // Add other sender details here
+    };
+
+    project.members.push(senderInfo);
+
+    // Remove the join request from pendingRequests
+    project.pendingRequests = project.pendingRequests.filter(request => request.notificationId.toString() !== notificationId);
+
+    // Save the updated project
+    await project.save();
+
+    // Delete the notification
+    await Notification.findByIdAndDelete(notificationId);
 
     res.status(200).json({ message: 'Join request accepted successfully.' });
   } catch (error) {
@@ -48,6 +76,7 @@ export const acceptJoinRequest = async (req, res) => {
     res.status(500).json({ message: 'Error accepting join request.' });
   }
 };
+
 
 export const getNotifications = async (req, res) => {
   try {
