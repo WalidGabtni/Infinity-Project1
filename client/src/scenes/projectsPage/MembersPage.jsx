@@ -5,6 +5,7 @@ import Navbar from 'scenes/navbar';
 import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
 import ProjectMemberWidget from 'scenes/widgets/ProjectMemberWidget'; // Import ProjectMemberWidget
 import Box from '@mui/material/Box'; // Import Box component from MUI
+import ProjectMemberListWidget from 'scenes/widgets/ProjectMemberListWidget';
 
 const MembersPage = () => {
   const { projectId } = useParams();
@@ -22,10 +23,12 @@ const MembersPage = () => {
         gap="0.5rem"
         justifyContent="space-between"
       >
-        <Box flexBasis="70%">
+        <Box flexBasis="71%">
           <ProjectProfileWidget project={project} userId={userId} /> 
+          <Box m="2rem 0" />
+          <ProjectMemberListWidget project={project} />
         </Box>
-        <Box flexBasis="28%"> {/* Adjust width as needed */}
+        <Box flexBasis="30%"> {/* Adjust width as needed */}
           <ProjectMemberWidget projectId={projectId} /> {/* Include ProjectMemberWidget */}
         </Box>
       </Box>

@@ -3,14 +3,17 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Navbar from 'scenes/navbar';
 import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
+import ProjectPublicTopicWidget from 'scenes/widgets/ProjectPublicTopicWidget';
 import Box from '@mui/material/Box'; // Import Box component from MUI
-import { Typography } from '@mui/material';
+import { Typography, useTheme, Divider } from '@mui/material';
+import WidgetWrapper from 'components/WidgetWrapper';
 
 const PublicTopicsPage = () => {
   const { projectId } = useParams();
   const projects = useSelector((state) => state.projects);
   const project = projects.find((project) => project._id === projectId);
   const userId = useSelector((state) => state.user?.id);
+  const { palette } = useTheme();
 
   return (
     <div>
@@ -25,7 +28,7 @@ const PublicTopicsPage = () => {
         <Box flexBasis="71%">
           <ProjectProfileWidget project={project} userId={userId} />
           <Box m="2rem 0" />
-          <Typography>test</Typography>
+          <ProjectPublicTopicWidget project={project} userId={userId} />
         </Box>
         
         <Box flexBasis="30%"> {/* Adjust width as needed */}

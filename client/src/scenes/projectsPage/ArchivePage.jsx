@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Navbar from 'scenes/navbar';
 import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
+import ProjectArchiveWidget from 'scenes/widgets/ProjectArchiveWidget';
 import Box from '@mui/material/Box'; // Import Box component from MUI
 
 const ArchivePage = () => {
@@ -23,6 +24,8 @@ const ArchivePage = () => {
       >
         <Box flexBasis="71%">
           <ProjectProfileWidget project={project} userId={userId} /> 
+          <Box m="2rem 0" />
+          <ProjectArchiveWidget />
         </Box>
         <Box flexBasis="30%"> {/* Adjust width as needed */}
           {/* Your content goes here */}

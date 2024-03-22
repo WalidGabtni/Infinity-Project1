@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 import Navbar from 'scenes/navbar';
 import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
 import Box from '@mui/material/Box'; // Import Box component from MUI
+import ProjectPrivateTopicWidget from 'scenes/widgets/ProjectPrivateTopicWidget';
+
 
 const PrivateTopicsPage = () => {
   const { projectId } = useParams();
@@ -23,9 +25,10 @@ const PrivateTopicsPage = () => {
       >
         <Box flexBasis="71%">
           <ProjectProfileWidget project={project} userId={userId} /> 
+          <Box m="2rem 0" />
+          <ProjectPrivateTopicWidget project={project} userId={userId} /> 
         </Box>
         <Box flexBasis="30%"> {/* Adjust width as needed */}
-          {/* Your content goes here */}
         </Box>
       </Box>
     </div>
