@@ -1,15 +1,20 @@
+// NotificationMenu.jsx
+
 import React from 'react';
 import { Typography, Avatar, Button, Box, Divider } from '@mui/material';
 import UserImage from './UserImage'; // Import the UserImage component
 
 const NotificationMenu = ({ notifications, handleAccept, loggedInUserId }) => {
-  if (!notifications || notifications.length === 0) {
+  // Filter out notifications with status "accepted"
+  const filteredNotifications = notifications.filter(notification => notification.status !== 'accepted');
+
+  if (!filteredNotifications || filteredNotifications.length === 0) {
     return <Typography>No notifications</Typography>;
   }
 
   return (
     <div style={{ padding: '16px' }}>
-      {notifications.map((notification, index) => (
+      {filteredNotifications.map((notification, index) => (
         <React.Fragment key={index}>
           <Box display="flex" alignItems="flex-start" marginBottom="16px">
             <Avatar>
@@ -37,7 +42,7 @@ const NotificationMenu = ({ notifications, handleAccept, loggedInUserId }) => {
               </Button>
             </Box>
           </Box>
-          {index !== notifications.length - 1 && <Divider style={{ margin: '24px 0' }} />}
+          {index !== filteredNotifications.length - 1 && <Divider style={{ margin: '24px 0' }} />}
         </React.Fragment>
       ))}
     </div>

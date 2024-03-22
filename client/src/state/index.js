@@ -100,6 +100,9 @@ export const authSlice = createSlice({
         // If user notifications don't exist, create a new entry
         state.notifications.push({ userId, notifications });
       }
+
+      // Remove accepted notification from notifications menu
+      state.notifications = state.notifications.filter(entry => entry.notifications.some(notification => notification._id !== userId));
     },
     leaveProject: (state, action) => {
       const { projectId, userId } = action.payload;

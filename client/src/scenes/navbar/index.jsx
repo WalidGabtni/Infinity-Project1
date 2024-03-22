@@ -353,7 +353,7 @@ const Navbar = ({ updateSearchResults }) => {
                 horizontal: 'right',
               }}
               >
-              <NotificationMenu notifications={notifications} handleAccept={handleAccept} loggedInUserId={user._id} />{/* Pass handleAccept as prop */}
+              <NotificationMenu notifications={notifications} setNotifications={setNotifications} handleAccept={handleAccept} loggedInUserId={user._id} />
             </Popover>
             <Help sx={{ fontSize: "25px" }} />
             <FormControl variant="standard" value={fullName}>

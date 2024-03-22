@@ -90,10 +90,17 @@ export const acceptJoinRequest = async (req, res) => {
 
     project.members.push(newUser);
 
-    // Step 6: Save the updated project
+    // Step 6: Remove the join request from pendingRequests
+    project.pendingRequests = project.pendingRequests.filter(request => request.notificationId.toString() !== notificationId);
+
+    // Step 7: Save the updated project
     await project.save();
 
-    // Step 7: Proceed with accepting the join request...
+    // Step 8: Update the status of the notification to 'accepted'
+    notification.status = 'accepted';
+    await notification.save();
+
+    // Step 9: Proceed with accepting the join request...
     console.log('Join request accepted successfully.');
     res.status(200).json({ message: 'Join request accepted successfully.' });
   } catch (error) {
@@ -101,6 +108,7 @@ export const acceptJoinRequest = async (req, res) => {
     res.status(500).json({ message: 'Error accepting join request.' });
   }
 };
+
 
 
 
