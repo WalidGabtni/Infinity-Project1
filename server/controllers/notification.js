@@ -27,55 +27,71 @@ export const sendJoinRequest = async (req, res) => {
   }
 };
 
+
+
 export const acceptJoinRequest = async (req, res) => {
   try {
     const { notificationId } = req.params;
-    const { userId } = req.user; // Get the authenticated user's ID from the request object
+    const userId = req.user.id; // Get the authenticated user's ID from the request object
 
-    // Find the notification to get the associated project and sender
+    console.log('Accepting join request...');
+    console.log('Notification ID:', notificationId);
+    console.log('User ID:', userId);
+
+    // Step 1: Verify Notification Existence
     const notification = await Notification.findById(notificationId);
 
     if (!notification) {
+      console.log('Notification not found.');
       return res.status(404).json({ message: 'Notification not found.' });
     }
 
-    // Verify if the authenticated user is the intended recipient
+    // Step 2: Ensure User Authorization
     if (notification.recipient.toString() !== userId) {
+      console.log('Unauthorized: User is not the recipient of this notification.');
       return res.status(403).json({ message: 'Unauthorized: User is not the recipient of this notification.' });
     }
 
-    // Retrieve the associated project
+    // Step 3: Validate Project Ownership
     const project = await Project.findById(notification.project);
 
     if (!project) {
+      console.log('Project not found.');
       return res.status(404).json({ message: 'Project not found.' });
     }
 
-    // Add the sender to the project's members list
-    const senderInfo = {
+    console.log('Notification:', notification);
+    console.log('Project:', project);
+
+    // Check if the user is the owner of the project
+    if (project.userId.toString() !== userId) {
+      console.log('Unauthorized: User is not the owner of the project.');
+      return res.status(403).json({ message: 'Unauthorized: User is not the owner of the project.' });
+    }
+
+    // Step 4: Add the user to the project's members array
+    const newUser = {
       userId: notification.sender,
-      firstName: req.body.senderFirstName,
-      lastName: req.body.senderLastName,
-      // Add other sender details here
+      firstName: 'Default', // Provide a default value for firstName
+      lastName: 'User', // Provide a default value for lastName
+      // You can modify these default values as per your requirements
     };
 
-    project.members.push(senderInfo);
+    project.members.push(newUser);
 
-    // Remove the join request from pendingRequests
-    project.pendingRequests = project.pendingRequests.filter(request => request.notificationId.toString() !== notificationId);
-
-    // Save the updated project
+    // Step 5: Save the updated project
     await project.save();
 
-    // Delete the notification
-    await Notification.findByIdAndDelete(notificationId);
-
+    // Step 6: Proceed with accepting the join request...
+    console.log('Join request accepted successfully.');
     res.status(200).json({ message: 'Join request accepted successfully.' });
   } catch (error) {
     console.error('Error accepting join request:', error);
     res.status(500).json({ message: 'Error accepting join request.' });
   }
 };
+
+
 
 
 export const getNotifications = async (req, res) => {

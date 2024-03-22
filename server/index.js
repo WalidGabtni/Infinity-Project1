@@ -63,6 +63,7 @@ app.post("/posts", verifyToken, upload.single("picture"), createPost);
 // Additional route for creating projects
 app.post("/projects", verifyToken, upload.fields([{ name: 'projectImage', maxCount: 1 }, { name: 'projectCover', maxCount: 1 }]), createProject);
 
+
 /* ROUTE FOR IMAGE UPLOAD */
 app.post("/upload-image", upload.single("projectImage"), (req, res) => {
   try {
