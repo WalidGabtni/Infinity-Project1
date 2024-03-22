@@ -1,5 +1,6 @@
 import Notification from "../models/Notification.js";
 import Project from "../models/Project.js";
+import User from '../models/User.js';
 
 export const sendJoinRequest = async (req, res) => {
   try {
@@ -69,20 +70,30 @@ export const acceptJoinRequest = async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized: User is not the owner of the project.' });
     }
 
-    // Step 4: Add the user to the project's members array
+    // Step 4: Fetch user details including picturePath and userPicturePath
+    const user = await User.findById(notification.sender);
+
+    if (!user) {
+      console.log('User not found.');
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Step 5: Add the user to the project's members array with picturePath and userPicturePath
     const newUser = {
       userId: notification.sender,
-      firstName: 'Default', // Provide a default value for firstName
-      lastName: 'User', // Provide a default value for lastName
+      firstName: user.firstName,
+      lastName: user.lastName,
+      picturePath: user.picturePath, // Add picturePath
+      userPicturePath: user.userPicturePath, // Add userPicturePath
       // You can modify these default values as per your requirements
     };
 
     project.members.push(newUser);
 
-    // Step 5: Save the updated project
+    // Step 6: Save the updated project
     await project.save();
 
-    // Step 6: Proceed with accepting the join request...
+    // Step 7: Proceed with accepting the join request...
     console.log('Join request accepted successfully.');
     res.status(200).json({ message: 'Join request accepted successfully.' });
   } catch (error) {
