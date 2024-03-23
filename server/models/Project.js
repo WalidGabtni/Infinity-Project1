@@ -2,6 +2,26 @@ import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
+const topicSchema = new Schema({
+  userId: {
+    type: String,
+    required: false,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  // Add more fields as needed
+});
+
 const ProjectSchema = new Schema(
   {
     userId: {
@@ -84,6 +104,7 @@ const ProjectSchema = new Schema(
         occupation: String,
       },
     ],
+    topics: [topicSchema], // Array of topic objects
   },
   {
     timestamps: true,

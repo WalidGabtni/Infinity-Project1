@@ -21,7 +21,6 @@ const ProjectPrivateTopicWidget = ({ projectId }) => {
       <Divider variant="fullWidth" />
       <Box sx={{ mb: '1rem' }} />
       <Typography variant="body1" sx={{ color: palette.neutral.main }}>
-        {/* Content for Private Topics */}
       </Typography>
     </WidgetWrapper>
   );

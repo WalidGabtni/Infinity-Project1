@@ -23,13 +23,13 @@ const MembersPage = () => {
         gap="0.5rem"
         justifyContent="space-between"
       >
-        <Box flexBasis="71%">
+        <Box flexBasis="70%">
           <ProjectProfileWidget project={project} userId={userId} /> 
           <Box m="2rem 0" />
           <ProjectMemberListWidget project={project} />
         </Box>
-        <Box flexBasis="30%"> {/* Adjust width as needed */}
-          <ProjectMemberWidget projectId={projectId} /> {/* Include ProjectMemberWidget */}
+        <Box flexBasis="28%"> 
+          <ProjectMemberWidget projectId={projectId} /> 
         </Box>
       </Box>
     </div>
