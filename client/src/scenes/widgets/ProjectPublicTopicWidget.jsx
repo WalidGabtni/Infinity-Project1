@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, useTheme, Divider } from '@mui/material';
 import WidgetWrapper from 'components/WidgetWrapper';
 import { useSelector } from 'react-redux';
+import UserImage from 'components/UserImage'; // Import the UserImage component
 
 const ProjectPublicTopicWidget = ({ projectId }) => {
   const { palette } = useTheme();
   const [publicTopics, setPublicTopics] = useState([]);
+  const users = useSelector((state) => state.users); // Assuming you have a users slice in Redux
+
   const fetchPublicTopics = async () => {
     try {
       const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public`);
@@ -41,13 +44,19 @@ const ProjectPublicTopicWidget = ({ projectId }) => {
       <Divider variant="fullWidth" />
       <Box sx={{ mb: '1rem' }} />
       {publicTopics.map((topic, index) => (
-        <Box key={topic._id}>
-          <Typography variant="body1" sx={{ color: palette.neutral.main }}>
+        <Box key={topic._id} sx={{ mb: '1rem' }}>
+          <Typography variant="h3" sx={{ color: palette.primary.main }}>
             {topic.title}
           </Typography>
-          <Typography variant="body2" sx={{ color: palette.neutral.secondary }}>
-            {topic.content}
-          </Typography>
+          <Typography variant="body1" sx={{ color: palette.neutral.main }} dangerouslySetInnerHTML={{ __html: topic.content }} />
+          {topic.userId && users[topic.userId] && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: '0.5rem' }}>
+              <UserImage image={users[topic.userId].picturePath} size="30px" />
+              <Typography variant="body2" sx={{ color: palette.primary.main }}>
+                {users[topic.userId].firstName} {users[topic.userId].lastName}
+              </Typography>
+            </Box>
+          )}
           {index !== publicTopics.length - 1 && <Divider variant="middle" />}
         </Box>
       ))}
