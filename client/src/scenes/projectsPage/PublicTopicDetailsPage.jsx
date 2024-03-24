@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Divider } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import WidgetWrapper from 'components/WidgetWrapper';
-import UserImage from 'components/UserImage';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import Navbar from 'scenes/navbar';
+import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
+import PublicTopicTitleWidget from 'scenes/widgets/PublicTopicTitleWidget';
+import { useSelector } from 'react-redux';
 
 const PublicTopicDetailsPage = () => {
   const { projectId, topicId } = useParams(); // Extract projectId and topicId from URL parameters
   const [topicDetails, setTopicDetails] = useState(null);
   const users = useSelector((state) => state.users); // Assuming you have a users slice in Redux
+  const projects = useSelector((state) => state.projects);
+  const project = projects.find((project) => project._id === projectId);
+  const userId = useSelector((state) => state.user?._id);
 
   useEffect(() => {
     const fetchTopicDetails = async () => {
@@ -29,23 +34,31 @@ const PublicTopicDetailsPage = () => {
   }, [projectId, topicId]);
 
   return (
-    <WidgetWrapper>
-      {topicDetails && (
-        <Box sx={{ mb: '1rem' }}>
-          <Typography variant="h3" sx={{ color: 'primary.main' }}>{topicDetails.title}</Typography>
-          <Typography variant="body1" sx={{ color: 'neutral.main' }}>{topicDetails.content}</Typography>
-          {topicDetails.userId && users[topicDetails.userId] && (
-            <Box sx={{ display: 'flex', alignItems: 'center', mt: '0.5rem' }}>
-              <UserImage image={users[topicDetails.userId].picturePath} size="30px" />
-              <Typography variant="body2" sx={{ color: 'primary.main' }}>
-                {users[topicDetails.userId].firstName} {users[topicDetails.userId].lastName}
-              </Typography>
-            </Box>
-          )}
-          <Divider variant="middle" />
+    <div>
+      <Navbar />
+      <Box
+        width="100%"
+        padding="2rem 6%"
+        display="flex"
+        gap="0.5rem"
+        justifyContent="space-between"
+      >
+        <Box flexBasis="100%">
+          <ProjectProfileWidget project={project} userId={userId} />
+          <Box m="2rem 0" />
+          <PublicTopicTitleWidget project={project} userId={userId}/>
+          <Box m="2rem 0" />
+          <WidgetWrapper>
+            {topicDetails && (
+              <Box sx={{ mb: '1rem' }}>
+              
+                <Typography variant="body1" sx={{ color: 'neutral.main' }} dangerouslySetInnerHTML={{ __html: topicDetails.content }} />
+              </Box>
+            )}
+          </WidgetWrapper>
         </Box>
-      )}
-    </WidgetWrapper>
+      </Box>
+    </div>
   );
 };
 

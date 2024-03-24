@@ -156,13 +156,16 @@ export const getPublicTopicDetails = async (req, res) => {
     }
 
     // Find the public topic within the project based on the topicId
-    const publicTopic = project.topics.find(topic => topic._id === topicId);
+    const publicTopic = project.topics.id(topicId);
     if (!publicTopic) {
       return res.status(404).json({ message: 'Public topic not found' });
     }
 
-    // Send the public topic details in the response
-    res.status(200).json(publicTopic);
+    // Extract only the title and content fields from the public topic
+    const { title, content } = publicTopic;
+
+    // Send the title and content of the public topic in the response
+    res.status(200).json({ title, content });
   } catch (error) {
     console.error('Error getting public topic details:', error);
     res.status(500).json({ message: 'Internal server error' });

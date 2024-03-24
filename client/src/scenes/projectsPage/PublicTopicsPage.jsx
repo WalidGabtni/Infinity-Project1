@@ -59,6 +59,7 @@ const PublicTopicsPage = () => {
 
       // Close the form after successfully creating the topic
       handleFormClose();
+      window.location.reload();
     } catch (error) {
       console.error('Error creating topic:', error.message);
       // Handle error state or display error message to the user
