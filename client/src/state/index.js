@@ -1,3 +1,5 @@
+// Redux authSlice.js
+
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -9,7 +11,8 @@ const initialState = {
   projects: [],
   members: [],
   description: '',
-  notifications: [], // Add notifications to initialState
+  notifications: [],
+  publicTopics: [], // Add publicTopics to initialState
 };
 
 export const authSlice = createSlice({
@@ -21,7 +24,6 @@ export const authSlice = createSlice({
     },
     setLogin: (state, action) => {
       const { user, token } = action.payload;
-
       state.user = user;
       state.token = token;
       state.bookmarkedPosts = user ? user.bookmarks : [];
@@ -31,20 +33,17 @@ export const authSlice = createSlice({
       state.token = null;
       state.bookmarkedPosts = [];
       state.projects = [];
-      state.notifications = []; // Reset notifications on logout
+      state.notifications = [];
+      state.publicTopics = []; // Reset publicTopics on logout
     },
     setFriends: (state, action) => {
       if (state.user) {
-        return {
-          ...state,
-          user: {
-            ...state.user,
-            friends: action.payload.friends,
-          },
+        state.user = {
+          ...state.user,
+          friends: action.payload.friends,
         };
       } else {
         console.error("user friends non-existent :(");
-        return state;
       }
     },
     setPosts: (state, action) => {
@@ -87,21 +86,15 @@ export const authSlice = createSlice({
     },
     setNotifications: (state, action) => {
       const { userId, notifications } = action.payload;
-      // Initialize state.notifications as an array if it's not already
       if (!state.notifications) {
         state.notifications = [];
       }
-      // Find the user in the notifications array or create a new entry if not found
       const userNotifications = state.notifications.find(entry => entry.userId === userId);
       if (userNotifications) {
-        // If user notifications exist, update them
         userNotifications.notifications = notifications;
       } else {
-        // If user notifications don't exist, create a new entry
         state.notifications.push({ userId, notifications });
       }
-
-      // Remove accepted notification from notifications menu
       state.notifications = state.notifications.filter(entry => entry.notifications.some(notification => notification._id !== userId));
     },
     leaveProject: (state, action) => {
@@ -109,11 +102,13 @@ export const authSlice = createSlice({
       const projectIndex = state.projects.findIndex(project => project.id === projectId);
       
       if (projectIndex !== -1) {
-        // Remove the user from the members list of the project
         state.projects[projectIndex].members = state.projects[projectIndex].members.filter(member => member.userId !== userId);
       }
     },
+    setPublicTopics: (state, action) => {
+      state.publicTopics = action.payload;
     },
+  },
 });
 
 export const {
@@ -129,8 +124,9 @@ export const {
   setMembers,
   setDescription,
   joinProject,
-  setNotifications, // Export the new action
+  setNotifications,
   leaveProject,
+  setPublicTopics,
 } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -1,12 +1,10 @@
-// NotificationMenu.jsx
-
 import React from 'react';
 import { Typography, Avatar, Button, Box, Divider } from '@mui/material';
 import UserImage from './UserImage'; // Import the UserImage component
 
-const NotificationMenu = ({ notifications, handleAccept, loggedInUserId }) => {
-  // Filter out notifications with status "accepted"
-  const filteredNotifications = notifications.filter(notification => notification.status !== 'accepted');
+const NotificationMenu = ({ notifications, handleAccept, handleRefuse, loggedInUserId }) => {
+  // Filter out notifications with status "accepted" and "refused"
+  const filteredNotifications = notifications.filter(notification => notification.status !== 'accepted' && notification.status !== 'rejected');
 
   if (!filteredNotifications || filteredNotifications.length === 0) {
     return <Typography>No notifications</Typography>;
@@ -36,9 +34,22 @@ const NotificationMenu = ({ notifications, handleAccept, loggedInUserId }) => {
                   console.log('Logged-in User ID:', loggedInUserId); // Log logged-in user ID
                   handleAccept(notification._id, notification.project?._id);
                 }}
-                style={{ marginTop: '16px' }}
+                style={{ marginRight: '8px', marginTop: '16px' }}
               >
                 Accept
+              </Button>
+              <Button
+                variant="contained"
+                color="error" // Making the button red
+                onClick={() => {
+                  console.log('Refusing notification:', notification._id);
+                  console.log('Recipient ID:', notification.recipient); // Log recipient ID
+                  console.log('Logged-in User ID:', loggedInUserId); // Log logged-in user ID
+                  handleRefuse(notification._id, notification.project?._id);
+                }}
+                style={{ marginTop: '16px' }}
+              >
+                Refuse
               </Button>
             </Box>
           </Box>

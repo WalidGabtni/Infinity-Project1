@@ -123,6 +123,33 @@ const Navbar = ({ updateSearchResults }) => {
             console.error('Failed to accept notification request:', error);
         }
     };
+
+    const handleRefuse = async (notificationId) => {
+      try {
+        // Check if the notification recipient ID matches the logged-in user ID
+        if (notifications.some(notification => notification._id === notificationId && notification.recipient === user._id)) {
+          const response = await fetch(`http://localhost:3001/notifications/${notificationId}/refuse`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+    
+          if (response.ok) {
+            // Handle success response
+            // For example, you can remove the notification from the UI
+            setNotifications(prevNotifications => prevNotifications.filter(notification => notification._id !== notificationId));
+          } else {
+            console.error('Failed to refuse notification request:', response.status, response.statusText);
+          }
+        } else {
+          console.error('User does not have permission to refuse this notification.');
+        }
+      } catch (error) {
+        console.error('Failed to refuse notification request:', error);
+      }
+    };
     
 
 
@@ -353,7 +380,13 @@ const Navbar = ({ updateSearchResults }) => {
                 horizontal: 'right',
               }}
               >
-              <NotificationMenu notifications={notifications} setNotifications={setNotifications} handleAccept={handleAccept} loggedInUserId={user._id} />
+              <NotificationMenu
+                notifications={notifications}
+                setNotifications={setNotifications}
+                handleAccept={handleAccept}
+                handleRefuse={handleRefuse} // Add handleRefuse prop
+                loggedInUserId={user._id}
+              />
             </Popover>
             <Help sx={{ fontSize: "25px" }} />
             <FormControl variant="standard" value={fullName}>

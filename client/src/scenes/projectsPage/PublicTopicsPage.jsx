@@ -12,9 +12,10 @@ import TopicPostForm from 'components/TopicPostForm';
 
 const PublicTopicsPage = () => {
   const { projectId } = useParams();
+  const token = useSelector((state) => state.token);
   const projects = useSelector((state) => state.projects);
   const project = projects.find((project) => project._id === projectId);
-  const userId = useSelector((state) => state.user?.id);
+  const userId = useSelector((state) => state.user?._id);
   const { palette } = useTheme();
 
   const [isFormOpen, setIsFormOpen] = useState(false); // State to manage form visibility
@@ -29,13 +30,21 @@ const PublicTopicsPage = () => {
 
   const createTopic = async (newTopicData) => {
     try {
+      // Get the logged-in user ID
+      
+
+      // Check if the user is authenticated
+      if (!userId) {
+        throw new Error('User is not authenticated');
+      }
+
       const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add any authorization headers if needed
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newTopicData),
+        body: JSON.stringify({ ...newTopicData, userId }), // Include the userId in the request body
       });
 
       if (!response.ok) {
@@ -67,7 +76,7 @@ const PublicTopicsPage = () => {
         <Box flexBasis="100%">
           <ProjectProfileWidget project={project} userId={userId} />
           <Box m="2rem 0" />
-          <ProjectPublicTopicWidget project={project} userId={userId} />
+          <ProjectPublicTopicWidget projectId={project._id} userId={userId} />
           <Box m="1rem 0" />
           {/* Button to start a new topic */}
           <Grid container justifyContent="flex-end">
