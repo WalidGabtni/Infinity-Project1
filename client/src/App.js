@@ -14,6 +14,7 @@ import PublicTopicsPage from 'scenes/projectsPage/PublicTopicsPage';
 import PrivateTopicsPage from 'scenes/projectsPage/PrivateTopicsPage'; // Add PrivateTopicsPage import
 import MembersPage from 'scenes/projectsPage/MembersPage'; // Add MembersPage import
 import ArchivePage from 'scenes/projectsPage/ArchivePage'; // Add ArchivePage import
+import PublicTopicDetailsPage from 'scenes/projectsPage/PublicTopicDetailsPage';
 
 
 
@@ -40,7 +41,7 @@ function App() {
           <Route path="/projects/:projectId/private-topics" element={isAuth ? <PrivateTopicsPage /> : <Navigate to="/" />} /> 
           <Route path="/projects/:projectId/members" element={isAuth ? <MembersPage /> : <Navigate to="/" />} /> 
           <Route path="/projects/:projectId/archive" element={isAuth ? <ArchivePage /> : <Navigate to="/" />} /> 
-
+          <Route path="/projects/:projectId/public-topics/:topicId" element={isAuth ? <PublicTopicDetailsPage /> : <Navigate to="/" />} />
         </Routes>
       </ThemeProvider>
       </BrowserRouter>

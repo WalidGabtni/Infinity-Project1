@@ -30,7 +30,7 @@ const ProjectPublicTopicWidget = ({ projectId }) => {
   useEffect(() => {
     fetchPublicTopics();
   }, [projectId]);
-
+  console.log(publicTopics);
   return (
     <WidgetWrapper>
       <Typography
@@ -43,23 +43,6 @@ const ProjectPublicTopicWidget = ({ projectId }) => {
       </Typography>
       <Divider variant="fullWidth" />
       <Box sx={{ mb: '1rem' }} />
-      {publicTopics.map((topic, index) => (
-        <Box key={topic._id} sx={{ mb: '1rem' }}>
-          <Typography variant="h3" sx={{ color: palette.primary.main }}>
-            {topic.title}
-          </Typography>
-          <Typography variant="body1" sx={{ color: palette.neutral.main }} dangerouslySetInnerHTML={{ __html: topic.content }} />
-          {topic.userId && users[topic.userId] && (
-            <Box sx={{ display: 'flex', alignItems: 'center', mt: '0.5rem' }}>
-              <UserImage image={users[topic.userId].picturePath} size="30px" />
-              <Typography variant="body2" sx={{ color: palette.primary.main }}>
-                {users[topic.userId].firstName} {users[topic.userId].lastName}
-              </Typography>
-            </Box>
-          )}
-          {index !== publicTopics.length - 1 && <Divider variant="middle" />}
-        </Box>
-      ))}
     </WidgetWrapper>
   );
 };

@@ -75,6 +75,7 @@ export const getPublicTopics = async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
     const publicTopics = project.topics.map(topic => ({
+      _id: topic._id, // Ensure each topic has a unique identifier
       title: topic.title,
       content: topic.content
     }));
@@ -84,6 +85,7 @@ export const getPublicTopics = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 // Update a public topic within a project
 export const updatePublicTopic = async (req, res) => {
@@ -142,3 +144,27 @@ export const deletePublicTopic = async (req, res) => {
   }
 };
 
+// Controller function to fetch details of a specific public topic within a project
+export const getPublicTopicDetails = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the public topic within the project based on the topicId
+    const publicTopic = project.topics.find(topic => topic._id === topicId);
+    if (!publicTopic) {
+      return res.status(404).json({ message: 'Public topic not found' });
+    }
+
+    // Send the public topic details in the response
+    res.status(200).json(publicTopic);
+  } catch (error) {
+    console.error('Error getting public topic details:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

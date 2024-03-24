@@ -4,11 +4,13 @@ import { useSelector } from 'react-redux';
 import Navbar from 'scenes/navbar';
 import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
 import ProjectPublicTopicWidget from 'scenes/widgets/ProjectPublicTopicWidget';
+import PublicTopicsClickWidget from 'scenes/widgets/PublicTopicsClickWidget';
 import Box from '@mui/material/Box';
 import { Typography, useTheme, Divider, Button, Grid } from '@mui/material';
 import WidgetWrapper from 'components/WidgetWrapper';
 
 import TopicPostForm from 'components/TopicPostForm';
+
 
 const PublicTopicsPage = () => {
   const { projectId } = useParams();
@@ -86,6 +88,8 @@ const PublicTopicsPage = () => {
               </Button>
             </Grid>
           </Grid>
+          <Box m="1rem 0" />
+          <PublicTopicsClickWidget projectId={project._id}/>
           {/* Render the TopicPostForm component if isFormOpen is true */}
           {isFormOpen && <TopicPostForm onClose={handleFormClose} onPost={createTopic} userId={userId}/>}
         </Box>
