@@ -9,8 +9,6 @@ export const createPublicTopic = async (req, res) => {
     const { projectId } = req.params;
     const { userId, title, content } = req.body;
 
-  
-
     // Find the project by ID
     const project = await Project.findById(projectId);
 
@@ -37,9 +35,10 @@ export const createPublicTopic = async (req, res) => {
 
     // Create a new topic object with the required fields
     const newTopic = {
-      userId: user._id,
+      userId: user._id, // Use the ObjectId of the user
       title,
       content,
+      createdBy: user._id, // Use the ObjectId of the user for createdBy field
       createdAt: new Date(),
       // Add other properties as needed
     };
@@ -65,7 +64,6 @@ export const createPublicTopic = async (req, res) => {
 
 
 
-
 // Get the title and content of public topics within a project
 export const getPublicTopics = async (req, res) => {
   try {
@@ -77,7 +75,8 @@ export const getPublicTopics = async (req, res) => {
     const publicTopics = project.topics.map(topic => ({
       _id: topic._id, // Ensure each topic has a unique identifier
       title: topic.title,
-      content: topic.content
+      content: topic.content,
+      createdBy: topic.createdBy // Include createdBy details
     }));
     res.status(200).json(publicTopics);
   } catch (error) {
@@ -145,6 +144,7 @@ export const deletePublicTopic = async (req, res) => {
 };
 
 // Controller function to fetch details of a specific public topic within a project
+// Controller function to fetch details of a specific public topic within a project
 export const getPublicTopicDetails = async (req, res) => {
   try {
     const { projectId, topicId } = req.params;
@@ -161,11 +161,23 @@ export const getPublicTopicDetails = async (req, res) => {
       return res.status(404).json({ message: 'Public topic not found' });
     }
 
-    // Extract only the title and content fields from the public topic
-    const { title, content } = publicTopic;
+    // Fetch the user who created the topic
+    const createdByUser = await User.findById(publicTopic.createdBy);
 
-    // Send the title and content of the public topic in the response
-    res.status(200).json({ title, content });
+    // Construct the response object with populated createdBy details
+    const publicTopicDetails = {
+      _id: publicTopic._id,
+      title: publicTopic.title,
+      content: publicTopic.content,
+      createdBy: {
+        firstName: createdByUser.firstName,
+        lastName: createdByUser.lastName,
+        picturePath: createdByUser.picturePath
+      }
+    };
+
+    // Send the response
+    res.status(200).json(publicTopicDetails);
   } catch (error) {
     console.error('Error getting public topic details:', error);
     res.status(500).json({ message: 'Internal server error' });

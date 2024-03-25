@@ -4,7 +4,8 @@ const { Schema } = mongoose;
 
 const topicSchema = new Schema({
   userId: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: 'User', // Referencing the User model
     required: false,
   },
   title: {
@@ -13,6 +14,11 @@ const topicSchema = new Schema({
   },
   content: {
     type: String,
+    required: true,
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User', // Referencing the User model
     required: true,
   },
   createdAt: {

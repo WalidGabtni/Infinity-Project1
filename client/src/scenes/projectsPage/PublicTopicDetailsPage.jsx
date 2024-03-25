@@ -10,7 +10,6 @@ import { useSelector } from 'react-redux';
 const PublicTopicDetailsPage = () => {
   const { projectId, topicId } = useParams(); // Extract projectId and topicId from URL parameters
   const [topicDetails, setTopicDetails] = useState(null);
-  const users = useSelector((state) => state.users); // Assuming you have a users slice in Redux
   const projects = useSelector((state) => state.projects);
   const project = projects.find((project) => project._id === projectId);
   const userId = useSelector((state) => state.user?._id);
