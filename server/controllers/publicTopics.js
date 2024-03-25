@@ -143,7 +143,7 @@ export const deletePublicTopic = async (req, res) => {
   }
 };
 
-// Controller function to fetch details of a specific public topic within a project
+
 // Controller function to fetch details of a specific public topic within a project
 export const getPublicTopicDetails = async (req, res) => {
   try {
@@ -164,12 +164,14 @@ export const getPublicTopicDetails = async (req, res) => {
     // Fetch the user who created the topic
     const createdByUser = await User.findById(publicTopic.createdBy);
 
-    // Construct the response object with populated createdBy details
+    // Construct the response object with populated createdBy details, createdAt, and userId
     const publicTopicDetails = {
       _id: publicTopic._id,
       title: publicTopic.title,
       content: publicTopic.content,
+      createdAt: publicTopic.createdAt, // Add createdAt field
       createdBy: {
+        userId: publicTopic.createdBy, // Add userId field
         firstName: createdByUser.firstName,
         lastName: createdByUser.lastName,
         picturePath: createdByUser.picturePath
