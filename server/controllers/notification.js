@@ -114,48 +114,53 @@ export const refuseJoinRequest = async (req, res) => {
     const { notificationId } = req.params;
     const userId = req.user.id;
 
-    console.log('Refusing join request...');
-    console.log('Notification ID:', notificationId);
-    console.log('User ID:', userId);
-
     // Step 1: Verify Notification Existence
     const notification = await Notification.findById(notificationId);
     if (!notification) {
-      console.log('Notification not found.');
       return res.status(404).json({ message: 'Notification not found.' });
     }
 
     // Step 2: Ensure User Authorization
     if (notification.recipient.toString() !== userId) {
-      console.log('Unauthorized: User is not the recipient of this notification.');
       return res.status(403).json({ message: 'Unauthorized: User is not the recipient of this notification.' });
     }
 
     // Step 3: Validate Project Ownership
     const project = await Project.findById(notification.project);
     if (!project) {
-      console.log('Project not found.');
       return res.status(404).json({ message: 'Project not found.' });
     }
 
-    console.log('Notification:', notification);
-    console.log('Project:', project);
-
+    // Check if the user is the owner of the project
     if (project.userId.toString() !== userId) {
-      console.log('Unauthorized: User is not the owner of the project.');
       return res.status(403).json({ message: 'Unauthorized: User is not the owner of the project.' });
     }
 
-    // Step 4: Update the status of the notification to 'rejected' directly in the database query
+    // Step 4: Update the status of the notification to 'rejected'
     await Notification.findByIdAndUpdate(notificationId, { status: 'rejected' });
 
-    // Step 5: Remove the join request from pendingRequests
+    // Step 5: Delete the old notification
+    await Notification.findByIdAndDelete(notificationId);
+
+    // Step 6: Remove the join request from pendingRequests
     project.pendingRequests = project.pendingRequests.filter(request => request.notificationId.toString() !== notificationId);
 
-    // Step 6: Save the updated project
+    // Step 7: Save the updated project
     await project.save();
 
-    console.log('Join request refused successfully.');
+    // Step 8: Create and send notification to the sender
+    const sender = await User.findById(notification.sender);
+    if (sender) {
+      const senderNotification = await Notification.create({
+        sender: req.user.id,
+        recipient: sender._id,
+        project: project._id,
+        status: 'rejected',
+      });
+      
+      // Handle refusal notification sending (optional)
+    }
+
     return res.status(200).json({ message: 'Join request refused successfully.' });
   } catch (error) {
     console.error('Error refusing join request:', error);

@@ -54,6 +54,7 @@ const Navbar = ({ updateSearchResults }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const notificationButtonRef = useRef(null);
+    const [rejectedNotificationId, setRejectedNotificationId] = useState(null);
 
     /*SEARCH*/
     const [searchTerm, setSearchTerm] = useState('');
@@ -124,27 +125,25 @@ const Navbar = ({ updateSearchResults }) => {
         }
     };
 
-    const handleRefuse = async (notificationId) => {
+    const handleRefuse = async (notificationId, projectId) => {
       try {
-        // Check if the notification recipient ID matches the logged-in user ID
-        if (notifications.some(notification => notification._id === notificationId && notification.recipient === user._id)) {
-          const response = await fetch(`http://localhost:3001/notifications/${notificationId}/refuse`, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
+        const response = await fetch(`http://localhost:3001/notifications/${notificationId}/refuse`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
     
-          if (response.ok) {
-            // Handle success response
-            // For example, you can remove the notification from the UI
-            setNotifications(prevNotifications => prevNotifications.filter(notification => notification._id !== notificationId));
-          } else {
-            console.error('Failed to refuse notification request:', response.status, response.statusText);
-          }
+        if (response.ok) {
+          // Handle success response
+          // For example, you can remove the notification from the UI
+          setNotifications(prevNotifications => prevNotifications.filter(notification => notification._id !== notificationId));
+          
+          // Show snackbar for rejected notification
+          setRejectedNotificationId(notificationId);
         } else {
-          console.error('User does not have permission to refuse this notification.');
+          console.error('Failed to refuse notification request:', response.status, response.statusText);
         }
       } catch (error) {
         console.error('Failed to refuse notification request:', error);
