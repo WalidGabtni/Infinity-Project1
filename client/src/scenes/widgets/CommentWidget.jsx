@@ -6,16 +6,18 @@ import WidgetWrapper from 'components/WidgetWrapper';
 import ReactQuill from 'react-quill'; // Import ReactQuill
 import 'react-quill/dist/quill.snow.css'; // Import Quill styles
 
-const CommentWidget = ({ topicDetails, projectId, topicId }) => {
+const CommentWidget = ({ projectId, topicId, topicDetails }) => {
   const [comment, setComment] = useState('');
   const [isQuillEnabled, setIsQuillEnabled] = useState(false); // State to track whether Quill is enabled
   const loggedInUser = useSelector((state) => state.user);
+
 
   const handleCommentChange = (value) => {
     setComment(value);
   };
 
-  const handleCommentSubmit = async () => {
+  // Update the handleCommentSubmit function in CommentWidget.jsx
+const handleCommentSubmit = async () => {
     try {
       console.log('Submitting comment...');
       
@@ -24,17 +26,12 @@ const CommentWidget = ({ topicDetails, projectId, topicId }) => {
         console.error('Error: Topic details not found');
         return;
       }
-
+  
       // Check if loggedInUser is available
       if (!loggedInUser) {
         console.error('Error: User not logged in');
         return;
       }
-
-      // Make the API request to submit the comment
-      console.log('Topic ID:', topicDetails._id);
-      console.log('User ID:', loggedInUser._id);
-      console.log('Comment:', comment);
   
       // Make the API request to submit the comment
       const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}/comments`, {
@@ -44,7 +41,7 @@ const CommentWidget = ({ topicDetails, projectId, topicId }) => {
         },
         body: JSON.stringify({
           topicId: topicDetails._id,
-          content: comment,
+          comment: comment, // Send the comment as HTML
           userId: loggedInUser._id,
         }),
       });
@@ -70,7 +67,7 @@ const CommentWidget = ({ topicDetails, projectId, topicId }) => {
 
   return (
     <WidgetWrapper>
-      <Box display="flex" justifyContent="space-between"  gap="16px">
+      <Box display="flex" justifyContent="space-between" gap="16px">
         {/* Logged-in User Image */}
         <Avatar>
           {/* Render the user image */}
@@ -118,7 +115,7 @@ const CommentWidget = ({ topicDetails, projectId, topicId }) => {
         <Button
             variant="contained"
             color="primary"
-            onClick={() => handleCommentSubmit(projectId, topicId)}
+            onClick={handleCommentSubmit}
             disabled={!comment} // Disable button if comment is empty
             style={{ alignSelf: 'center', minWidth: '100px' }} // Center the button and set minimum width
         >

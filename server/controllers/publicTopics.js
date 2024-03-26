@@ -192,33 +192,39 @@ export const addCommentToTopic = async (req, res) => {
     const { projectId, topicId } = req.params;
     const { comment, userId } = req.body;
 
+    console.log('Adding comment to topic:', { projectId, topicId, comment, userId });
+
     // Find the project by ID
     const project = await Project.findById(projectId);
     if (!project) {
+      console.log('Project not found:', projectId);
       return res.status(404).json({ message: 'Project not found' });
     }
 
     // Find the topic within the project based on the topicId
     const topic = project.topics.id(topicId);
     if (!topic) {
+      console.log('Topic not found:', topicId);
       return res.status(404).json({ message: 'Topic not found' });
     }
 
     // Ensure that the comment and userId are provided
     if (!comment || !userId) {
+      console.log('Comment or userId is missing');
       return res.status(400).json({ message: 'Comment and userId are required' });
     }
 
     // Find the user based on the userId
     const user = await User.findById(userId);
     if (!user) {
+      console.log('User not found:', userId);
       return res.status(404).json({ message: 'User not found' });
     }
 
     // Create a new comment object
     const newComment = {
       comment,
-      createdBy: user._Id, // Use the ObjectId of the user for createdBy field
+      createdBy: user._id, // Use the ObjectId of the user for createdBy field
     };
 
     // Push the new comment into the 'comments' array of the topic
@@ -226,6 +232,8 @@ export const addCommentToTopic = async (req, res) => {
 
     // Save the updated project with the new comment
     await project.save();
+
+    console.log('Comment added successfully:', newComment);
 
     // Respond with the created comment
     res.status(201).json(newComment);

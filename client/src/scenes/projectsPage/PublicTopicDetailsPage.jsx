@@ -125,7 +125,7 @@ const PublicTopicDetailsPage = () => {
           <TopicDetailsWidget topicDetails={topicDetails} />
           <Box m="2rem 0" />
           <Box  p="1rem"> 
-            <CommentWidget projectId={projectId} topicId={topicId} />
+            <CommentWidget projectId={projectId} topicId={topicId} topicDetails={topicDetails} />
           </Box>
         </Box>
       </Box>
