@@ -185,3 +185,52 @@ export const getPublicTopicDetails = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+// Add a comment to a specific topic within a project
+export const addCommentToTopic = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+    const { comment, userId } = req.body;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the topic within the project based on the topicId
+    const topic = project.topics.id(topicId);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    // Ensure that the comment and userId are provided
+    if (!comment || !userId) {
+      return res.status(400).json({ message: 'Comment and userId are required' });
+    }
+
+    // Find the user based on the userId
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Create a new comment object
+    const newComment = {
+      comment,
+      createdBy: user._Id, // Use the ObjectId of the user for createdBy field
+    };
+
+    // Push the new comment into the 'comments' array of the topic
+    topic.comments.push(newComment);
+
+    // Save the updated project with the new comment
+    await project.save();
+
+    // Respond with the created comment
+    res.status(201).json(newComment);
+  } catch (error) {
+    console.error('Error adding comment to topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

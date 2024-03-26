@@ -33,79 +33,75 @@ export const sendJoinRequest = async (req, res) => {
 export const acceptJoinRequest = async (req, res) => {
   try {
     const { notificationId } = req.params;
-    const userId = req.user.id; // Get the authenticated user's ID from the request object
-
-    console.log('Accepting join request...');
-    console.log('Notification ID:', notificationId);
-    console.log('User ID:', userId);
+    const userId = req.user.id;
 
     // Step 1: Verify Notification Existence
     const notification = await Notification.findById(notificationId);
-
     if (!notification) {
-      console.log('Notification not found.');
       return res.status(404).json({ message: 'Notification not found.' });
     }
 
     // Step 2: Ensure User Authorization
     if (notification.recipient.toString() !== userId) {
-      console.log('Unauthorized: User is not the recipient of this notification.');
       return res.status(403).json({ message: 'Unauthorized: User is not the recipient of this notification.' });
     }
 
     // Step 3: Validate Project Ownership
     const project = await Project.findById(notification.project);
-
     if (!project) {
-      console.log('Project not found.');
       return res.status(404).json({ message: 'Project not found.' });
     }
 
-    console.log('Notification:', notification);
-    console.log('Project:', project);
-
     // Check if the user is the owner of the project
     if (project.userId.toString() !== userId) {
-      console.log('Unauthorized: User is not the owner of the project.');
       return res.status(403).json({ message: 'Unauthorized: User is not the owner of the project.' });
     }
 
-    // Step 4: Fetch user details including picturePath and userPicturePath
-    const user = await User.findById(notification.sender);
-
-    if (!user) {
-      console.log('User not found.');
-      return res.status(404).json({ message: 'User not found.' });
-    }
-
-    // Step 5: Add the user to the project's members array with picturePath and userPicturePath
-    const newUser = {
-      userId: notification.sender,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      picturePath: user.picturePath, // Add picturePath
-      userPicturePath: user.userPicturePath, // Add userPicturePath
-      // You can modify these default values as per your requirements
-    };
-
-    project.members.push(newUser);
-
-    // Step 6: Remove the join request from pendingRequests
-    project.pendingRequests = project.pendingRequests.filter(request => request.notificationId.toString() !== notificationId);
-
-    // Step 7: Save the updated project
-    await project.save();
-
-    // Step 8: Update the status of the notification to 'accepted'
+    // Step 4: Update the status of the notification to 'accepted'
     notification.status = 'accepted';
     await notification.save();
 
-    // Step 9: Proceed with accepting the join request...
-    console.log('Join request accepted successfully.');
-    res.status(200).json({ message: 'Join request accepted successfully.' });
+    // Step 5: Delete the old notification
+    await Notification.findByIdAndDelete(notificationId);
+
+    // Step 6: Add the user to the project's members list
+    const user = await User.findById(notification.sender);
+    if (user) {
+      project.members.push({
+        userId: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        picturePath: user.picturePath,
+        // Add any other required user details
+      });
+      await project.save();
+    } else {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Step 7: Remove the join request from pendingRequests
+    project.pendingRequests = project.pendingRequests.filter(request => request.notificationId.toString() !== notificationId);
+
+    // Step 8: Save the updated project
+    await project.save();
+
+    // Step 9: Create and send notification to the sender
+    const sender = await User.findById(notification.sender);
+    if (sender) {
+      const senderNotification = await Notification.create({
+        sender: notification.recipient,
+        recipient: sender._id,
+        project: project._id,
+        status: 'accepted',
+      });
+      
+      // Handle acceptance notification sending (optional)
+    }
+
+    return res.status(200).json({ message: 'Join request accepted successfully.' });
   } catch (error) {
     console.error('Error accepting join request:', error);
-    res.status(500).json({ message: 'Error accepting join request.' });
+    return res.status(500).json({ message: 'Error accepting join request.' });
   }
 };
 

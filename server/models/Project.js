@@ -2,6 +2,18 @@ import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
+const commentSchema = new Schema({
+  comment: {
+    type: String,
+    required: true,
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User', // Reference to the User model
+    required: true,
+  },
+});
+
 const topicSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
@@ -25,7 +37,7 @@ const topicSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  // Add more fields as needed
+  comments: [commentSchema], // Array of comments objects
 });
 
 const ProjectSchema = new Schema(

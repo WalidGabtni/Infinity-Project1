@@ -8,7 +8,7 @@ const NotificationMenu = ({ notifications, handleAccept, handleRefuse, loggedInU
     if (notification.status === 'rejected') {
       return notification.sender._id === loggedInUserId || notification.recipient === loggedInUserId;
     }
-    return notification.status !== 'accepted' && (notification.sender._id === loggedInUserId || notification.recipient === loggedInUserId);
+    return notification.status === 'accepted' || notification.status === 'pending' && (notification.sender._id === loggedInUserId || notification.recipient === loggedInUserId);
   });
 
   if (!filteredNotifications || filteredNotifications.length === 0) {
@@ -75,6 +75,11 @@ const NotificationMenu = ({ notifications, handleAccept, handleRefuse, loggedInU
               {notification.status === 'rejected' && (
                 <Typography variant="body1" color="textSecondary">
                   Your join request for "{notification.project?.name}" has been rejected.
+                </Typography>
+              )}
+              {notification.status === 'accepted' && (
+                <Typography variant="body1" color="textSecondary">
+                  Your join request for "{notification.project?.name}" has been accepted.
                 </Typography>
               )}
               {rejectedNotificationId === notification._id && (

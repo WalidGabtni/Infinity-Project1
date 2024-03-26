@@ -1,7 +1,7 @@
 import express from "express";
 import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers, getUserProjects, getProjectDescription, leaveProject} from "../controllers/projects.js";
 import { verifyToken } from "../middleware/auth.js";
-import { createPublicTopic, getPublicTopics, updatePublicTopic, deletePublicTopic, getPublicTopicDetails} from '../controllers/publicTopics.js';
+import { createPublicTopic, getPublicTopics, updatePublicTopic, deletePublicTopic, getPublicTopicDetails,addCommentToTopic} from '../controllers/publicTopics.js';
 import { createPrivateTopic, getPrivateTopics, updatePrivateTopic, deletePrivateTopic } from '../controllers/privateTopics.js';
 import { createArchiveTopic, getArchiveTopics, updateArchiveTopic, deleteArchiveTopic } from '../controllers/archiveTopics.js';
 
@@ -43,6 +43,7 @@ router.get('/:projectId/topics/public', getPublicTopics);
 router.patch('/:projectId/topics/public/:topicId', updatePublicTopic);
 router.delete('/:projectId/topics/public/:topicId', deletePublicTopic);
 router.get('/:projectId/topics/public/:topicId', getPublicTopicDetails);
+router.post('/:projectId/topics/public/:topicId/comments', addCommentToTopic);
 
 // Private Topics Routes
 router.post('/:projectId/topics/private', verifyToken, createPrivateTopic);
