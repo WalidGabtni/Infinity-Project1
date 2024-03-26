@@ -6,6 +6,7 @@ import Navbar from 'scenes/navbar';
 import ProjectDescriptionWidget from 'scenes/widgets/ProjectDescriptionWidget';
 import ProjectMemberWidget from 'scenes/widgets/ProjectMemberWidget';
 import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
+import NavBreadcrumbsIndividual from 'components/NavBreadcrumbsIndividual';
 
 const IndividualProjectPage = () => {
   const { projectId } = useParams();
@@ -28,10 +29,13 @@ const IndividualProjectPage = () => {
         justifyContent="space-between"
       >
         <Box flexBasis={isNonMobileScreens ? '70%' : undefined}>
+        <NavBreadcrumbsIndividual projectId={projectId} projectName={project.name}/>
+        <Box m="2rem 0" />
           <ProjectProfileWidget project={project} userId={userId} /> 
           <Box m="2rem 0" />
           <ProjectDescriptionWidget projectId={projectId} />
           <Box m="2rem 0" />
+          <NavBreadcrumbsIndividual projectId={projectId} projectName={project.name}/>
         </Box>
 
         {isNonMobileScreens && (
@@ -40,6 +44,7 @@ const IndividualProjectPage = () => {
           </Box>
         )}
       </Box>
+      
     </Box>
   );
 };

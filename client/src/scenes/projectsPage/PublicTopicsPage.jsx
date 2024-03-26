@@ -8,7 +8,7 @@ import PublicTopicsClickWidget from 'scenes/widgets/PublicTopicsClickWidget';
 import Box from '@mui/material/Box';
 import { Typography, useTheme, Divider, Button, Grid } from '@mui/material';
 import WidgetWrapper from 'components/WidgetWrapper';
-
+import NavigationBreadcrumbsPublicTopics from 'components/NavBreadcrumbsPublicTopicsPage';
 import TopicPostForm from 'components/TopicPostForm';
 
 
@@ -77,6 +77,8 @@ const PublicTopicsPage = () => {
         justifyContent="space-between"
       >
         <Box flexBasis="100%">
+        <NavigationBreadcrumbsPublicTopics projectId={projectId} projectName={project.name}/>
+        <Box m="2rem 0" />
           <ProjectProfileWidget project={project} userId={userId} />
           <Box m="2rem 0" />
           <ProjectPublicTopicWidget projectId={project._id} userId={userId} />
@@ -93,6 +95,8 @@ const PublicTopicsPage = () => {
           <PublicTopicsClickWidget projectId={project._id}/>
           {/* Render the TopicPostForm component if isFormOpen is true */}
           {isFormOpen && <TopicPostForm onClose={handleFormClose} onPost={createTopic} userId={userId}/>}
+          <Box m="2rem 0" />
+          <NavigationBreadcrumbsPublicTopics projectId={projectId} projectName={project.name}/>
         </Box>
       </Box>
     </div>

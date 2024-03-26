@@ -10,6 +10,7 @@ import UserImage from 'components/UserImage';
 import TopicPostForm from 'components/TopicPostForm';
 import TopicDetailsWidget from 'scenes/widgets/TopicDetailsWidget';
 import CustomPagination from 'components/ProjectPagination';
+import NavigationBreadcrumbs from 'components/NavigationBreadcrumbs'; // Import NavigationBreadcrumbs component
 
 const PublicTopicDetailsPage = () => {
   const { projectId, topicId } = useParams();
@@ -31,6 +32,7 @@ const PublicTopicDetailsPage = () => {
       
         const data = await response.json();
         setTopicDetails(data);
+        console.log('Topic Details:', data); // Add this line to log topicDetails
       } catch (error) {
         console.error('Error fetching topic details:', error);
       }
@@ -98,6 +100,7 @@ const PublicTopicDetailsPage = () => {
   return (
     <div>
       <Navbar />
+      
       <Box
         width="100%"
         padding="2rem 6%"
@@ -106,6 +109,8 @@ const PublicTopicDetailsPage = () => {
         justifyContent="space-between"
       >
         <Box flexBasis="100%">
+        <NavigationBreadcrumbs projectId={projectId} projectName={project.name} topicName={topicDetails?.title} topicId={topicId} />
+        <Box m="2rem 0" />
           <ProjectProfileWidget project={project} userId={userId} />
           <Box m="2rem 0" />
           <PublicTopicTitleWidget project={project} userId={userId}/>
@@ -130,6 +135,8 @@ const PublicTopicDetailsPage = () => {
           {isFormOpen && <TopicPostForm onClose={handleFormClose} onPost={createTopic} userId={userId}/>}
           <Box m="1rem 0" />
           <TopicDetailsWidget topicDetails={topicDetails} />
+          <Box m="2rem 0" />
+          <NavigationBreadcrumbs projectId={projectId} projectName={project.name} topicName={topicDetails?.title} topicId={topicId} />
         </Box>
       </Box>
     </div>
