@@ -12,6 +12,8 @@ import TopicDetailsWidget from 'scenes/widgets/TopicDetailsWidget';
 import CustomPagination from 'components/ProjectPagination';
 import NavigationBreadcrumbs from 'components/NavigationBreadcrumbs';
 import CommentWidget from 'scenes/widgets/CommentWidget';
+import GetCommentsWidget from 'scenes/widgets/GetCommentsWidget';
+
 
 const PublicTopicDetailsPage = () => {
   const { projectId, topicId } = useParams();
@@ -124,7 +126,9 @@ const PublicTopicDetailsPage = () => {
           <Box m="1rem 0" />
           <TopicDetailsWidget topicDetails={topicDetails} />
           <Box m="2rem 0" />
-          <Box  p="1rem"> 
+          <GetCommentsWidget projectId={projectId} topicId={topicId} />
+          <Box m="2rem 0" />
+          <Box width="100%" p="1rem"> 
             <CommentWidget projectId={projectId} topicId={topicId} topicDetails={topicDetails} />
           </Box>
         </Box>

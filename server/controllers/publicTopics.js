@@ -242,3 +242,28 @@ export const addCommentToTopic = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+// Get comments for a specific topic
+export const getTopicComments = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+    
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the topic within the project based on the topicId
+    const topic = project.topics.id(topicId);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    // Return only the comments for the topic
+    res.status(200).json(topic.comments);
+  } catch (error) {
+    console.error('Error fetching comments for topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

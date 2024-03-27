@@ -58,6 +58,7 @@ const handleCommentSubmit = async () => {
       // For example:
       // const updatedTopicDetails = await response.json();
       // Update the UI with the new comment
+      window.location.reload();
     } catch (error) {
       console.error('Error submitting comment:', error);
       // Handle error, e.g., display an error message to the user

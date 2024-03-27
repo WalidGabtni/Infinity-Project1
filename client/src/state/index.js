@@ -14,6 +14,7 @@ const initialState = {
   notifications: [],
   publicTopics: [], // Add publicTopics to initialState
   currentTopic: null,
+  commenterDetails: null,
 };
 
 export const authSlice = createSlice({
@@ -112,6 +113,9 @@ export const authSlice = createSlice({
     setPublicTopicDetails: (state, action) => {
       state.currentTopic = action.payload; // Set the details of the currently selected public topic
     },
+    setCommenterDetails: (state, action) => {
+      state.commenterDetails = action.payload;
+    },
   },
 });
 
@@ -132,6 +136,7 @@ export const {
   leaveProject,
   setPublicTopics,
   setPublicTopicDetails,
+  setCommenterDetails,
 } = authSlice.actions;
 
 export default authSlice.reducer;
