@@ -314,16 +314,14 @@ const PostWidget = ({
           "Content-Type": "application/json",
         },
       });
-
+  
       if (response.ok) {
         // Toggle the bookmark state
-        const newIsBookmarked = !isBookmarked;
-        setIsBookmarked(newIsBookmarked);
-
-        // Remove the localStorage logic for debugging purposes
-        // localStorage.setItem(`bookmark_${postId}`, JSON.stringify(newIsBookmarked));
+        setIsBookmarked(prevState => !prevState);
       } else {
-        console.error("Failed to update bookmark:", response.status, response.statusText);
+        // Handle the error if the request fails
+        const errorMessage = await response.text();
+        console.error("Failed to update bookmark:", response.status, errorMessage);
       }
     } catch (error) {
       console.error("Error updating bookmark:", error.message);

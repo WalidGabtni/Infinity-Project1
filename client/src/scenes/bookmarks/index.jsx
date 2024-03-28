@@ -14,6 +14,7 @@ const BookmarkPage = () => {
   const { _id, picturePath } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const bookmarkedPosts = useSelector((state) => state.user.bookmarkedPosts) || [];
+  const loggedInUserId = useSelector((state) => state.user._id);
   const dispatch = useDispatch();
 
   // Fetch bookmarked posts on component mount
@@ -23,10 +24,11 @@ const BookmarkPage = () => {
       try {
         // Check if _id is defined before making the request
         if (!_id) {
+          console.error("User ID is not defined.");
           return;
         }
   
-        const response = await fetch(`http://localhost:3001/api/users/${_id}/bookmarks`, {
+        const response = await fetch(`http://localhost:3001/users/${_id}/bookmarks`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -64,7 +66,7 @@ const BookmarkPage = () => {
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
           {/* Pass bookmarked posts to PostsWidget and set isBookmarkPage to true */}
-          <PostsWidget isBookmarkPage={true} />
+          <PostsWidget isBookmarkPage={true} userId={loggedInUserId} />
         </Box>
         <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
           <AdvertWidget />

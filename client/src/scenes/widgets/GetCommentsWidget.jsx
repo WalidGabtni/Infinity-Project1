@@ -8,24 +8,35 @@ const GetCommentsWidget = ({ projectId, topicId }) => {
   useEffect(() => {
     const fetchComments = async () => {
       try {
+        console.log(`Fetching comments for projectId: ${projectId}, topicId: ${topicId}`);
         const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}/all-comments`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
-
+  
         if (!response.ok) {
           throw new Error('Failed to fetch comments');
         }
-
-        const data = await response.json();
-        setComments(data);
+  
+        const commentsData = await response.json();
+        console.log('Fetched comments:');
+        commentsData.forEach(comment => {
+          const { _id, comment: commentText, createdBy } = comment;
+          console.log(`Comment Id: ${_id}`);
+          console.log(`Comment Text: ${commentText}`);
+          console.log(`User Id: ${createdBy?._id}`);
+          console.log(`User Name: ${createdBy?.firstName} ${createdBy?.lastName}`);
+          console.log(`User Picture: ${createdBy?.picturePath}`);
+        });
+        setComments(commentsData);
       } catch (error) {
         console.error('Error fetching comments:', error);
       }
     };
-
+  
+    console.log('Fetching comments...');
     fetchComments();
   }, [projectId, topicId]);
 

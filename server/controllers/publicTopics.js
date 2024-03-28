@@ -214,8 +214,8 @@ export const addCommentToTopic = async (req, res) => {
       return res.status(400).json({ message: 'Comment and userId are required' });
     }
 
-    // Find the user based on the userId
-    const user = await User.findById(userId);
+    // Find the user based on the userId and populate firstName, lastName, and picturePath
+    const user = await User.findById(userId).select('firstName lastName picturePath');
     if (!user) {
       console.log('User not found:', userId);
       return res.status(404).json({ message: 'User not found' });
@@ -225,6 +225,9 @@ export const addCommentToTopic = async (req, res) => {
     const newComment = {
       comment,
       createdBy: user._id, // Use the ObjectId of the user for createdBy field
+      firstName: user.firstName,
+      lastName: user.lastName,
+      picturePath: user.picturePath,
     };
 
     // Push the new comment into the 'comments' array of the topic
@@ -248,22 +251,62 @@ export const getTopicComments = async (req, res) => {
   try {
     const { projectId, topicId } = req.params;
     
+    console.log(`Fetching comments for projectId: ${projectId}, topicId: ${topicId}`);
+
     // Find the project by ID
     const project = await Project.findById(projectId);
     if (!project) {
+      console.log('Project not found');
       return res.status(404).json({ message: 'Project not found' });
     }
+
+    console.log('Project found:', project);
 
     // Find the topic within the project based on the topicId
     const topic = project.topics.id(topicId);
     if (!topic) {
+      console.log('Topic not found');
       return res.status(404).json({ message: 'Topic not found' });
     }
 
-    // Return only the comments for the topic
-    res.status(200).json(topic.comments);
+    console.log('Topic found:', topic);
+
+    // Extract comments from the topic
+    const comments = topic.comments;
+
+    console.log('Comments:', comments);
+
+    // Extract user IDs from comments
+    const userIds = comments.map(comment => comment.createdBy);
+
+    console.log('User IDs from comments:', userIds);
+
+    // Populate users for comments
+    console.log('Fetching users for comments...');
+    const users = await User.find({ _id: { $in: userIds } });
+
+    console.log('Fetched users:', users);
+
+    // Map users to comments
+    console.log('Mapping users to comments...');
+    comments.forEach(comment => {
+      const user = users.find(user => user._id.equals(comment.createdBy));
+      if (user) {
+        comment.createdBy = user; // Update createdBy with user details
+      }
+    });
+
+    console.log('Comments with populated createdBy:', comments);
+
+    // Return comments for the topic with createdBy populated
+    console.log('Returning comments for the topic with createdBy populated');
+    res.status(200).json(comments);
   } catch (error) {
     console.error('Error fetching comments for topic:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+
+
+
