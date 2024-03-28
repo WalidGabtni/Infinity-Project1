@@ -37,7 +37,7 @@ const TopicDetailsWidget = ({ }) => {
                     {/* Display name and creation date */}
                     <Box display="flex" alignItems="center">
                         {/* Use Link to navigate to user profile on name click */}
-                        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                        <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: "1.25rem"  }}>
                             <Link to={`/profile/${topicDetails.createdBy.userId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
                                 {topicDetails.createdBy.firstName} {topicDetails.createdBy.lastName}
                             </Link>
@@ -53,7 +53,7 @@ const TopicDetailsWidget = ({ }) => {
                     </Box>
                     <Box m="1rem 0" />
                     {/* Display UserImage */}
-                    <Box display="flex" alignItems="center">
+                    <Box display="flex" alignItems="center" sx={{marginLeft: "0.5rem" }}>
                         {/* Use Link to navigate to user profile on image click */}
                         <Link to={`/profile/${topicDetails.createdBy.userId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                             <UserImage image={topicDetails.createdBy.picturePath} size="100px" sx={{ cursor: 'pointer' }} />
