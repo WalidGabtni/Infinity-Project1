@@ -43,7 +43,7 @@ const GetCommentsWidget = ({ projectId, topicId }) => {
   return (
     <Box display="flex" flexDirection="column" gap="16px">
       {comments.map((comment, index) => (
-        <OneCommentWidget key={index} comment={comment} />
+        <OneCommentWidget key={index} comment={comment} userId={comment?.createdBy?.userId} />
       ))}
     </Box>
   );
