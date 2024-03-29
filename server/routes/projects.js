@@ -40,7 +40,7 @@ router.post('/:projectId/leave', leaveProject);
 // Public Topics Routes
 router.post('/:projectId/topics/public', createPublicTopic);
 router.get('/:projectId/topics/public', getPublicTopics);
-router.patch('/:projectId/topics/public/:topicId', verifyToken,updatePublicTopic);
+router.patch('/:projectId/topics/public/:topicId/update', verifyToken,updatePublicTopic);
 router.delete('/:projectId/topics/public/:topicId/delete', verifyToken,deletePublicTopic);
 router.get('/:projectId/topics/public/:topicId', getPublicTopicDetails);
 router.post('/:projectId/topics/public/:topicId/comments', addCommentToTopic);

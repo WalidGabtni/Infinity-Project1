@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Divider, IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import WidgetWrapper from 'components/WidgetWrapper';
 import UserImage from 'components/UserImage';
 import { Link } from 'react-router-dom';
 import { useSelector } from "react-redux";
+import TopicPostForm from 'components/TopicPostForm'; // Import the TopicPostForm component
 
 const PublicTopicsClickWidget = ({ projectId }) => {
   const [publicTopics, setPublicTopics] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null); // State variable to track anchor element for menu
-  const [selectedTopicId, setSelectedTopicId] = useState(null); // State variable to track the selected topic ID
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedTopicId, setSelectedTopicId] = useState(null);
+  const [editFormData, setEditFormData] = useState(null); // State to store data for editing
   const loggedInUserId = useSelector((state) => state.user._id);
   const token = useSelector((state) => state.token);
   
@@ -54,12 +56,12 @@ const PublicTopicsClickWidget = ({ projectId }) => {
 
   const handleMenuOpen = (event, topicId) => {
     setAnchorEl(event.currentTarget);
-    setSelectedTopicId(topicId); // Set the selected topic ID when opening the menu
+    setSelectedTopicId(topicId);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedTopicId(null); // Clear the selected topic ID when closing the menu
+    setSelectedTopicId(null);
   };
 
   const handleDeleteTopic = async (projectId, topicId, loggedInUserId) => {
@@ -87,19 +89,61 @@ const PublicTopicsClickWidget = ({ projectId }) => {
     }
   };
 
-  const handleMenuItemClick = (projectId, topicId, loggedInUserId) => {
+  const handleEditTopic = async (topicId) => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch topic details for editing');
+      }
+
+      const topicData = await response.json();
+      setEditFormData(topicData);
+    } catch (error) {
+      console.error('Error fetching topic details for editing:', error);
+    }
+  };
+
+  const handleMenuItemClick = (projectId, topicId, loggedInUserId, action) => {
     console.log('Menu item clicked for topic ID:', topicId, 'in project:', projectId, 'by user ID:', loggedInUserId);
-    handleDeleteTopic(projectId, topicId, loggedInUserId);
+    if (action === 'delete') {
+      handleDeleteTopic(projectId, topicId, loggedInUserId);
+    } else if (action === 'edit') {
+      handleEditTopic(topicId);
+    }
+  };
+
+  const handlePost = async (formData) => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${formData._id}/update`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update topic');
+      }
+
+      const updatedTopic = await response.json();
+      // Update publicTopics state with the updated topic
+      setPublicTopics(publicTopics.map(topic => topic._id === updatedTopic._id ? updatedTopic : topic));
+      console.log('Topic updated successfully:', updatedTopic);
+    } catch (error) {
+      console.error('Error updating topic:', error);
+    }
   };
 
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>
       {publicTopics.map((topic, index) => (
         <Box key={topic._id} sx={{ position: 'relative', mb: '1rem' }}>
-          {loggedInUserId === topic.createdBy.userId && ( // Only render the three dots icon if the logged-in user is the creator of the topic
+          {loggedInUserId === topic.createdBy.userId && (
             <IconButton
               sx={{ position: 'absolute', top: -20, right: -20 }}
-              onClick={(event) => handleMenuOpen(event, topic._id)} // Pass the topic ID when opening the menu
+              onClick={(event) => handleMenuOpen(event, topic._id)}
             >
               <MoreVertIcon />
             </IconButton>
@@ -134,13 +178,23 @@ const PublicTopicsClickWidget = ({ projectId }) => {
           {index !== publicTopics.length - 1 && <Divider variant="middle" />}
           <Menu
             anchorEl={anchorEl}
-            open={selectedTopicId === topic._id} // Open the menu only for the selected topic
+            open={selectedTopicId === topic._id}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId)}>Delete</MenuItem>
+            <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'delete')}>Delete</MenuItem>
+            <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'edit')}>Edit</MenuItem>
           </Menu>
         </Box>
       ))}
+      {editFormData && (
+        <TopicPostForm
+          onClose={() => setEditFormData(null)}
+          onPost={handlePost}
+          initialFormData={editFormData} // Pass initialFormData to populate the form fields
+          userId={loggedInUserId}
+          editMode={true}
+        />
+      )}
     </WidgetWrapper>
   );
 };

@@ -5,7 +5,7 @@ import Overlay from "./Overlay";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
-const TopicPostForm = ({ onClose, onPost, postData, userId  }) => {
+const TopicPostForm = ({ onClose, onPost, initialFormData, userId, editMode }) => {
   const { palette } = useTheme();
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [formData, setFormData] = useState({ title: "", content: "" });
@@ -16,34 +16,24 @@ const TopicPostForm = ({ onClose, onPost, postData, userId  }) => {
   };
 
   useEffect(() => {
-    // If postData is provided, set the form data
-    if (postData) {
-      setFormData({
-        title: postData.title || '',
-        content: postData.content || '',
-        // Map other properties accordingly
-      });
+    if (initialFormData) {
+      setFormData(initialFormData);
     }
-  }, [postData]);
+  }, [initialFormData]);
 
   const handleInputChange = (field, value) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
   };
 
   const handlePostClick = () => {
-    // Check if postData is provided to determine the mode (create or edit)
-    const isEditMode = !!postData;
-  
-    // Call onPost with the appropriate data based on the mode
     onPost({
       ...formData,
-      userId: userId, // Include the userId of the current user
-      postId: isEditMode ? postData.postId : undefined,  // Include postId for edit mode
+      userId: userId,
+      editMode: editMode,
     });
   
     onClose();
   };
-  
   
   const modules = {
     toolbar: [
@@ -93,7 +83,7 @@ const TopicPostForm = ({ onClose, onPost, postData, userId  }) => {
             }}
             id="postForm"
           >
-            <Typography variant="h6">New Topic</Typography>
+            <Typography variant="h6">{editMode ? 'Edit Topic' : 'New Topic'}</Typography>
 
             {/* Title input field */}
             <Input
@@ -132,7 +122,7 @@ const TopicPostForm = ({ onClose, onPost, postData, userId  }) => {
                 right: "2rem",
               }}
             >
-              POST
+              {editMode ? 'SAVE' : 'POST'}
             </Button>
 
             {/* Close button */}

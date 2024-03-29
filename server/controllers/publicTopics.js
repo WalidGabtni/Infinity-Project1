@@ -109,7 +109,7 @@ export const updatePublicTopic = async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    const publicTopic = project.publicTopics.id(topicId);
+    const publicTopic = project.topics.id(topicId);
     if (!publicTopic) {
       return res.status(404).json({ message: 'Public topic not found' });
     }
