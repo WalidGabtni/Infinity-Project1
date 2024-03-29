@@ -72,12 +72,24 @@ export const getPublicTopics = async (req, res) => {
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
-    const publicTopics = project.topics.map(topic => ({
-      _id: topic._id, // Ensure each topic has a unique identifier
-      title: topic.title,
-      content: topic.content,
-      createdBy: topic.createdBy // Include createdBy details
+    
+    // Fetch user details for createdBy field of each topic
+    const publicTopics = await Promise.all(project.topics.map(async (topic) => {
+      const createdByUser = await User.findById(topic.createdBy);
+      return {
+        _id: topic._id,
+        title: topic.title,
+        content: topic.content,
+        createdAt: topic.createdAt,
+        createdBy: {
+          userId: topic.createdBy,
+          firstName: createdByUser.firstName,
+          lastName: createdByUser.lastName,
+          picturePath: createdByUser.picturePath
+        }
+      };
     }));
+    
     res.status(200).json(publicTopics);
   } catch (error) {
     console.error('Error getting public topics:', error);
@@ -123,18 +135,17 @@ export const deletePublicTopic = async (req, res) => {
   try {
     const { projectId, topicId } = req.params;
 
-    const project = await Project.findById(projectId);
-    if (!project) {
-      return res.status(404).json({ message: 'Project not found' });
-    }
+    // Find the project by ID and update it to remove the specified topic
+    const updatedProject = await Project.findByIdAndUpdate(
+      projectId,
+      { $pull: { topics: { _id: topicId } } },
+      { new: true } // To return the updated project
+    );
 
-    const publicTopic = project.publicTopics.id(topicId);
-    if (!publicTopic) {
-      return res.status(404).json({ message: 'Public topic not found' });
+    // Check if the project was found and updated successfully
+    if (!updatedProject) {
+      return res.status(404).json({ message: 'Project not found or topic not deleted' });
     }
-
-    publicTopic.remove();
-    await project.save();
 
     res.status(200).json({ message: 'Public topic deleted successfully' });
   } catch (error) {
