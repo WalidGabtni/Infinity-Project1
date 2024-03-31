@@ -13,8 +13,9 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
   const [selectedTopicId, setSelectedTopicId] = useState(null);
   const [editFormData, setEditFormData] = useState(null); // State to store data for editing
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-  const loggedInUserId = useSelector((state) => state.user._id);
+  const loggedInUserId = useSelector((state) => state.user?._id); // Extract loggedInUserId from Redux state
   const token = useSelector((state) => state.token);
+  const project = useSelector((state) => state.projects.find((project) => project._id === projectId));
 
   const fetchPrivateTopics = async () => {
     try {
@@ -44,8 +45,6 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
     }
   };
   
-
-
   useEffect(() => {
     fetchPrivateTopics();
   }, [projectId]);
@@ -116,17 +115,22 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
 
   const handleEditTopic = async (topicId) => {
     try {
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private/${topicId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch topic details for editing');
-      }
+        const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private/${topicId}`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch topic details for editing');
+        }
 
-      const topicData = await response.json();
-      setEditFormData(topicData);
+        const topicData = await response.json();
+        setEditFormData(topicData);
     } catch (error) {
-      console.error('Error fetching topic details for editing:', error);
+        console.error('Error fetching topic details for editing:', error);
     }
-  };
+};
 
   const handleMenuItemClick = (projectId, topicId, loggedInUserId, action) => {
     console.log('Menu item clicked for topic ID:', topicId, 'in project:', projectId, 'by user ID:', loggedInUserId);
@@ -160,6 +164,14 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
       console.error('Error updating topic:', error);
     }
   };
+
+  if (!loggedInUserId || !project || !project.members.some(member => member.userId === loggedInUserId)) {
+    return (
+      <WidgetWrapper>
+        <Typography variant="body1">You have to be a member to get access to this page.</Typography>
+      </WidgetWrapper>
+    );
+  }
 
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>

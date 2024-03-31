@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
 import OneCommentWidget from './OneCommentWidget';
+import { useSelector } from 'react-redux';
 
-const GetCommentsWidget = ({ projectId, topicId }) => {
+const GetCommentsWidget = ({ projectId, topicId, isPrivate }) => {
   const [comments, setComments] = useState([]);
+  const token = useSelector((state) => state.token);
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
         console.log(`Fetching comments for projectId: ${projectId}, topicId: ${topicId}`);
-        const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}/all-comments`, {
+        const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPrivate ? 'private' : 'public'}/${topicId}/all-comments`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
         });
   
@@ -38,7 +41,7 @@ const GetCommentsWidget = ({ projectId, topicId }) => {
   
     console.log('Fetching comments...');
     fetchComments();
-  }, [projectId, topicId]);
+  }, [projectId, topicId, isPrivate]);
 
   return (
     <Box display="flex" flexDirection="column" gap="16px">

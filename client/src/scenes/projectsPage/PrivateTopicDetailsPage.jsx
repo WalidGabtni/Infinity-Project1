@@ -4,18 +4,17 @@ import WidgetWrapper from 'components/WidgetWrapper';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from 'scenes/navbar';
 import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
-import PublicTopicTitleWidget from 'scenes/widgets/PublicTopicTitleWidget';
+import PrivateTopicTitleWidget from 'scenes/widgets/PrivateTopicTitleWidget'; // Assuming this widget exists
 import { useSelector } from 'react-redux';
 import UserImage from 'components/UserImage';
 import TopicPostForm from 'components/TopicPostForm';
-import TopicDetailsWidget from 'scenes/widgets/TopicDetailsWidget';
+import PrivateTopicDetailsWidget from 'scenes/widgets/PrivateTopicDetailsWidget';
 import CustomPagination from 'components/ProjectPagination';
 import NavigationBreadcrumbs from 'components/NavigationBreadcrumbs';
 import CommentWidget from 'scenes/widgets/CommentWidget';
 import GetCommentsWidget from 'scenes/widgets/GetCommentsWidget';
 
-
-const PublicTopicDetailsPage = () => {
+const PrivateTopicDetailsPage = () => {
   const { projectId, topicId } = useParams();
   const [topicDetails, setTopicDetails] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -28,7 +27,9 @@ const PublicTopicDetailsPage = () => {
   useEffect(() => {
     const fetchTopicDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}`);
+        const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private/${topicId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch topic details');
         }
@@ -42,7 +43,7 @@ const PublicTopicDetailsPage = () => {
     };
 
     fetchTopicDetails();
-  }, [projectId, topicId]);
+  }, [projectId, topicId, token]);
 
   const handleNewTopicClick = () => {
     setIsFormOpen(true);
@@ -58,7 +59,7 @@ const PublicTopicDetailsPage = () => {
         throw new Error('User is not authenticated');
       }
 
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public`, {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ const PublicTopicDetailsPage = () => {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    navigate(`/projects/${projectId}/public-topics/${topicId}/page/${pageNumber}`);
+    navigate(`/projects/${projectId}/private-topics/${topicId}/page/${pageNumber}`);
   };
 
   const totalItems = topicDetails ? topicDetails.totalTopics : 0;
@@ -106,7 +107,7 @@ const PublicTopicDetailsPage = () => {
           <Box m="2rem 0" />
           <ProjectProfileWidget project={project} userId={userId} />
           <Box m="2rem 0" />
-          <PublicTopicTitleWidget project={project} userId={userId}/>
+          <PrivateTopicTitleWidget project={project} userId={userId}/>
           <Box m="1rem 0" />
           <Grid container justifyContent="flex-end">
             <Grid item>
@@ -124,12 +125,12 @@ const PublicTopicDetailsPage = () => {
           />
           {isFormOpen && <TopicPostForm onClose={handleFormClose} onPost={createTopic} userId={userId}/>}
           <Box m="1rem 0" />
-          <TopicDetailsWidget topicDetails={topicDetails} />
+          <PrivateTopicDetailsWidget topicDetails={topicDetails} />
           <Box m="2rem 0" />
-          <GetCommentsWidget projectId={projectId} topicId={topicId} isPrivate={false}/>
+          <GetCommentsWidget projectId={projectId} topicId={topicId} isPrivate={true} />
           <Box m="2rem 0" />
           <Box width="100%" p="1rem"> 
-            <CommentWidget projectId={projectId} topicId={topicId} topicDetails={topicDetails} isPrivate={false}/>
+          <CommentWidget projectId={projectId} topicId={topicId} topicDetails={topicDetails} isPrivate={true} />
           </Box>
         </Box>
       </Box>
@@ -137,4 +138,4 @@ const PublicTopicDetailsPage = () => {
   );
 };
 
-export default PublicTopicDetailsPage;
+export default PrivateTopicDetailsPage;

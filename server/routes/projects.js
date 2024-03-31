@@ -2,7 +2,7 @@ import express from "express";
 import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers, getUserProjects, getProjectDescription, leaveProject} from "../controllers/projects.js";
 import { verifyToken } from "../middleware/auth.js";
 import { createPublicTopic, getPublicTopics, updatePublicTopic, deletePublicTopic, getPublicTopicDetails, addCommentToTopic, getTopicComments} from '../controllers/publicTopics.js';
-import { createPrivateTopic, getPrivateTopics, updatePrivateTopic, deletePrivateTopic } from '../controllers/privateTopics.js';
+import { createPrivateTopic, getPrivateTopics, updatePrivateTopic, deletePrivateTopic ,getPrivateTopicDetails,addCommentToPrivateTopic,getPrivateTopicComments} from '../controllers/privateTopics.js';
 import { createArchiveTopic, getArchiveTopics, updateArchiveTopic, deleteArchiveTopic } from '../controllers/archiveTopics.js';
 
 const router = express.Router();
@@ -49,8 +49,11 @@ router.get('/:projectId/topics/public/:topicId/all-comments', getTopicComments);
 // Private Topics Routes
 router.post('/:projectId/topics/private', verifyToken, createPrivateTopic);
 router.get('/:projectId/topics/private', verifyToken, getPrivateTopics);
-router.patch('/:projectId/topics/private/:topicId', verifyToken, updatePrivateTopic);
-router.delete('/:projectId/topics/private/:topicId', verifyToken, deletePrivateTopic);
+router.get('/:projectId/topics/private/:topicId', verifyToken,getPrivateTopicDetails);
+router.patch('/:projectId/topics/private/:topicId/update', verifyToken, updatePrivateTopic);
+router.delete('/:projectId/topics/private/:topicId/delete', verifyToken, deletePrivateTopic);
+router.post('/:projectId/topics/private/:topicId/comments', verifyToken,addCommentToPrivateTopic);
+router.get('/:projectId/topics/private/:topicId/all-comments', verifyToken,getPrivateTopicComments);
 
 // Archive Topics Routes
 router.post('/:projectId/topics/archive', verifyToken, createArchiveTopic);

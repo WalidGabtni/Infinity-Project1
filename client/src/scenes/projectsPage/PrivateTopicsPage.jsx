@@ -95,15 +95,19 @@ const PrivateTopicsPage = () => {
           <Box m="2rem 0" />
           <ProjectPrivateTopicWidget project={project} userId={userId} />
           <Box m="1rem 0" />
-          {/* Button to start a new topic */}
-          <Grid container justifyContent="flex-end">
-            <Grid item>
-              <Button onClick={isFormOpen ? handleFormClose : handleNewTopicClick} variant="contained" color="primary" size="large">
-                {isFormOpen ? 'Cancel' : 'Start New Topic'}
-              </Button>
-            </Grid>
-          </Grid>
-          <Box m="1rem 0" />
+          {/* Conditionally render the button only for members */}
+          {loggedInUser && project && project.members.some(member => member.userId === loggedInUser._id) && (
+            <>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Button onClick={isFormOpen ? handleFormClose : handleNewTopicClick} variant="contained" color="primary" size="large">
+                    {isFormOpen ? 'Cancel' : 'Start New Topic'}
+                  </Button>
+                </Grid>
+              </Grid>
+              <Box m="1rem 0" />
+            </>
+          )}
           <PrivateTopicsClickWidget projectId={project._id} userId={userId}/>
           {isFormOpen && <TopicPostForm onClose={handleFormClose} onPost={handleCreatePrivateTopic} userId={userId}/>}
         </Box>
