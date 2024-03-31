@@ -72,9 +72,6 @@ export const createPrivateTopic = async (req, res) => {
 // Get the title and content of private topics within a project
 export const getPrivateTopics = async (req, res) => {
   try {
-    // Log the entire request object
-    console.log('Request object:', req);
-
     // Extract projectId from request parameters
     const { projectId } = req.params;
     console.log('Fetching private topics for project ID:', projectId); // Log project ID
@@ -100,13 +97,21 @@ export const getPrivateTopics = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden: User is not a member of the project' });
     }
 
-    // Fetch private topics from the privateTopics array
-    const privateTopics = project.privateTopics.map(topic => ({
-      _id: topic._id,
-      title: topic.title,
-      content: topic.content,
-      createdAt: topic.createdAt,
-      createdBy: topic.createdBy, // No need to fetch user details here
+    // Fetch user details for each topic's creator asynchronously
+    const privateTopics = await Promise.all(project.privateTopics.map(async topic => {
+      const createdByUser = await User.findById(topic.createdBy);
+      return {
+        _id: topic._id,
+        title: topic.title,
+        content: topic.content,
+        createdAt: topic.createdAt,
+        createdBy: {
+          userId: topic.createdBy,
+          firstName: createdByUser.firstName,
+          lastName: createdByUser.lastName,
+          picturePath: createdByUser.picturePath
+        }
+      };
     }));
 
     console.log('Private topics fetched successfully:', privateTopics);
@@ -117,6 +122,7 @@ export const getPrivateTopics = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 
 
