@@ -7,8 +7,8 @@ import { Link } from 'react-router-dom';
 import { useSelector } from "react-redux";
 import TopicPostForm from 'components/TopicPostForm'; // Import the TopicPostForm component
 
-const PublicTopicsClickWidget = ({ projectId }) => {
-  const [publicTopics, setPublicTopics] = useState([]);
+const PrivateTopicsClickWidget = ({ projectId }) => {
+  const [privateTopics, setPrivateTopics] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTopicId, setSelectedTopicId] = useState(null);
   const [editFormData, setEditFormData] = useState(null); // State to store data for editing
@@ -16,26 +16,38 @@ const PublicTopicsClickWidget = ({ projectId }) => {
   const loggedInUserId = useSelector((state) => state.user._id);
   const token = useSelector((state) => state.token);
 
-  const fetchPublicTopics = async () => {
+  const fetchPrivateTopics = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public`);
+      console.log('Initiating fetch for private topics...');
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
       if (!response.ok) {
-        throw new Error('Failed to fetch public topics');
+        console.error('Error: Fetch request failed with status:', response.status);
+        throw new Error('Failed to fetch private topics');
       }
-
+  
+      console.log('Private topics fetch request successful. Processing response...');
       const data = await response.json();
+  
       if (!data) {
+        console.error('Error: Empty response received');
         throw new Error('Empty response received');
       }
-
-      setPublicTopics(data);
+  
+      console.log('Private topics fetched successfully:', data);
+      setPrivateTopics(data);
     } catch (error) {
-      console.error('Error fetching public topics:', error);
+      console.error('Error fetching private topics:', error);
     }
   };
+  
+
 
   useEffect(() => {
-    fetchPublicTopics();
+    fetchPrivateTopics();
   }, [projectId]);
 
   const getTimeElapsed = (createdAt) => {
@@ -78,7 +90,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
 
   const confirmDeleteTopic = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${selectedTopicId}/delete`, {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private/${selectedTopicId}/delete`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -90,7 +102,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
         throw new Error('Failed to delete topic');
       }
 
-      setPublicTopics(publicTopics.filter(topic => topic._id !== selectedTopicId));
+      setPrivateTopics(privateTopics.filter(topic => topic._id !== selectedTopicId));
       handleMenuClose();
 
       console.log('Topic deleted successfully');
@@ -104,7 +116,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
 
   const handleEditTopic = async (topicId) => {
     try {
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}`);
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private/${topicId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch topic details for editing');
       }
@@ -127,7 +139,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
 
   const handlePost = async (formData) => {
     try {
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${formData._id}/update`, {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private/${formData._id}/update`, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -141,8 +153,8 @@ const PublicTopicsClickWidget = ({ projectId }) => {
       }
 
       const updatedTopic = await response.json();
-      // Update publicTopics state with the updated topic
-      setPublicTopics(publicTopics.map(topic => topic._id === updatedTopic._id ? updatedTopic : topic));
+      // Update privateTopics state with the updated topic
+      setPrivateTopics(privateTopics.map(topic => topic._id === updatedTopic._id ? updatedTopic : topic));
       console.log('Topic updated successfully:', updatedTopic);
     } catch (error) {
       console.error('Error updating topic:', error);
@@ -151,7 +163,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
 
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>
-      {publicTopics.map((topic, index) => (
+      {privateTopics.map((topic, index) => (
         <Box key={topic._id} sx={{ position: 'relative', mb: '1rem' }}>
           {loggedInUserId === topic.createdBy.userId && (
             <IconButton
@@ -163,7 +175,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
           )}
           <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box>
-              <Link to={`/projects/${projectId}/public-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
+              <Link to={`/projects/${projectId}/private-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem' }}>
                   {topic.title}
                 </Typography>
@@ -188,7 +200,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
               </Box>
             </Box>
           </Box>
-          {index !== publicTopics.length - 1 && <Divider variant="middle" />}
+          {index !== privateTopics.length - 1 && <Divider variant="middle" />}
           <Menu
             anchorEl={anchorEl}
             open={selectedTopicId === topic._id}
@@ -222,4 +234,4 @@ const PublicTopicsClickWidget = ({ projectId }) => {
   );
 };
 
-export default PublicTopicsClickWidget;
+export default PrivateTopicsClickWidget;

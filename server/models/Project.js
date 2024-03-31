@@ -122,7 +122,8 @@ const ProjectSchema = new Schema(
         occupation: String,
       },
     ],
-    topics: [topicSchema], // Array of topic objects
+    topics: [topicSchema], // Array of public topic objects
+    privateTopics: [topicSchema], // Array of private topic objects
   },
   {
     timestamps: true,

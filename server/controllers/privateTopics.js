@@ -1,47 +1,126 @@
 import Project from '../models/Project.js';
+import User from '../models/User.js';
 
 // Create a new private topic within a project
 export const createPrivateTopic = async (req, res) => {
   try {
     const { projectId } = req.params;
-    const { title, content } = req.body;
+    const { userId, title, content } = req.body;
 
+    // Find the project by ID
     const project = await Project.findById(projectId);
+
+    // Ensure that the project exists
     if (!project) {
+      console.error('Project not found:', projectId);
       return res.status(404).json({ message: 'Project not found' });
     }
 
+    // Handle the case when userId is not provided in the request body
+    if (!userId) {
+      console.error('User ID is required');
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    // Find the user based on the userId
+    const user = await User.findById(userId);
+
+    // Ensure that the user exists
+    if (!user) {
+      console.error('User not found:', userId);
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if the user is a member of the project
+    const isMember = project.members.some(member => member.userId === userId);
+
+    if (!isMember) {
+      console.error('User is not a member of the project:', userId);
+      return res.status(403).json({ message: 'User is not a member of the project' });
+    }
+
+    // Create a new topic object with the required fields
     const newTopic = {
+      userId: user._id, // Use the ObjectId of the user
       title,
       content,
-      // Add other topic properties as needed
+      createdBy: user._id, // Use the ObjectId of the user for createdBy field
+      createdAt: new Date(),
+      // Add other properties as needed
     };
 
+    console.log('New Private Topic:', newTopic);
+
+    // Push the new topic into the 'privateTopics' array
     project.privateTopics.push(newTopic);
+
+    // Save the updated project with the new topic
     await project.save();
 
+    console.log('Private Topic created successfully');
+
+    // Respond with the created topic
     res.status(201).json(newTopic);
   } catch (error) {
+    // Handle errors
     console.error('Error creating private topic:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Error creating private topic' });
   }
 };
 
-// Get all private topics within a project
+
+// Get the title and content of private topics within a project
 export const getPrivateTopics = async (req, res) => {
   try {
+    // Log the entire request object
+    console.log('Request object:', req);
+
+    // Extract projectId from request parameters
     const { projectId } = req.params;
+    console.log('Fetching private topics for project ID:', projectId); // Log project ID
+
+    // Extract userId from authenticated user in the request object
+    const { id: userId } = req.user;
+    console.log('User ID:', userId); // Log the user ID
+
+    // Find the project by ID
     const project = await Project.findById(projectId);
+
+    // Ensure that the project exists
     if (!project) {
+      console.error('Project not found:', projectId);
       return res.status(404).json({ message: 'Project not found' });
     }
-    const privateTopics = project.privateTopics;
+
+    // Check if the user is a member of the project
+    const isMember = project.members.some(member => member.userId === userId);
+
+    if (!isMember) {
+      console.error('User is not a member of the project:', userId);
+      return res.status(403).json({ message: 'Forbidden: User is not a member of the project' });
+    }
+
+    // Fetch private topics from the privateTopics array
+    const privateTopics = project.privateTopics.map(topic => ({
+      _id: topic._id,
+      title: topic.title,
+      content: topic.content,
+      createdAt: topic.createdAt,
+      createdBy: topic.createdBy, // No need to fetch user details here
+    }));
+
+    console.log('Private topics fetched successfully:', privateTopics);
     res.status(200).json(privateTopics);
   } catch (error) {
+    // Handle errors
     console.error('Error getting private topics:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+
+
+
 
 // Update a private topic within a project
 export const updatePrivateTopic = async (req, res) => {
