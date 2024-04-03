@@ -33,6 +33,7 @@ const TopicPostForm = ({ onClose, onPost, initialFormData, userId, editMode }) =
     });
   
     onClose();
+    window.location.reload()
   };
   
   const modules = {

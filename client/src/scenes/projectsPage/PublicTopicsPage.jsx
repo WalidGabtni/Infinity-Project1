@@ -10,6 +10,7 @@ import { Typography, useTheme, Divider, Button, Grid } from '@mui/material';
 import WidgetWrapper from 'components/WidgetWrapper';
 import NavigationBreadcrumbsPublicTopics from 'components/NavBreadcrumbsPublicTopicsPage';
 import TopicPostForm from 'components/TopicPostForm';
+import TopicModerationActions from 'components/TopicModerationActions';
 
 
 const PublicTopicsPage = () => {
@@ -18,6 +19,7 @@ const PublicTopicsPage = () => {
   const projects = useSelector((state) => state.projects);
   const project = projects.find((project) => project._id === projectId);
   const userId = useSelector((state) => state.user?._id);
+  const projectOwnerId = project?.userId; // Fetch project owner's ID
   const { palette } = useTheme();
 
   const [isFormOpen, setIsFormOpen] = useState(false); // State to manage form visibility
@@ -83,8 +85,14 @@ const PublicTopicsPage = () => {
           <Box m="2rem 0" />
           <ProjectPublicTopicWidget projectId={project._id} userId={userId} />
           <Box m="1rem 0" />
-          {/* Button to start a new topic */}
-          <Grid container justifyContent="flex-end">
+          {/* Grid container for the buttons */}
+          <Grid container spacing={2} justifyContent="flex-end" >
+            {/* Grid item for Moderation Actions button */}
+            <Grid item >
+              {/* Conditionally render TopicModerationActions only if the user is the project owner */}
+              {userId === projectOwnerId && <TopicModerationActions />}
+            </Grid>
+            {/* Grid item for Start New Topic button */}
             <Grid item>
               <Button onClick={handleNewTopicClick} variant="contained" color="primary" size="large">
                 Start New Topic

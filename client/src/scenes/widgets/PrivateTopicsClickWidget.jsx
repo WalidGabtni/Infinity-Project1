@@ -165,13 +165,26 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
     }
   };
 
-  if (!loggedInUserId || !project || !project.members.some(member => member.userId === loggedInUserId)) {
+  const projectOwnerId = project?.userId; // Fetch project owner's ID
+  const allMemberIds = project ? [projectOwnerId, ...project.members.map(member => member.userId)] : [];
+  
+  console.log('Logged In User ID:', loggedInUserId);
+  console.log('Project Owner ID:', projectOwnerId);
+  console.log('All Member IDs:', allMemberIds);
+  
+  if (
+    !loggedInUserId ||
+    !project ||
+    !allMemberIds.includes(loggedInUserId)
+  ) {
     return (
       <WidgetWrapper>
-        <Typography variant="body1">You have to be a member to get access to this page.</Typography>
+        <Typography variant="body1">You have to be a member or the owner to get access to this page.</Typography>
       </WidgetWrapper>
     );
   }
+  
+  
 
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>

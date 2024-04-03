@@ -9,6 +9,7 @@ import { Typography, useTheme, Divider, Button, Grid } from '@mui/material';
 import WidgetWrapper from 'components/WidgetWrapper';
 import TopicPostForm from 'components/TopicPostForm';
 import PrivateTopicsClickWidget from 'scenes/widgets/PrivateTopicsClickWidget'
+import TopicModerationActions from 'components/TopicModerationActions';
 
 const PrivateTopicsPage = () => {
   const { projectId } = useParams();
@@ -17,6 +18,7 @@ const PrivateTopicsPage = () => {
   const projects = useSelector((state) => state.projects);
   const project = projects.find((project) => project._id === projectId);
   const userId = useSelector((state) => state.user?._id);
+  const projectOwnerId = project?.userId; // Fetch project owner's ID
   const { palette } = useTheme();
 
   const [isFormOpen, setIsFormOpen] = useState(false); // State to manage form visibility
@@ -95,25 +97,37 @@ const PrivateTopicsPage = () => {
           <Box m="2rem 0" />
           <ProjectPrivateTopicWidget project={project} userId={userId} />
           <Box m="1rem 0" />
-          {/* Conditionally render the button only for members */}
-          {loggedInUser && project && project.members.some(member => member.userId === loggedInUser._id) && (
-            <>
-              <Grid container justifyContent="flex-end">
-                <Grid item>
-                  <Button onClick={isFormOpen ? handleFormClose : handleNewTopicClick} variant="contained" color="primary" size="large">
-                    {isFormOpen ? 'Cancel' : 'Start New Topic'}
-                  </Button>
-                </Grid>
+          <Grid container spacing={2} justifyContent="flex-end">
+            {/* Grid item for Moderation Actions button */}
+            <Grid item>
+              {/* Conditionally render TopicModerationActions only if the user is the project owner */}
+              {userId === projectOwnerId && <TopicModerationActions />}
+            </Grid>
+            {/* Conditionally render the button only for members */}
+            {loggedInUser && project && project.members.some(member => member.userId === loggedInUser._id) && (
+              <Grid item>
+                <Button onClick={isFormOpen ? handleFormClose : handleNewTopicClick} variant="contained" color="primary" size="large">
+                  {isFormOpen ? 'Cancel' : 'Start New Topic'}
+                </Button>
               </Grid>
-              <Box m="1rem 0" />
-            </>
-          )}
+            )}
+            {/* Conditionally render the button only for project owner */}
+            {loggedInUser && project && project.userId === loggedInUser._id && (
+              <Grid item>
+                <Button onClick={isFormOpen ? handleFormClose : handleNewTopicClick} variant="contained" color="primary" size="large">
+                  {isFormOpen ? 'Cancel' : 'Start New Topic'}
+                </Button>
+              </Grid>
+            )}
+          </Grid>
+          <Box m="1rem 0" />
           <PrivateTopicsClickWidget projectId={project._id} userId={userId}/>
           {isFormOpen && <TopicPostForm onClose={handleFormClose} onPost={handleCreatePrivateTopic} userId={userId}/>}
         </Box>
       </Box>
     </div>
   );
+  
 };
 
 export default PrivateTopicsPage;

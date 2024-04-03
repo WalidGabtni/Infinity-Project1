@@ -124,7 +124,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
       handleEditTopic(topicId);
     }
   };
-
+  
   const handlePost = async (formData) => {
     try {
       const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${formData._id}/update`, {
@@ -168,7 +168,15 @@ const PublicTopicsClickWidget = ({ projectId }) => {
                   {topic.title}
                 </Typography>
               </Link>
-              <Typography variant="body1" sx={{ color: 'neutral.main', mb: '0.5rem' }} dangerouslySetInnerHTML={{ __html: topic.content }} />
+              <div style={{ 
+              color: 'neutral.main', 
+              marginBottom: '0.5rem',
+              maxWidth: '125ch',  // Limit to 10 characters
+              overflow: 'hidden',  // Hide overflowing text
+              textOverflow: 'ellipsis',  // Add ellipsis (...) for truncated text
+              whiteSpace: 'nowrap',  // Prevent line breaks
+            }} dangerouslySetInnerHTML={{ __html: topic.content }} />
+
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
@@ -217,6 +225,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
           userId={loggedInUserId}
           editMode={true}
         />
+
       )}
     </WidgetWrapper>
   );
