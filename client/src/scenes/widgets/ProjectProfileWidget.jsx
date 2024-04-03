@@ -83,6 +83,7 @@ const ProjectProfileWidget = ({ project }) => {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+          <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}`}>Overview</Button>
             <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/members`}>Members</Button>
             <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/public-topics`}>Public Topics</Button>
             <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/private-topics`}>Private Topics</Button>

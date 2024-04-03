@@ -111,14 +111,6 @@ const PrivateTopicsPage = () => {
                 </Button>
               </Grid>
             )}
-            {/* Conditionally render the button only for project owner */}
-            {loggedInUser && project && project.userId === loggedInUser._id && (
-              <Grid item>
-                <Button onClick={isFormOpen ? handleFormClose : handleNewTopicClick} variant="contained" color="primary" size="large">
-                  {isFormOpen ? 'Cancel' : 'Start New Topic'}
-                </Button>
-              </Grid>
-            )}
           </Grid>
           <Box m="1rem 0" />
           <PrivateTopicsClickWidget projectId={project._id} userId={userId}/>

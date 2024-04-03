@@ -38,12 +38,19 @@ export const createProject = async (req, res) => {
       userId: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
+      picturePath: user.picturePath,
       name,
       description,
       startDate,
       endDate,
       projectImage: projectImagePath,
       projectCover: projectCoverPath,
+      members: [{ 
+        userId: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        picturePath: user.picturePath
+      }] // Add the user who created the project to the members list with picturePath
       // Add other fields as needed
     });
 

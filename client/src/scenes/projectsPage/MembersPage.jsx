@@ -26,7 +26,7 @@ const MembersPage = () => {
         <Box flexBasis="70%">
           <ProjectProfileWidget project={project} userId={userId} /> 
           <Box m="2rem 0" />
-          <ProjectMemberListWidget project={project} />
+          <ProjectMemberListWidget projectId={projectId}  />
         </Box>
         <Box flexBasis="28%"> 
           <ProjectMemberWidget projectId={projectId} /> 
