@@ -64,7 +64,7 @@ export const createPublicTopic = async (req, res) => {
 
 
 
-// Get the title and content of public topics within a project
+// Get the title, content, and pinned status of public topics within a project
 export const getPublicTopics = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -86,9 +86,21 @@ export const getPublicTopics = async (req, res) => {
           firstName: createdByUser.firstName,
           lastName: createdByUser.lastName,
           picturePath: createdByUser.picturePath
-        }
+        },
+        pinned: topic.pinned === true // Check if pinned is true
       };
     }));
+
+    // Sort publicTopics so that pinned topics appear first
+    publicTopics.sort((a, b) => {
+      if (a.pinned && !b.pinned) {
+        return -1; // a should come before b
+      } else if (!a.pinned && b.pinned) {
+        return 1; // b should come before a
+      } else {
+        return 0; // leave the order unchanged
+      }
+    });
     
     res.status(200).json(publicTopics);
   } catch (error) {
@@ -96,6 +108,7 @@ export const getPublicTopics = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 
 // Update a public topic within a project
@@ -175,7 +188,10 @@ export const getPublicTopicDetails = async (req, res) => {
     // Fetch the user who created the topic
     const createdByUser = await User.findById(publicTopic.createdBy);
 
-    // Construct the response object with populated createdBy details, createdAt, and userId
+    // Fetch the pinned status of the topic
+    const pinned = publicTopic.pinned; // Assuming the pinned field is directly available in the topic
+
+    // Construct the response object with populated createdBy details, createdAt, userId, and pinned status
     const publicTopicDetails = {
       _id: publicTopic._id,
       title: publicTopic.title,
@@ -187,7 +203,8 @@ export const getPublicTopicDetails = async (req, res) => {
         lastName: createdByUser.lastName,
         picturePath: createdByUser.picturePath
       },
-      locked: publicTopic.locked // Add locked field
+      locked: publicTopic.locked, // Add locked field
+      pinned: pinned // Add pinned field
     };
 
     // Send the response
@@ -197,6 +214,7 @@ export const getPublicTopicDetails = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 // Add a comment to a specific topic within a project
 export const addCommentToTopic = async (req, res) => {
@@ -378,6 +396,38 @@ export const unlockTopic = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+// Controller function to pin or unpin a specific topic within a project
+export const pinOrUnpinTopic = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the topic within the project based on the topicId
+    const topic = project.topics.id(topicId);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    // Toggle the pinned status of the topic
+    topic.pinned = !topic.pinned;
+
+    // Save the updated project
+    await project.save();
+
+    res.status(200).json({ message: `Topic ${topic.pinned ? 'pinned' : 'unpinned'} successfully` });
+  } catch (error) {
+    console.error('Error pinning/unpinning topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
 
 
 

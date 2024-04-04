@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -6,6 +6,48 @@ import MenuItem from '@mui/material/MenuItem';
 function TopicModerationActions({ projectId, topicId, token }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isTopicLocked, setIsTopicLocked] = useState(false);
+  const [isTopicPinned, setIsTopicPinned] = useState(false);
+
+  // Function to update the locked status of the topic
+  const updateLockedStatus = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch topic details');
+      }
+    
+      const data = await response.json();
+      setIsTopicLocked(data.locked === true); // Update isTopicLocked only if data.locked exists
+    } catch (error) {
+      console.error('Error updating locked status:', error);
+    }
+  };
+
+  // Call updateLockedStatus on component mount to fetch the latest locked status
+  useEffect(() => {
+    updateLockedStatus();
+  }, []);
+
+   // Function to update the pinned status of the topic
+   const updatePinnedStatus = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch topic details');
+      }
+    
+      const data = await response.json();
+      setIsTopicPinned(data.pinned === true); // Update isTopicPinned only if data.pinned exists
+    } catch (error) {
+      console.error('Error updating pinned status:', error);
+    }
+  };
+
+  // Call updatePinnedStatus on component mount to fetch the latest pinned status
+  useEffect(() => {
+    updatePinnedStatus();
+  }, []);
+
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -31,17 +73,34 @@ function TopicModerationActions({ projectId, topicId, token }) {
       }
 
       console.log(`Topic ${isTopicLocked ? 'unlocked' : 'locked'} successfully`);
-      setIsTopicLocked(!isTopicLocked); // Toggle the lock state
-      // Add any additional logic here after locking or unlocking the topic, such as updating UI state
+      setIsTopicLocked(!isTopicLocked);
     } catch (error) {
       console.error(`Error ${isTopicLocked ? 'unlocking' : 'locking'} topic:`, error);
-      // Handle error, e.g., display error message to the user
     }
   };
 
-  // Add other moderation actions here
-  const pinTopic = async () => {
-    // Implement pin topic logic
+  const togglePinTopic = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}/pin`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        console.error(`Error: Toggle pin request failed with status:`, response.status);
+        throw new Error(`Failed to toggle pin status of topic`);
+      }
+
+      const data = await response.json();
+      console.log(` ${data.message}`);
+
+      setIsTopicPinned(prev => !prev);
+    } catch (error) {
+      console.error(`Error toggling pin status of topic:`, error);
+    }
   };
 
   const hideTopic = async () => {
@@ -71,7 +130,7 @@ function TopicModerationActions({ projectId, topicId, token }) {
         onClose={handleClose}
       >
         <MenuItem onClick={toggleLockTopic}>{isTopicLocked ? 'Unlock' : 'Lock'} Topic</MenuItem>
-        <MenuItem onClick={pinTopic}>Pin Topic</MenuItem>
+        <MenuItem onClick={togglePinTopic}>{isTopicPinned ? 'Unpin' : 'Pin'} Topic</MenuItem>
         <MenuItem onClick={hideTopic}>Hide Topic</MenuItem>
         <MenuItem onClick={moveTopic}>Move Topic</MenuItem>
       </Menu>

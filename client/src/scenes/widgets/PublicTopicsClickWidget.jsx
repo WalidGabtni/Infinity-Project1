@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Divider, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import PinIcon from '@mui/icons-material/PushPin'; // Import PinIcon
 import WidgetWrapper from 'components/WidgetWrapper';
 import UserImage from 'components/UserImage';
 import { Link } from 'react-router-dom';
 import { useSelector } from "react-redux";
-import TopicPostForm from 'components/TopicPostForm'; // Import the TopicPostForm component
+import TopicPostForm from 'components/TopicPostForm';
 
 const PublicTopicsClickWidget = ({ projectId }) => {
   const [publicTopics, setPublicTopics] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTopicId, setSelectedTopicId] = useState(null);
-  const [editFormData, setEditFormData] = useState(null); // State to store data for editing
+  const [editFormData, setEditFormData] = useState(null);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const loggedInUserId = useSelector((state) => state.user._id);
   const token = useSelector((state) => state.token);
@@ -67,9 +68,6 @@ const PublicTopicsClickWidget = ({ projectId }) => {
 
   const handleDeleteTopic = async (projectId, topicId, loggedInUserId) => {
     try {
-      console.log('Deleting topic with ID:', topicId, 'in project:', projectId, 'by user ID:', loggedInUserId);
-
-      // Open confirmation dialog
       setIsConfirmationOpen(true);
     } catch (error) {
       console.error('Error deleting topic:', error);
@@ -97,7 +95,6 @@ const PublicTopicsClickWidget = ({ projectId }) => {
     } catch (error) {
       console.error('Error deleting topic:', error);
     } finally {
-      // Close confirmation dialog
       setIsConfirmationOpen(false);
     }
   };
@@ -141,7 +138,6 @@ const PublicTopicsClickWidget = ({ projectId }) => {
       }
 
       const updatedTopic = await response.json();
-      // Update publicTopics state with the updated topic
       setPublicTopics(publicTopics.map(topic => topic._id === updatedTopic._id ? updatedTopic : topic));
       console.log('Topic updated successfully:', updatedTopic);
     } catch (error) {
@@ -164,18 +160,18 @@ const PublicTopicsClickWidget = ({ projectId }) => {
           <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box>
               <Link to={`/projects/${projectId}/public-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
-                <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem' }}>
-                  {topic.title}
+                <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem', display: 'flex', alignItems: 'center' }}>
+                  {topic.pinned && <PinIcon sx={{ marginRight: '0.5rem' }} />} {topic.title}
                 </Typography>
               </Link>
               <div style={{ 
-              color: 'neutral.main', 
-              marginBottom: '0.5rem',
-              maxWidth: '125ch',  // Limit to 10 characters
-              overflow: 'hidden',  // Hide overflowing text
-              textOverflow: 'ellipsis',  // Add ellipsis (...) for truncated text
-              whiteSpace: 'nowrap',  // Prevent line breaks
-            }} dangerouslySetInnerHTML={{ __html: topic.content }} />
+                color: 'neutral.main', 
+                marginBottom: '0.5rem',
+                maxWidth: '125ch',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }} dangerouslySetInnerHTML={{ __html: topic.content }} />
 
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -221,11 +217,10 @@ const PublicTopicsClickWidget = ({ projectId }) => {
         <TopicPostForm
           onClose={() => setEditFormData(null)}
           onPost={handlePost}
-          initialFormData={editFormData} // Pass initialFormData to populate the form fields
+          initialFormData={editFormData}
           userId={loggedInUserId}
           editMode={true}
         />
-
       )}
     </WidgetWrapper>
   );

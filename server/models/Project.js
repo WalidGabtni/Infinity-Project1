@@ -17,7 +17,7 @@ const commentSchema = new Schema({
 const topicSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: 'User', // Referencing the User model
+    ref: 'User',
     required: false,
   },
   title: {
@@ -30,19 +30,24 @@ const topicSchema = new Schema({
   },
   createdBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User', // Referencing the User model
+    ref: 'User',
     required: true,
   },
   locked: {
     type: Boolean,
     default: false,
   },
+  pinned: {
+    type: Boolean,
+    default: false, // Default value is false
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
-  comments: [commentSchema], // Array of comments objects
+  comments: [commentSchema],
 });
+
 
 const ProjectSchema = new Schema(
   {
