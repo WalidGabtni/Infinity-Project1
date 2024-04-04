@@ -2,7 +2,7 @@ import express from "express";
 import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers, getUserProjects, getProjectDescription, leaveProject} from "../controllers/projects.js";
 import { verifyToken } from "../middleware/auth.js";
 import { createPublicTopic, getPublicTopics, updatePublicTopic, deletePublicTopic, getPublicTopicDetails, addCommentToTopic, getTopicComments, lockTopic, unlockTopic, pinOrUnpinTopic} from '../controllers/publicTopics.js';
-import { createPrivateTopic, getPrivateTopics, updatePrivateTopic, deletePrivateTopic ,getPrivateTopicDetails,addCommentToPrivateTopic,getPrivateTopicComments} from '../controllers/privateTopics.js';
+import { createPrivateTopic, getPrivateTopics, updatePrivateTopic, deletePrivateTopic ,getPrivateTopicDetails,addCommentToPrivateTopic,getPrivateTopicComments,lockPrivateTopic,unlockPrivateTopic,pinOrUnpinPrivateTopic } from '../controllers/privateTopics.js';
 import { createArchiveTopic, getArchiveTopics, updateArchiveTopic, deleteArchiveTopic } from '../controllers/archiveTopics.js';
 
 const router = express.Router();
@@ -62,6 +62,11 @@ router.patch('/:projectId/topics/private/:topicId/update', verifyToken, updatePr
 router.delete('/:projectId/topics/private/:topicId/delete', verifyToken, deletePrivateTopic);
 router.post('/:projectId/topics/private/:topicId/comments', verifyToken,addCommentToPrivateTopic);
 router.get('/:projectId/topics/private/:topicId/all-comments', verifyToken,getPrivateTopicComments);
+// Define a new route for locking topics
+router.put('/:projectId/topics/private/:topicId/lock', verifyToken,lockPrivateTopic);
+// Define a new route for unlocking topics
+router.put('/:projectId/topics/private/:topicId/unlock',verifyToken, unlockPrivateTopic);
+router.put('/:projectId/topics/private/:topicId/pin',verifyToken, pinOrUnpinPrivateTopic);
 
 // Archive Topics Routes
 router.post('/:projectId/topics/archive', verifyToken, createArchiveTopic);

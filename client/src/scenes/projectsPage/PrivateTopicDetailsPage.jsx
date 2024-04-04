@@ -13,6 +13,7 @@ import CustomPagination from 'components/ProjectPagination';
 import NavigationBreadcrumbs from 'components/NavigationBreadcrumbs';
 import CommentWidget from 'scenes/widgets/CommentWidget';
 import GetCommentsWidget from 'scenes/widgets/GetCommentsWidget';
+import TopicModerationActions from 'components/TopicModerationActions';
 
 const PrivateTopicDetailsPage = () => {
   const { projectId, topicId } = useParams();
@@ -23,6 +24,7 @@ const PrivateTopicDetailsPage = () => {
   const projects = useSelector((state) => state.projects);
   const project = projects.find((project) => project._id === projectId);
   const navigate = useNavigate();
+  const projectOwnerId = project?.userId; // Fetch project owner's ID
 
   useEffect(() => {
     const fetchTopicDetails = async () => {
@@ -109,7 +111,11 @@ const PrivateTopicDetailsPage = () => {
           <Box m="2rem 0" />
           <PrivateTopicTitleWidget project={project} userId={userId}/>
           <Box m="1rem 0" />
-          <Grid container justifyContent="flex-end">
+          <Grid container spacing={2} justifyContent="flex-end" >
+            <Grid item >
+              {/* Conditionally render TopicModerationActions only if the user is the project owner */}
+              {userId === projectOwnerId && <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={false} />}
+            </Grid>
             <Grid item>
               <Button onClick={handleNewTopicClick} variant="contained" color="primary" size="large">
                 Start New Topic

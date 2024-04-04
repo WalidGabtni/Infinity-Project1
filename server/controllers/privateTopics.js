@@ -69,36 +69,17 @@ export const createPrivateTopic = async (req, res) => {
 };
 
 
-// Get the title and content of private topics within a project
+// Get the title, content, and pinned status of private topics within a project
 export const getPrivateTopics = async (req, res) => {
   try {
-    // Extract projectId from request parameters
     const { projectId } = req.params;
-    console.log('Fetching private topics for project ID:', projectId); // Log project ID
-
-    // Extract userId from authenticated user in the request object
-    const { id: userId } = req.user;
-    console.log('User ID:', userId); // Log the user ID
-
-    // Find the project by ID
     const project = await Project.findById(projectId);
-
-    // Ensure that the project exists
     if (!project) {
-      console.error('Project not found:', projectId);
       return res.status(404).json({ message: 'Project not found' });
     }
-
-    // Check if the user is a member of the project
-    const isMember = project.members.some(member => member.userId === userId);
-
-    if (!isMember) {
-      console.error('User is not a member of the project:', userId);
-      return res.status(403).json({ message: 'Forbidden: User is not a member of the project' });
-    }
-
-    // Fetch user details for each topic's creator asynchronously
-    const privateTopics = await Promise.all(project.privateTopics.map(async topic => {
+    
+    // Fetch user details for createdBy field of each topic
+    const privateTopics = await Promise.all(project.privateTopics.map(async (topic) => {
       const createdByUser = await User.findById(topic.createdBy);
       return {
         _id: topic._id,
@@ -110,18 +91,30 @@ export const getPrivateTopics = async (req, res) => {
           firstName: createdByUser.firstName,
           lastName: createdByUser.lastName,
           picturePath: createdByUser.picturePath
-        }
+        },
+        pinned: topic.pinned === true // Check if pinned is true
       };
     }));
 
-    console.log('Private topics fetched successfully:', privateTopics);
+    // Sort privateTopics so that pinned topics appear first
+    privateTopics.sort((a, b) => {
+      if (a.pinned && !b.pinned) {
+        return -1; // a should come before b
+      } else if (!a.pinned && b.pinned) {
+        return 1; // b should come before a
+      } else {
+        return 0; // leave the order unchanged
+      }
+    });
+    
     res.status(200).json(privateTopics);
   } catch (error) {
-    // Handle errors
     console.error('Error getting private topics:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+
 
 // Controller function to fetch details of a specific private topic within a project
 export const getPrivateTopicDetails = async (req, res) => {
@@ -143,7 +136,7 @@ export const getPrivateTopicDetails = async (req, res) => {
     // Fetch the user who created the topic
     const createdByUser = await User.findById(privateTopic.createdBy);
 
-    // Construct the response object with populated createdBy details, createdAt, and userId
+    // Construct the response object with populated createdBy details, createdAt, userId, locked, and pinned
     const privateTopicDetails = {
       _id: privateTopic._id,
       title: privateTopic.title,
@@ -154,7 +147,9 @@ export const getPrivateTopicDetails = async (req, res) => {
         firstName: createdByUser.firstName,
         lastName: createdByUser.lastName,
         picturePath: createdByUser.picturePath
-      }
+      },
+      locked: privateTopic.locked, // Add locked field
+      pinned: privateTopic.pinned // Add pinned field
     };
 
     // Send the response
@@ -164,6 +159,7 @@ export const getPrivateTopicDetails = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 
 
@@ -349,4 +345,94 @@ export const getPrivateTopicComments = async (req, res) => {
   }
 };
 
+
+// Controller function to lock a specific topic within a project
+export const lockPrivateTopic = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the topic within the project based on the topicId
+    const topic = project.privateTopics.id(topicId);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    // Update the lock status of the topic
+    topic.locked = true;
+
+    // Save the updated project
+    await project.save();
+
+    res.status(200).json({ message: 'Topic locked successfully' });
+  } catch (error) {
+    console.error('Error locking topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Controller function to unlock a specific topic within a project
+export const unlockPrivateTopic = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the topic within the project based on the topicId
+    const topic = project.privateTopics.id(topicId);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    // Update the lock status of the topic
+    topic.locked = false;
+
+    // Save the updated project
+    await project.save();
+
+    res.status(200).json({ message: 'Topic unlocked successfully' });
+  } catch (error) {
+    console.error('Error unlocking topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Controller function to pin or unpin a specific private topic within a project
+export const pinOrUnpinPrivateTopic = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the private topic within the project based on the topicId
+    const privateTopic = project.privateTopics.id(topicId);
+    if (!privateTopic) {
+      return res.status(404).json({ message: 'Private topic not found' });
+    }
+
+    // Toggle the pinned status of the private topic
+    privateTopic.pinned = !privateTopic.pinned;
+
+    // Save the updated project
+    await project.save();
+
+    res.status(200).json({ message: `Private topic ${privateTopic.pinned ? 'pinned' : 'unpinned'} successfully` });
+  } catch (error) {
+    console.error('Error pinning/unpinning private topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 

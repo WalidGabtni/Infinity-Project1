@@ -3,6 +3,7 @@ import { Box, Typography, Divider, IconButton, Menu, MenuItem, Dialog, DialogTit
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import WidgetWrapper from 'components/WidgetWrapper';
 import UserImage from 'components/UserImage';
+import PinIcon from '@mui/icons-material/PushPin'; 
 import { Link } from 'react-router-dom';
 import { useSelector } from "react-redux";
 import TopicPostForm from 'components/TopicPostForm'; // Import the TopicPostForm component
@@ -202,7 +203,7 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
             <Box>
               <Link to={`/projects/${projectId}/private-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem' }}>
-                  {topic.title}
+                {topic.pinned && <PinIcon sx={{ marginRight: '0.5rem' }} />} {topic.title}
                 </Typography>
               </Link>
               <Typography variant="body1" sx={{ color: 'neutral.main', mb: '0.5rem' }} dangerouslySetInnerHTML={{ __html: topic.content }} />

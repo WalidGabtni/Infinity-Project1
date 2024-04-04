@@ -3,50 +3,60 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 
-function TopicModerationActions({ projectId, topicId, token }) {
+function TopicModerationActions({ projectId, topicId, token, isPublic }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isTopicLocked, setIsTopicLocked] = useState(false);
   const [isTopicPinned, setIsTopicPinned] = useState(false);
 
   // Function to update the locked status of the topic
-  const updateLockedStatus = async () => {
-    try {
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch topic details');
-      }
-    
-      const data = await response.json();
-      setIsTopicLocked(data.locked === true); // Update isTopicLocked only if data.locked exists
-    } catch (error) {
-      console.error('Error updating locked status:', error);
+const updateLockedStatus = async () => {
+  try {
+    const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch topic details');
     }
-  };
+  
+    const data = await response.json();
+    setIsTopicLocked(data.locked === true); // Update isTopicLocked only if data.locked exists
+  } catch (error) {
+    console.error('Error updating locked status:', error);
+  }
+};
 
-  // Call updateLockedStatus on component mount to fetch the latest locked status
-  useEffect(() => {
-    updateLockedStatus();
-  }, []);
+// Call updateLockedStatus on component mount to fetch the latest locked status
+useEffect(() => {
+  updateLockedStatus();
+}, []);
 
-   // Function to update the pinned status of the topic
-   const updatePinnedStatus = async () => {
-    try {
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch topic details');
-      }
-    
-      const data = await response.json();
-      setIsTopicPinned(data.pinned === true); // Update isTopicPinned only if data.pinned exists
-    } catch (error) {
-      console.error('Error updating pinned status:', error);
+// Function to update the pinned status of the topic
+const updatePinnedStatus = async () => {
+  try {
+    const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch topic details');
     }
-  };
+  
+    const data = await response.json();
+    setIsTopicPinned(data.pinned === true); // Update isTopicPinned only if data.pinned exists
+  } catch (error) {
+    console.error('Error updating pinned status:', error);
+  }
+};
 
-  // Call updatePinnedStatus on component mount to fetch the latest pinned status
-  useEffect(() => {
-    updatePinnedStatus();
-  }, []);
+// Call updatePinnedStatus on component mount to fetch the latest pinned status
+useEffect(() => {
+  updatePinnedStatus();
+}, []);
 
 
   const handleClick = (event) => {
@@ -59,7 +69,7 @@ function TopicModerationActions({ projectId, topicId, token }) {
 
   const toggleLockTopic = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}/${isTopicLocked ? 'unlock' : 'lock'}`, {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}/${isTopicLocked ? 'unlock' : 'lock'}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +91,7 @@ function TopicModerationActions({ projectId, topicId, token }) {
 
   const togglePinTopic = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${topicId}/pin`, {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}/pin`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

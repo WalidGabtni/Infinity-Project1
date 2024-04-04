@@ -9,7 +9,7 @@ import { Typography, useTheme, Divider, Button, Grid } from '@mui/material';
 import WidgetWrapper from 'components/WidgetWrapper';
 import TopicPostForm from 'components/TopicPostForm';
 import PrivateTopicsClickWidget from 'scenes/widgets/PrivateTopicsClickWidget'
-import TopicModerationActions from 'components/TopicModerationActions';
+
 
 const PrivateTopicsPage = () => {
   const { projectId } = useParams();
@@ -98,11 +98,6 @@ const PrivateTopicsPage = () => {
           <ProjectPrivateTopicWidget project={project} userId={userId} />
           <Box m="1rem 0" />
           <Grid container spacing={2} justifyContent="flex-end">
-            {/* Grid item for Moderation Actions button */}
-            <Grid item>
-              {/* Conditionally render TopicModerationActions only if the user is the project owner */}
-              {userId === projectOwnerId && <TopicModerationActions />}
-            </Grid>
             {/* Conditionally render the button only for members */}
             {loggedInUser && project && project.members.some(member => member.userId === loggedInUser._id) && (
               <Grid item>

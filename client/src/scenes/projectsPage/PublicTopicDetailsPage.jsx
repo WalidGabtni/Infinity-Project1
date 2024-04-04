@@ -123,7 +123,7 @@ const PublicTopicDetailsPage = () => {
           <Grid container spacing={2} justifyContent="flex-end" >
             <Grid item >
               {/* Conditionally render TopicModerationActions only if the user is the project owner */}
-              {userId === projectOwnerId && <TopicModerationActions projectId={projectId} topicId={topicId} token={token}  />}
+              {userId === projectOwnerId && <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={true} />}
             </Grid>
             <Grid item>
               <Button onClick={handleNewTopicClick} variant="contained" color="primary" size="large">
