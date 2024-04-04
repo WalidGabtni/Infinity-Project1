@@ -1,7 +1,7 @@
 import express from "express";
 import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers, getUserProjects, getProjectDescription, leaveProject} from "../controllers/projects.js";
 import { verifyToken } from "../middleware/auth.js";
-import { createPublicTopic, getPublicTopics, updatePublicTopic, deletePublicTopic, getPublicTopicDetails, addCommentToTopic, getTopicComments} from '../controllers/publicTopics.js';
+import { createPublicTopic, getPublicTopics, updatePublicTopic, deletePublicTopic, getPublicTopicDetails, addCommentToTopic, getTopicComments, lockTopic, unlockTopic} from '../controllers/publicTopics.js';
 import { createPrivateTopic, getPrivateTopics, updatePrivateTopic, deletePrivateTopic ,getPrivateTopicDetails,addCommentToPrivateTopic,getPrivateTopicComments} from '../controllers/privateTopics.js';
 import { createArchiveTopic, getArchiveTopics, updateArchiveTopic, deleteArchiveTopic } from '../controllers/archiveTopics.js';
 
@@ -45,6 +45,11 @@ router.delete('/:projectId/topics/public/:topicId/delete', verifyToken,deletePub
 router.get('/:projectId/topics/public/:topicId', getPublicTopicDetails);
 router.post('/:projectId/topics/public/:topicId/comments', addCommentToTopic);
 router.get('/:projectId/topics/public/:topicId/all-comments', getTopicComments); // Add this route
+// Define a new route for locking topics
+router.put('/:projectId/topics/public/:topicId/lock', lockTopic);
+// Define a new route for unlocking topics
+router.put('/:projectId/topics/public/:topicId/unlock', unlockTopic);
+
 
 // Private Topics Routes
 router.post('/:projectId/topics/private', verifyToken, createPrivateTopic);

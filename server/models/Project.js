@@ -33,6 +33,10 @@ const topicSchema = new Schema({
     ref: 'User', // Referencing the User model
     required: true,
   },
+  locked: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

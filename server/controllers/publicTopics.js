@@ -186,7 +186,8 @@ export const getPublicTopicDetails = async (req, res) => {
         firstName: createdByUser.firstName,
         lastName: createdByUser.lastName,
         picturePath: createdByUser.picturePath
-      }
+      },
+      locked: publicTopic.locked // Add locked field
     };
 
     // Send the response
@@ -318,6 +319,65 @@ export const getTopicComments = async (req, res) => {
   }
 };
 
+// Controller function to lock a specific topic within a project
+export const lockTopic = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the topic within the project based on the topicId
+    const topic = project.topics.id(topicId);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    // Update the lock status of the topic
+    topic.locked = true;
+
+    // Save the updated project
+    await project.save();
+
+    res.status(200).json({ message: 'Topic locked successfully' });
+  } catch (error) {
+    console.error('Error locking topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Controller function to unlock a specific topic within a project
+export const unlockTopic = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the topic within the project based on the topicId
+    const topic = project.topics.id(topicId);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    // Update the lock status of the topic
+    topic.locked = false;
+
+    // Save the updated project
+    await project.save();
+
+    res.status(200).json({ message: 'Topic unlocked successfully' });
+  } catch (error) {
+    console.error('Error unlocking topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 
 

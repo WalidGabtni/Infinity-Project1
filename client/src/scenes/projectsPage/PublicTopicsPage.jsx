@@ -19,7 +19,7 @@ const PublicTopicsPage = () => {
   const projects = useSelector((state) => state.projects);
   const project = projects.find((project) => project._id === projectId);
   const userId = useSelector((state) => state.user?._id);
-  const projectOwnerId = project?.userId; // Fetch project owner's ID
+
   const { palette } = useTheme();
 
   const [isFormOpen, setIsFormOpen] = useState(false); // State to manage form visibility
@@ -87,11 +87,6 @@ const PublicTopicsPage = () => {
           <Box m="1rem 0" />
           {/* Grid container for the buttons */}
           <Grid container spacing={2} justifyContent="flex-end" >
-            {/* Grid item for Moderation Actions button */}
-            <Grid item >
-              {/* Conditionally render TopicModerationActions only if the user is the project owner */}
-              {userId === projectOwnerId && <TopicModerationActions />}
-            </Grid>
             {/* Grid item for Start New Topic button */}
             <Grid item>
               <Button onClick={handleNewTopicClick} variant="contained" color="primary" size="large">
