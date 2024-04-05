@@ -1,45 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Divider, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import PinIcon from '@mui/icons-material/PushPin';
+import Tooltip from '@mui/material/Tooltip';
+import LockIcon from '@mui/icons-material/Lock';
 import WidgetWrapper from 'components/WidgetWrapper';
 import UserImage from 'components/UserImage';
-import PinIcon from '@mui/icons-material/PushPin'; 
 import { Link } from 'react-router-dom';
-import { useSelector } from "react-redux";
-import TopicPostForm from 'components/TopicPostForm'; // Import the TopicPostForm component
+import { useSelector } from 'react-redux';
+import TopicPostForm from 'components/TopicPostForm';
 
 const PrivateTopicsClickWidget = ({ projectId }) => {
   const [privateTopics, setPrivateTopics] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTopicId, setSelectedTopicId] = useState(null);
-  const [editFormData, setEditFormData] = useState(null); // State to store data for editing
+  const [editFormData, setEditFormData] = useState(null);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-  const loggedInUserId = useSelector((state) => state.user?._id); // Extract loggedInUserId from Redux state
+  const loggedInUserId = useSelector((state) => state.user?._id);
   const token = useSelector((state) => state.token);
   const project = useSelector((state) => state.projects.find((project) => project._id === projectId));
+  const projectOwnerId = project?.userId;
 
   const fetchPrivateTopics = async () => {
     try {
-      console.log('Initiating fetch for private topics...');
       const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private`, {
-        method: "GET",
+        method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
       
       if (!response.ok) {
-        console.error('Error: Fetch request failed with status:', response.status);
         throw new Error('Failed to fetch private topics');
       }
   
-      console.log('Private topics fetch request successful. Processing response...');
       const data = await response.json();
-  
-      if (!data) {
-        console.error('Error: Empty response received');
-        throw new Error('Empty response received');
-      }
-  
-      console.log('Private topics fetched successfully:', data);
       setPrivateTopics(data);
     } catch (error) {
       console.error('Error fetching private topics:', error);
@@ -48,7 +41,7 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
   
   useEffect(() => {
     fetchPrivateTopics();
-  }, [projectId]);
+  }, [projectId, token]);
 
   const getTimeElapsed = (createdAt) => {
     const currentTime = new Date();
@@ -79,10 +72,8 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
 
   const handleDeleteTopic = async (projectId, topicId, loggedInUserId) => {
     try {
-      console.log('Deleting topic with ID:', topicId, 'in project:', projectId, 'by user ID:', loggedInUserId);
-
-      // Open confirmation dialog
       setIsConfirmationOpen(true);
+      setSelectedTopicId(topicId);
     } catch (error) {
       console.error('Error deleting topic:', error);
     }
@@ -102,39 +93,38 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
         throw new Error('Failed to delete topic');
       }
 
-      setPrivateTopics(privateTopics.filter(topic => topic._id !== selectedTopicId));
+      setPrivateTopics(privateTopics.filter((topic) => topic._id !== selectedTopicId));
       handleMenuClose();
 
       console.log('Topic deleted successfully');
     } catch (error) {
       console.error('Error deleting topic:', error);
     } finally {
-      // Close confirmation dialog
       setIsConfirmationOpen(false);
     }
   };
 
   const handleEditTopic = async (topicId) => {
     try {
-        const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private/${topicId}`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error('Failed to fetch topic details for editing');
-        }
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/private/${topicId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        const topicData = await response.json();
-        setEditFormData(topicData);
+      if (!response.ok) {
+        throw new Error('Failed to fetch topic details for editing');
+      }
+
+      const topicData = await response.json();
+      setEditFormData(topicData);
     } catch (error) {
-        console.error('Error fetching topic details for editing:', error);
+      console.error('Error fetching topic details for editing:', error);
     }
-};
+  };
 
   const handleMenuItemClick = (projectId, topicId, loggedInUserId, action) => {
-    console.log('Menu item clicked for topic ID:', topicId, 'in project:', projectId, 'by user ID:', loggedInUserId);
     if (action === 'delete') {
       handleDeleteTopic(projectId, topicId, loggedInUserId);
     } else if (action === 'edit') {
@@ -158,85 +148,92 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
       }
 
       const updatedTopic = await response.json();
-      // Update privateTopics state with the updated topic
-      setPrivateTopics(privateTopics.map(topic => topic._id === updatedTopic._id ? updatedTopic : topic));
+      setPrivateTopics(privateTopics.map((topic) => (topic._id === updatedTopic._id ? updatedTopic : topic)));
       console.log('Topic updated successfully:', updatedTopic);
     } catch (error) {
       console.error('Error updating topic:', error);
     }
   };
 
-  const projectOwnerId = project?.userId; // Fetch project owner's ID
-  const allMemberIds = project ? [projectOwnerId, ...project.members.map(member => member.userId)] : [];
-  
-  console.log('Logged In User ID:', loggedInUserId);
-  console.log('Project Owner ID:', projectOwnerId);
-  console.log('All Member IDs:', allMemberIds);
-  
-  if (
-    !loggedInUserId ||
-    !project ||
-    !allMemberIds.includes(loggedInUserId)
-  ) {
+  if (!loggedInUserId || !project || !projectOwnerId || !projectOwnerId === loggedInUserId) {
     return (
       <WidgetWrapper>
-        <Typography variant="body1">You have to be a member or the owner to get access to this page.</Typography>
+        <Typography variant="body1">You have to be a member or the owner to access this page.</Typography>
       </WidgetWrapper>
     );
   }
-  
-  
 
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>
-      {privateTopics.map((topic, index) => (
-        <Box key={topic._id} sx={{ position: 'relative', mb: '1rem' }}>
-          {loggedInUserId === topic.createdBy.userId && (
-            <IconButton
-              sx={{ position: 'absolute', top: -20, right: -20 }}
-              onClick={(event) => handleMenuOpen(event, topic._id)}
-            >
-              <MoreVertIcon />
-            </IconButton>
-          )}
-          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box>
-              <Link to={`/projects/${projectId}/private-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
-                <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem' }}>
-                {topic.pinned && <PinIcon sx={{ marginRight: '0.5rem' }} />} {topic.title}
-                </Typography>
-              </Link>
-              <Typography variant="body1" sx={{ color: 'neutral.main', mb: '0.5rem' }} dangerouslySetInnerHTML={{ __html: topic.content }} />
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none' }}>
-                    <UserImage image={topic.createdBy.picturePath} size="50px" />
-                  </Link>
-                  <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none', display: 'inline-block', marginLeft: '0.5rem' }}>
-                    <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem', fontSize: '1.1rem' }}>
-                      <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.firstName}</span> <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.lastName}</span>
-                    </Typography>
-                  </Link>
+      {privateTopics.map((topic, index) => {
+        if (topic.hidden && loggedInUserId !== projectOwnerId) {
+          return null; // Skip rendering for hidden topics if not the project owner
+        }
+
+        return (
+          <Box key={topic._id} sx={{ position: 'relative', mb: '1rem' }}>
+            {loggedInUserId === topic.createdBy.userId && (
+              <IconButton
+                sx={{ position: 'absolute', top: -20, right: -20 }}
+                onClick={(event) => handleMenuOpen(event, topic._id)}
+              >
+                <MoreVertIcon />
+              </IconButton>
+            )}
+            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Link to={`/projects/${projectId}/private-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
+                  <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem', display: 'flex', alignItems: 'center' }}>
+                    {topic.pinned && (
+                      <Tooltip title="Pinned Topic" arrow>
+                        <PinIcon sx={{ marginRight: '0.3rem', color: 'green', borderRadius: '50%' }} />
+                      </Tooltip>
+                    )}
+                    {topic.locked && (
+                      <Tooltip title="Locked Topic" arrow>
+                        <LockIcon sx={{ marginRight: '0.3rem', borderRadius: '50%' }} />
+                      </Tooltip>
+                    )}
+                    {topic.title}
+                    {topic.hidden && loggedInUserId === projectOwnerId && (
+                      <Typography variant="body2" sx={{ color: 'white', marginLeft: '0.5rem' }}>
+                        (Hidden Topic)
+                      </Typography>
+                    )}
+                  </Typography>
+                </Link>
+                <Typography variant="body1" sx={{ color: 'neutral.main', mb: '0.5rem' }} dangerouslySetInnerHTML={{ __html: topic.content }} />
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none' }}>
+                      <UserImage image={topic.createdBy.picturePath} size="50px" />
+                    </Link>
+                    <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none', display: 'inline-block', marginLeft: '0.5rem' }}>
+                      <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem', fontSize: '1.1rem' }}>
+                        <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.firstName}</span> <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.lastName}</span>
+                      </Typography>
+                    </Link>
+                  </Box>
+                  <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem' }}>
+                    {getTimeElapsed(topic.createdAt)}
+                  </Typography>
                 </Box>
-                <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem' }}>
-                  {getTimeElapsed(topic.createdAt)}
-                </Typography>
               </Box>
             </Box>
+            {index !== privateTopics.length - 1 && <Divider variant="middle" />}
+            <Menu
+              anchorEl={anchorEl}
+              open={selectedTopicId === topic._id}
+              onClose={handleMenuClose}
+            >
+              <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'delete')}>Delete</MenuItem>
+              <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'edit')}>Edit</MenuItem>
+            </Menu>
           </Box>
-          {index !== privateTopics.length - 1 && <Divider variant="middle" />}
-          <Menu
-            anchorEl={anchorEl}
-            open={selectedTopicId === topic._id}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'delete')}>Delete</MenuItem>
-            <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'edit')}>Edit</MenuItem>
-          </Menu>
-        </Box>
-      ))}
+        );
+      })}
       <Dialog open={isConfirmationOpen} onClose={() => setIsConfirmationOpen(false)}>
         <DialogTitle>Confirmation</DialogTitle>
         <DialogContent>
@@ -251,7 +248,7 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
         <TopicPostForm
           onClose={() => setEditFormData(null)}
           onPost={handlePost}
-          initialFormData={editFormData} // Pass initialFormData to populate the form fields
+          initialFormData={editFormData}
           userId={loggedInUserId}
           editMode={true}
         />

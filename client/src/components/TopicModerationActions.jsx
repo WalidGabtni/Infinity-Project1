@@ -7,57 +7,73 @@ function TopicModerationActions({ projectId, topicId, token, isPublic }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isTopicLocked, setIsTopicLocked] = useState(false);
   const [isTopicPinned, setIsTopicPinned] = useState(false);
+  const [isTopicHidden, setIsTopicHidden] = useState(false);
 
-  // Function to update the locked status of the topic
-const updateLockedStatus = async () => {
-  try {
-    const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error('Failed to fetch topic details');
+  const updateLockedStatus = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch topic details');
+      }
+      const data = await response.json();
+      setIsTopicLocked(data.locked === true);
+    } catch (error) {
+      console.error('Error updating locked status:', error);
     }
-  
-    const data = await response.json();
-    setIsTopicLocked(data.locked === true); // Update isTopicLocked only if data.locked exists
-  } catch (error) {
-    console.error('Error updating locked status:', error);
-  }
-};
+  };
 
-// Call updateLockedStatus on component mount to fetch the latest locked status
-useEffect(() => {
-  updateLockedStatus();
-}, []);
+  useEffect(() => {
+    updateLockedStatus();
+  }, []);
 
-// Function to update the pinned status of the topic
-const updatePinnedStatus = async () => {
-  try {
-    const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error('Failed to fetch topic details');
+  const updatePinnedStatus = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch topic details');
+      }
+      const data = await response.json();
+      setIsTopicPinned(data.pinned === true);
+    } catch (error) {
+      console.error('Error updating pinned status:', error);
     }
-  
-    const data = await response.json();
-    setIsTopicPinned(data.pinned === true); // Update isTopicPinned only if data.pinned exists
-  } catch (error) {
-    console.error('Error updating pinned status:', error);
-  }
-};
+  };
 
-// Call updatePinnedStatus on component mount to fetch the latest pinned status
-useEffect(() => {
-  updatePinnedStatus();
-}, []);
+  useEffect(() => {
+    updatePinnedStatus();
+  }, []);
 
+  const updateHiddenStatus = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch topic details');
+      }
+      const data = await response.json();
+      setIsTopicHidden(data.hidden === true);
+    } catch (error) {
+      console.error('Error updating hidden status:', error);
+    }
+  };
+
+  useEffect(() => {
+    updateHiddenStatus();
+  }, []);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -82,7 +98,6 @@ useEffect(() => {
         throw new Error(`Failed to ${isTopicLocked ? 'unlock' : 'lock'} topic`);
       }
 
-      console.log(`Topic ${isTopicLocked ? 'unlocked' : 'locked'} successfully`);
       setIsTopicLocked(!isTopicLocked);
     } catch (error) {
       console.error(`Error ${isTopicLocked ? 'unlocking' : 'locking'} topic:`, error);
@@ -104,21 +119,35 @@ useEffect(() => {
         throw new Error(`Failed to toggle pin status of topic`);
       }
 
-      const data = await response.json();
-      console.log(` ${data.message}`);
-
-      setIsTopicPinned(prev => !prev);
+      setIsTopicPinned(!isTopicPinned);
     } catch (error) {
       console.error(`Error toggling pin status of topic:`, error);
     }
   };
 
-  const hideTopic = async () => {
-    // Implement hide topic logic
+  const toggleHideTopic = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}/hide`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        console.error(`Error: Toggle hide request failed with status:`, response.status);
+        throw new Error(`Failed to toggle hide status of topic`);
+      }
+
+      setIsTopicHidden(!isTopicHidden);
+    } catch (error) {
+      console.error(`Error toggling hide status of topic:`, error);
+    }
   };
 
   const moveTopic = async () => {
-    // Implement move topic logic
+    // Implementation to move topic
   };
 
   return (
@@ -141,7 +170,7 @@ useEffect(() => {
       >
         <MenuItem onClick={toggleLockTopic}>{isTopicLocked ? 'Unlock' : 'Lock'} Topic</MenuItem>
         <MenuItem onClick={togglePinTopic}>{isTopicPinned ? 'Unpin' : 'Pin'} Topic</MenuItem>
-        <MenuItem onClick={hideTopic}>Hide Topic</MenuItem>
+        <MenuItem onClick={toggleHideTopic}>{isTopicHidden ? 'Unhide' : 'Hide'} Topic</MenuItem>
         <MenuItem onClick={moveTopic}>Move Topic</MenuItem>
       </Menu>
     </div>

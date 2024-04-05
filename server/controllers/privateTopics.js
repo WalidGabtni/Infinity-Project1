@@ -92,7 +92,9 @@ export const getPrivateTopics = async (req, res) => {
           lastName: createdByUser.lastName,
           picturePath: createdByUser.picturePath
         },
-        pinned: topic.pinned === true // Check if pinned is true
+        locked: topic.locked === true, 
+        pinned: topic.pinned === true, // Check if pinned is true
+        hidden: topic.hidden === true
       };
     }));
 
@@ -149,7 +151,8 @@ export const getPrivateTopicDetails = async (req, res) => {
         picturePath: createdByUser.picturePath
       },
       locked: privateTopic.locked, // Add locked field
-      pinned: privateTopic.pinned // Add pinned field
+      pinned: privateTopic.pinned, // Add pinned field
+      hidden: privateTopic.hidden
     };
 
     // Send the response
@@ -436,3 +439,33 @@ export const pinOrUnpinPrivateTopic = async (req, res) => {
   }
 };
 
+// Controller function to hide or unhide a specific private topic within a project
+export const hideOrUnhidePrivateTopic = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the private topic within the project based on the topicId
+    const privateTopic = project.privateTopics.id(topicId); // Assuming private topics are stored in a 'privateTopics' array or field
+    if (!privateTopic) {
+      return res.status(404).json({ message: 'Private topic not found' });
+    }
+
+    // Toggle the hidden status of the private topic
+    privateTopic.hidden = !privateTopic.hidden; // Toggle the value of 'hidden' for private topic
+
+    // Save the updated project
+    await project.save();
+
+    const message = `Private topic ${privateTopic.hidden ? 'hidden' : 'unhidden'} successfully`;
+    res.status(200).json({ message });
+  } catch (error) {
+    console.error('Error hiding or unhiding private topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

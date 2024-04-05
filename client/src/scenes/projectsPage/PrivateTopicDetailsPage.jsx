@@ -10,7 +10,7 @@ import UserImage from 'components/UserImage';
 import TopicPostForm from 'components/TopicPostForm';
 import PrivateTopicDetailsWidget from 'scenes/widgets/PrivateTopicDetailsWidget';
 import CustomPagination from 'components/ProjectPagination';
-import NavigationBreadcrumbs from 'components/NavigationBreadcrumbs';
+import PrivateNavigationBreadcrumbs from 'components/PrivateNavigationBreadcrumbs';
 import CommentWidget from 'scenes/widgets/CommentWidget';
 import GetCommentsWidget from 'scenes/widgets/GetCommentsWidget';
 import TopicModerationActions from 'components/TopicModerationActions';
@@ -105,7 +105,7 @@ const PrivateTopicDetailsPage = () => {
         justifyContent="space-between"
       >
         <Box flexBasis="100%">
-          <NavigationBreadcrumbs projectId={projectId} projectName={project.name} topicName={topicDetails?.title} topicId={topicId} />
+          <PrivateNavigationBreadcrumbs projectId={projectId} projectName={project.name} topicName={topicDetails?.title} topicId={topicId}  />
           <Box m="2rem 0" />
           <ProjectProfileWidget project={project} userId={userId} />
           <Box m="2rem 0" />

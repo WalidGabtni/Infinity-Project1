@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Divider, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import PinIcon from '@mui/icons-material/PushPin'; // Import PinIcon
+import PinIcon from '@mui/icons-material/PushPin';
 import LockIcon from '@mui/icons-material/Lock';
-import Tooltip from '@mui/material/Tooltip'; // Import Tooltip
+import Tooltip from '@mui/material/Tooltip';
 import WidgetWrapper from 'components/WidgetWrapper';
 import UserImage from 'components/UserImage';
 import { Link } from 'react-router-dom';
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux';
 import TopicPostForm from 'components/TopicPostForm';
-
 
 const PublicTopicsClickWidget = ({ projectId }) => {
   const [publicTopics, setPublicTopics] = useState([]);
@@ -19,6 +18,9 @@ const PublicTopicsClickWidget = ({ projectId }) => {
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const loggedInUserId = useSelector((state) => state.user._id);
   const token = useSelector((state) => state.token);
+  const projects = useSelector((state) => state.projects);
+  const project = projects.find((project) => project._id === projectId);
+  const projectOwnerId = project?.userId;
 
   const fetchPublicTopics = async () => {
     try {
@@ -91,7 +93,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
         throw new Error('Failed to delete topic');
       }
 
-      setPublicTopics(publicTopics.filter(topic => topic._id !== selectedTopicId));
+      setPublicTopics(publicTopics.filter((topic) => topic._id !== selectedTopicId));
       handleMenuClose();
 
       console.log('Topic deleted successfully');
@@ -124,7 +126,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
       handleEditTopic(topicId);
     }
   };
-  
+
   const handlePost = async (formData) => {
     try {
       const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public/${formData._id}/update`, {
@@ -141,7 +143,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
       }
 
       const updatedTopic = await response.json();
-      setPublicTopics(publicTopics.map(topic => topic._id === updatedTopic._id ? updatedTopic : topic));
+      setPublicTopics(publicTopics.map((topic) => (topic._id === updatedTopic._id ? updatedTopic : topic)));
       console.log('Topic updated successfully:', updatedTopic);
     } catch (error) {
       console.error('Error updating topic:', error);
@@ -151,82 +153,78 @@ const PublicTopicsClickWidget = ({ projectId }) => {
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>
       {publicTopics.map((topic, index) => (
-        <Box key={topic._id} sx={{ position: 'relative', mb: '1rem' }}>
-          {loggedInUserId === topic.createdBy.userId && (
-            <IconButton
-              sx={{ position: 'absolute', top: -20, right: -20 }}
-              onClick={(event) => handleMenuOpen(event, topic._id)}
-            >
-              <MoreVertIcon />
-            </IconButton>
-          )}
-          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box>
-              <Link to={`/projects/${projectId}/public-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
-                <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem', display: 'flex', alignItems: 'center' }}>
-                {topic.pinned && (
-                  <Tooltip title="Pinned Topic" arrow>
-                    <PinIcon
-                      sx={{
-                          marginRight: '0.3rem',
-                          color: 'green',
-                          borderRadius: '50%',
-                      }}
-                    />
-                  </Tooltip>
-                )}
-            {topic.locked && (
-              <Tooltip title="Locked Topic" arrow>
-                <LockIcon
-                  sx={{
-                      marginRight: '0.3rem',
-                      borderRadius: '50%', 
-                  }}
-                />
-              </Tooltip>
-            )}
-
-                {topic.title}
-                </Typography>
-              </Link>
-              <div style={{ 
-                color: 'neutral.main', 
-                marginBottom: '0.5rem',
-                maxWidth: '125ch',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }} dangerouslySetInnerHTML={{ __html: topic.content }} />
-
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none' }}>
-                    <UserImage image={topic.createdBy.picturePath} size="50px" />
-                  </Link>
-                  <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none', display: 'inline-block', marginLeft: '0.5rem' }}>
-                    <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem', fontSize: '1.1rem' }}>
-                      <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.firstName}</span> <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.lastName}</span>
+        <React.Fragment key={topic._id}>
+          {!topic.hidden || loggedInUserId === projectOwnerId ? (
+            <Box sx={{ position: 'relative', mb: '1rem' }}>
+              {loggedInUserId === topic.createdBy.userId && (
+                <IconButton
+                  sx={{ position: 'absolute', top: -20, right: -20 }}
+                  onClick={(event) => handleMenuOpen(event, topic._id)}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              )}
+              <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Link to={`/projects/${projectId}/public-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
+                    <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem', display: 'flex', alignItems: 'center' }}>
+                      {topic.pinned && (
+                        <Tooltip title="Pinned Topic" arrow>
+                          <PinIcon sx={{ marginRight: '0.3rem', color: 'green', borderRadius: '50%' }} />
+                        </Tooltip>
+                      )}
+                      {topic.locked && (
+                        <Tooltip title="Locked Topic" arrow>
+                          <LockIcon sx={{ marginRight: '0.3rem', borderRadius: '50%' }} />
+                        </Tooltip>
+                      )}
+                      {topic.title}
+                      {topic.hidden && loggedInUserId === projectOwnerId && (
+                        <Typography variant="body2" sx={{ color: 'white', marginLeft: '0.5rem' }}>
+                          (Hidden Topic)
+                        </Typography>
+                      )}
                     </Typography>
                   </Link>
+                  <div
+                    style={{
+                      color: 'neutral.main',
+                      marginBottom: '0.5rem',
+                      maxWidth: '125ch',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                    dangerouslySetInnerHTML={{ __html: topic.content }}
+                  />
                 </Box>
-                <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem' }}>
-                  {getTimeElapsed(topic.createdAt)}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none' }}>
+                        <UserImage image={topic.createdBy.picturePath} size="50px" />
+                      </Link>
+                      <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none', display: 'inline-block', marginLeft: '0.5rem' }}>
+                        <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem', fontSize: '1.1rem' }}>
+                          <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.firstName}</span>{' '}
+                          <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.lastName}</span>
+                        </Typography>
+                      </Link>
+                    </Box>
+                    <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem' }}>
+                      {getTimeElapsed(topic.createdAt)}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
+              {index !== publicTopics.length - 1 && <Divider variant="middle" />}
+              <Menu anchorEl={anchorEl} open={selectedTopicId === topic._id} onClose={handleMenuClose}>
+                <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'delete')}>Delete</MenuItem>
+                <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'edit')}>Edit</MenuItem>
+              </Menu>
             </Box>
-          </Box>
-          {index !== publicTopics.length - 1 && <Divider variant="middle" />}
-          <Menu
-            anchorEl={anchorEl}
-            open={selectedTopicId === topic._id}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'delete')}>Delete</MenuItem>
-            <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'edit')}>Edit</MenuItem>
-          </Menu>
-        </Box>
+          ) : null}
+        </React.Fragment>
       ))}
       <Dialog open={isConfirmationOpen} onClose={() => setIsConfirmationOpen(false)}>
         <DialogTitle>Confirmation</DialogTitle>
@@ -235,7 +233,9 @@ const PublicTopicsClickWidget = ({ projectId }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsConfirmationOpen(false)}>Cancel</Button>
-          <Button onClick={confirmDeleteTopic} color="error">Delete</Button>
+          <Button onClick={confirmDeleteTopic} color="error">
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
       {editFormData && (

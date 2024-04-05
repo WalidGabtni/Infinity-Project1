@@ -114,7 +114,7 @@ const PublicTopicDetailsPage = () => {
         justifyContent="space-between"
       >
         <Box flexBasis="100%">
-          <NavigationBreadcrumbs projectId={projectId} projectName={project.name} topicName={topicDetails?.title} topicId={topicId} />
+          <NavigationBreadcrumbs projectId={projectId} projectName={project.name} topicName={topicDetails?.title} topicId={topicId}  />
           <Box m="2rem 0" />
           <ProjectProfileWidget project={project} userId={userId} />
           <Box m="2rem 0" />

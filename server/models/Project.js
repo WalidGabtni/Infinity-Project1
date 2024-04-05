@@ -41,6 +41,10 @@ const topicSchema = new Schema({
     type: Boolean,
     default: false, // Default value is false
   },
+  hidden: {
+    type: Boolean,
+    default: false, // Default value is false (topic is not hidden)
+  },
   createdAt: {
     type: Date,
     default: Date.now,

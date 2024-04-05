@@ -88,7 +88,8 @@ export const getPublicTopics = async (req, res) => {
           picturePath: createdByUser.picturePath
         },
         locked: topic.locked === true,
-        pinned: topic.pinned === true // Check if pinned is true
+        pinned: topic.pinned === true, // Check if pinned is true
+        hidden: topic.hidden === true // Include hidden status
         
         
       };
@@ -207,7 +208,8 @@ export const getPublicTopicDetails = async (req, res) => {
         picturePath: createdByUser.picturePath
       },
       locked: publicTopic.locked, // Add locked field
-      pinned: pinned // Add pinned field
+      pinned: pinned, // Add pinned field
+      hidden: publicTopic.hidden === true // Add hidden field
     };
 
     // Send the response
@@ -430,6 +432,36 @@ export const pinOrUnpinTopic = async (req, res) => {
   }
 };
 
+// Controller function to hide or unhide a specific topic within a project
+export const hideOrUnhideTopic = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Find the topic within the project based on the topicId
+    const topic = project.topics.id(topicId);
+    if (!topic) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    // Toggle the hidden status of the topic
+    topic.hidden = !topic.hidden; // Toggle the value of 'hidden'
+
+    // Save the updated project
+    await project.save();
+
+    const message = `Topic ${topic.hidden ? 'hidden' : 'unhidden'} successfully`;
+    res.status(200).json({ message });
+  } catch (error) {
+    console.error('Error hiding or unhiding topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 
 

@@ -9,6 +9,7 @@ import { Typography, useTheme, Divider, Button, Grid } from '@mui/material';
 import WidgetWrapper from 'components/WidgetWrapper';
 import TopicPostForm from 'components/TopicPostForm';
 import PrivateTopicsClickWidget from 'scenes/widgets/PrivateTopicsClickWidget'
+import NavigationBreadcrumbsPrivateTopics from 'components/NavigationBreadcrumbsPrivateTopics';
 
 
 const PrivateTopicsPage = () => {
@@ -93,6 +94,8 @@ const PrivateTopicsPage = () => {
         justifyContent="space-between"
       >
         <Box flexBasis="100%">
+        <NavigationBreadcrumbsPrivateTopics projectId={projectId} projectName={project.name}/>
+        <Box m="2rem 0" />
           <ProjectProfileWidget project={project} userId={userId} />
           <Box m="2rem 0" />
           <ProjectPrivateTopicWidget project={project} userId={userId} />
@@ -110,6 +113,8 @@ const PrivateTopicsPage = () => {
           <Box m="1rem 0" />
           <PrivateTopicsClickWidget projectId={project._id} userId={userId}/>
           {isFormOpen && <TopicPostForm onClose={handleFormClose} onPost={handleCreatePrivateTopic} userId={userId}/>}
+          <Box m="2rem 0" />
+          <NavigationBreadcrumbsPrivateTopics projectId={projectId} projectName={project.name}/>
         </Box>
       </Box>
     </div>
