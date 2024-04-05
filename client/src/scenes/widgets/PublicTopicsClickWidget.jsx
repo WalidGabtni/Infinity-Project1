@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Divider, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import PinIcon from '@mui/icons-material/PushPin'; // Import PinIcon
+import LockIcon from '@mui/icons-material/Lock';
+import Tooltip from '@mui/material/Tooltip'; // Import Tooltip
 import WidgetWrapper from 'components/WidgetWrapper';
 import UserImage from 'components/UserImage';
 import { Link } from 'react-router-dom';
 import { useSelector } from "react-redux";
 import TopicPostForm from 'components/TopicPostForm';
+
 
 const PublicTopicsClickWidget = ({ projectId }) => {
   const [publicTopics, setPublicTopics] = useState([]);
@@ -161,7 +164,29 @@ const PublicTopicsClickWidget = ({ projectId }) => {
             <Box>
               <Link to={`/projects/${projectId}/public-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
                 <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem', display: 'flex', alignItems: 'center' }}>
-                  {topic.pinned && <PinIcon sx={{ marginRight: '0.5rem' }} />} {topic.title}
+                {topic.pinned && (
+                  <Tooltip title="Pinned Topic" arrow>
+                    <PinIcon
+                      sx={{
+                          marginRight: '0.3rem',
+                          color: 'green',
+                          borderRadius: '50%',
+                      }}
+                    />
+                  </Tooltip>
+                )}
+            {topic.locked && (
+              <Tooltip title="Locked Topic" arrow>
+                <LockIcon
+                  sx={{
+                      marginRight: '0.3rem',
+                      borderRadius: '50%', 
+                  }}
+                />
+              </Tooltip>
+            )}
+
+                {topic.title}
                 </Typography>
               </Link>
               <div style={{ 

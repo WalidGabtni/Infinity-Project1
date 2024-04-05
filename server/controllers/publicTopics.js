@@ -87,7 +87,10 @@ export const getPublicTopics = async (req, res) => {
           lastName: createdByUser.lastName,
           picturePath: createdByUser.picturePath
         },
+        locked: topic.locked === true,
         pinned: topic.pinned === true // Check if pinned is true
+        
+        
       };
     }));
 
