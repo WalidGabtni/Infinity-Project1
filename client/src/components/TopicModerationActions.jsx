@@ -2,12 +2,63 @@ import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import Modal from '@mui/material/Modal'; // Import Modal from Material-UI
+import { FormControl, InputLabel, Select } from '@mui/material'; // Import form components
+import { makeStyles } from '@mui/styles'; // Import makeStyles for styling modal
+
 
 function TopicModerationActions({ projectId, topicId, token, isPublic }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isTopicLocked, setIsTopicLocked] = useState(false);
   const [isTopicPinned, setIsTopicPinned] = useState(false);
   const [isTopicHidden, setIsTopicHidden] = useState(false);
+  const [destination, setDestination] = useState(''); // State to store the selected destination
+  const [openModal, setOpenModal] = useState(false); // State to control modal visibility
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleChangeDestination = (event) => {
+    setDestination(event.target.value);
+    console.log('Selected destination:', event.target.value);
+  };
+
+  const handleMoveTopic = async () => {
+    try {
+      if (!destination) {
+        console.error('Destination is required');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/${isPublic ? 'public' : 'private'}/${topicId}/move`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ destination })
+      });
+
+      if (!response.ok) {
+        console.error('Move topic request failed:', response.status);
+        throw new Error('Failed to move topic');
+      }
+
+      console.log('Topic moved successfully');
+
+      // Redirect to the appropriate section based on the destination
+      window.location.href = `/projects/${projectId}/${destination === 'private' ? 'private' : 'public'}-topics`;
+
+    } catch (error) {
+      console.error('Error moving topic:', error);
+    }
+  };
+  
 
   const updateLockedStatus = async () => {
     try {
@@ -146,10 +197,6 @@ function TopicModerationActions({ projectId, topicId, token, isPublic }) {
     }
   };
 
-  const moveTopic = async () => {
-    // Implementation to move topic
-  };
-
   return (
     <div>
       <Button
@@ -171,8 +218,36 @@ function TopicModerationActions({ projectId, topicId, token, isPublic }) {
         <MenuItem onClick={toggleLockTopic}>{isTopicLocked ? 'Unlock' : 'Lock'} Topic</MenuItem>
         <MenuItem onClick={togglePinTopic}>{isTopicPinned ? 'Unpin' : 'Pin'} Topic</MenuItem>
         <MenuItem onClick={toggleHideTopic}>{isTopicHidden ? 'Unhide' : 'Hide'} Topic</MenuItem>
-        <MenuItem onClick={moveTopic}>Move Topic</MenuItem>
+        <MenuItem onClick={handleOpenModal}>Move Topic</MenuItem>
       </Menu>
+
+      {/* Modal for selecting destination */}
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <div style={{
+          position: 'absolute',
+          width: 400,
+          border: '2px solid #000',
+          boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', // Use the desired box shadow
+          padding: '16px',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}>
+          <FormControl fullWidth>
+            <InputLabel>Select Destination</InputLabel>
+            <Select
+              value={destination}
+              onChange={handleChangeDestination}
+            >
+              {/* Populate dropdown with destination options */}
+              <MenuItem value="private">Private Topic</MenuItem>
+              {/* Add more options as needed */}
+            </Select>
+          </FormControl>
+          <Button onClick={handleMoveTopic}>Move</Button>
+        </div>
+      </Modal>
+
     </div>
   );
 }

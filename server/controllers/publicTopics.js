@@ -89,7 +89,8 @@ export const getPublicTopics = async (req, res) => {
         },
         locked: topic.locked === true,
         pinned: topic.pinned === true, // Check if pinned is true
-        hidden: topic.hidden === true // Include hidden status
+        hidden: topic.hidden === true, // Include hidden status
+        destination: topic.destination === true,
         
         
       };
@@ -463,6 +464,47 @@ export const hideOrUnhideTopic = async (req, res) => {
   }
 };
 
+// Controller function to move a specific topic within a project
+export const moveTopicWithinProject = async (req, res) => {
+  try {
+    const { projectId, topicId } = req.params;
+    const { destination } = req.body;
 
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
 
+    // Find the topic within the project based on the topicId
+    let sourceTopicsArray;
+    let destinationTopicsArray;
+    
+    if (destination === 'private') {
+      sourceTopicsArray = project.topics;
+      destinationTopicsArray = project.privateTopics;
+    } else if (destination === 'public') {
+      sourceTopicsArray = project.privateTopics;
+      destinationTopicsArray = project.topics;
+    } else {
+      return res.status(400).json({ message: 'Invalid destination' });
+    }
 
+    const topicIndex = sourceTopicsArray.findIndex(topic => topic._id.toString() === topicId);
+    if (topicIndex === -1) {
+      return res.status(404).json({ message: 'Topic not found' });
+    }
+
+    const topic = sourceTopicsArray.splice(topicIndex, 1)[0];
+    destinationTopicsArray.push(topic);
+
+    // Save the updated project
+    await project.save();
+
+    const message = `Topic moved successfully to ${destination}`;
+    res.status(200).json({ message });
+  } catch (error) {
+    console.error('Error moving topic:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
