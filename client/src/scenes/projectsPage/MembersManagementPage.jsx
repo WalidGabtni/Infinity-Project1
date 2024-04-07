@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Table, TableContainer, TableHead, TableBody, TableCell, TableRow, Paper, Button } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import ProjectMember from 'components/ProjectMember'; // Import the ProjectMember component
-import UserImage from 'components/UserImage'; // Import the UserImage component
+import UserImage from 'components/UserImage';
 import Navbar from "scenes/navbar";
 
 const MembersManagementPage = () => {
@@ -80,8 +79,6 @@ const MembersManagementPage = () => {
       // Display an error message to the user or handle the error appropriately
     }
   };
-  
-
 
   return (
     <Box>
@@ -113,9 +110,11 @@ const MembersManagementPage = () => {
                   <TableCell>{member.email}</TableCell>
                   <TableCell>{member.role}</TableCell>
                   <TableCell>
-                    <Button variant="contained" color="error" onClick={() => handleRemoveMember(member.userId)}>
-                      Remove
-                    </Button>
+                    {member.userId !== projectOwnerId && ( // Display button if member is not the project owner
+                      <Button variant="contained" color="error" onClick={() => handleRemoveMember(member.userId)}>
+                        Remove
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
