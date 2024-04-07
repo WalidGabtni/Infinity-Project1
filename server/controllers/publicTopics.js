@@ -476,10 +476,10 @@ export const moveTopicWithinProject = async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    // Find the topic within the project based on the topicId
+    // Determine source and destination topic arrays based on the destination
     let sourceTopicsArray;
     let destinationTopicsArray;
-    
+
     if (destination === 'private') {
       sourceTopicsArray = project.topics;
       destinationTopicsArray = project.privateTopics;
@@ -490,13 +490,15 @@ export const moveTopicWithinProject = async (req, res) => {
       return res.status(400).json({ message: 'Invalid destination' });
     }
 
+    // Find the index of the topic within the source array
     const topicIndex = sourceTopicsArray.findIndex(topic => topic._id.toString() === topicId);
     if (topicIndex === -1) {
       return res.status(404).json({ message: 'Topic not found' });
     }
 
-    const topic = sourceTopicsArray.splice(topicIndex, 1)[0];
-    destinationTopicsArray.push(topic);
+    // Remove the topic from the source array and add it to the destination array
+    const topicToMove = sourceTopicsArray.splice(topicIndex, 1)[0];
+    destinationTopicsArray.push(topicToMove);
 
     // Save the updated project
     await project.save();

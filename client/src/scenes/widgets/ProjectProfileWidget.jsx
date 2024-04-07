@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux';
 import ProjectImage from 'components/ProjectImage';
 import ProjectCover from 'components/ProjectCover';
 import WidgetWrapper from 'components/WidgetWrapper';
@@ -13,7 +13,8 @@ const ProjectProfileWidget = ({ project }) => {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const user = useSelector((state) => state.user);
-  
+  const projectOwnerId = project?.userId; // Fetch project owner's ID
+
   const handleLeaveProject = async () => {
     try {
       const { _id: projectId } = project;
@@ -22,15 +23,15 @@ const ProjectProfileWidget = ({ project }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId }), 
+        body: JSON.stringify({ userId }),
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to leave the project');
       }
-  
+
       setOpenDialog(false); // Close the dialog upon success
       window.location.reload(); // Reload the page
     } catch (error) {
@@ -56,7 +57,10 @@ const ProjectProfileWidget = ({ project }) => {
   const { _id: projectId, projectImage, projectCover, name, members } = project;
 
   // Check if the user is a member of the project
-  const isMember = members.some(member => member.userId === user._id);
+  const isMember = members.some((member) => member.userId === user._id);
+
+  // Check if the current user is the owner of the project
+  const isOwner = user._id === projectOwnerId;
 
   return (
     <WidgetWrapper>
@@ -75,24 +79,49 @@ const ProjectProfileWidget = ({ project }) => {
         {/* PAGE Buttons */}
         <Box
           sx={{
-            position: 'relative',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            width: '100%' // Ensure buttons fill the entire width of the container
+            width: '100%', // Ensure buttons fill the entire width of the container
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-          <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}`}>Overview</Button>
-            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/members`}>Members</Button>
-            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/public-topics`}>Public Topics</Button>
-            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/private-topics`}>Private Topics</Button>
-            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/archive`}>Archive</Button>
+            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}`}>
+              Overview
+            </Button>
+            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/members`}>
+              Members
+            </Button>
+            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/public-topics`}>
+              Public Topics
+            </Button>
+            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/private-topics`}>
+              Private Topics
+            </Button>
+            <Button variant="text" size="medium" component={Link} to={`/projects/${projectId}/archive`}>
+              Archive
+            </Button>
           </div>
 
           {isMember && (
-            <div style={{ position: 'absolute', right: '0' }}>
-              <Button variant="contained" color="error" size="medium" onClick={() => setOpenDialog(true)}>Leave Project</Button>
+            <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
+              {/* Members Management button */}
+              {isOwner && (
+                <Button
+                  variant="text"
+                  size="medium"
+                  component={Link}
+                  to={`/projects/${projectId}/members-management`}
+                  style={{ marginRight: '10px' }} // Adjust margin for spacing
+                >
+                  Members Management
+                </Button>
+              )}
+
+              {/* Leave Project button */}
+              <Button variant="contained" color="error" size="medium" onClick={() => setOpenDialog(true)}>
+                Leave Project
+              </Button>
             </div>
           )}
         </Box>
@@ -106,7 +135,9 @@ const ProjectProfileWidget = ({ project }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleLeaveProject} color="error" variant="contained">Leave</Button>
+          <Button onClick={handleLeaveProject} color="error" variant="contained">
+            Leave
+          </Button>
         </DialogActions>
       </Dialog>
     </WidgetWrapper>

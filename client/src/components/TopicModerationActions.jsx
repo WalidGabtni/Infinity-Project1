@@ -4,7 +4,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Modal from '@mui/material/Modal'; // Import Modal from Material-UI
 import { FormControl, InputLabel, Select } from '@mui/material'; // Import form components
-import { makeStyles } from '@mui/styles'; // Import makeStyles for styling modal
+
 
 
 function TopicModerationActions({ projectId, topicId, token, isPublic }) {
@@ -241,6 +241,7 @@ function TopicModerationActions({ projectId, topicId, token, isPublic }) {
             >
               {/* Populate dropdown with destination options */}
               <MenuItem value="private">Private Topic</MenuItem>
+              <MenuItem value="public">Public Topic</MenuItem>
               {/* Add more options as needed */}
             </Select>
           </FormControl>

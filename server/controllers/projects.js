@@ -222,15 +222,29 @@ export const getProjectMembers = async (req, res) => {
       return res.status(404).json({ message: 'Project not found.' });
     }
 
-    // Extract and return the members of the project with additional information
-    const members = project.members.map((member) => ({
-      userId: member.userId,
-      firstName: member.firstName,
-      lastName: member.lastName,
-      picturePath: member.picturePath,
-      userPicturePath: member.userPicturePath,
-      occupation: member.occupation,
-    }));
+    // Extract and return the members of the project with additional information including email
+    const members = [];
+
+    for (const member of project.members) {
+      const user = await User.findById(member.userId);
+
+      if (!user) {
+        console.log(`User not found for userId: ${member.userId}`);
+        continue; // Skip if user not found (handle as per your requirement)
+      }
+
+      const memberWithEmail = {
+        userId: member.userId,
+        firstName: member.firstName,
+        lastName: member.lastName,
+        email: user.email, // Include email from the User model
+        picturePath: member.picturePath,
+        userPicturePath: member.userPicturePath,
+        occupation: member.occupation,
+      };
+
+      members.push(memberWithEmail);
+    }
 
     res.status(200).json(members);
   } catch (error) {
@@ -313,5 +327,35 @@ export const leaveProject = async (req, res) => {
   } catch (error) {
     console.error('Error leaving project:', error);
     res.status(500).json({ message: 'Error leaving the project.' });
+  }
+};
+
+// Controller to remove a member from a project
+export const removeMemberFromProject = async (req, res) => {
+  const { projectId, memberId } = req.params;
+
+  try {
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found.' });
+    }
+
+    // Check if the member exists in the project
+    const memberToRemove = project.members.find(member => member.userId.toString() === memberId);
+
+    if (!memberToRemove) {
+      return res.status(404).json({ message: 'Member not found in the project.' });
+    }
+
+    // Remove the member from the project's members array
+    project.members = project.members.filter(member => member.userId.toString() !== memberId);
+    await project.save();
+
+    res.status(200).json({ message: 'Member removed successfully.' });
+  } catch (error) {
+    console.error('Error removing member from project:', error);
+    res.status(500).json({ message: 'Failed to remove member from project.' });
   }
 };

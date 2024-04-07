@@ -1,5 +1,5 @@
 import express from "express";
-import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers, getUserProjects, getProjectDescription, leaveProject} from "../controllers/projects.js";
+import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers, getUserProjects, getProjectDescription, leaveProject, removeMemberFromProject} from "../controllers/projects.js";
 import { verifyToken } from "../middleware/auth.js";
 import { createPublicTopic, getPublicTopics, updatePublicTopic, deletePublicTopic, getPublicTopicDetails, addCommentToTopic, getTopicComments, lockTopic, unlockTopic, pinOrUnpinTopic, hideOrUnhideTopic, moveTopicWithinProject} from '../controllers/publicTopics.js';
 import { createPrivateTopic, getPrivateTopics, updatePrivateTopic, deletePrivateTopic ,getPrivateTopicDetails,addCommentToPrivateTopic,getPrivateTopicComments,lockPrivateTopic,unlockPrivateTopic,pinOrUnpinPrivateTopic,hideOrUnhidePrivateTopic } from '../controllers/privateTopics.js';
@@ -27,6 +27,9 @@ router.post('/:projectId/join', joinProject);
 
 // Fetch members for a project
 router.get('/:projectId/members', verifyToken, getProjectMembers);
+
+// DELETE request to remove a member from a project
+router.delete('/:projectId/members/:memberId', verifyToken, removeMemberFromProject);
 
 // Fetch projects for a user
 router.get('/projects/user/:userId', getUserProjects);
@@ -70,6 +73,7 @@ router.put('/:projectId/topics/private/:topicId/lock', verifyToken,lockPrivateTo
 router.put('/:projectId/topics/private/:topicId/unlock',verifyToken, unlockPrivateTopic);
 router.put('/:projectId/topics/private/:topicId/pin',verifyToken, pinOrUnpinPrivateTopic);
 router.put('/:projectId/topics/private/:topicId/hide', verifyToken,hideOrUnhidePrivateTopic);
+router.put('/:projectId/topics/private/:topicId/move', verifyToken, moveTopicWithinProject);
 
 // Archive Topics Routes
 router.post('/:projectId/topics/archive', verifyToken, createArchiveTopic);
