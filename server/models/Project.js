@@ -110,9 +110,15 @@ const ProjectSchema = new Schema(
           type: String,
           required: true,
         },
+        
         picturePath: String,
         userPicturePath: String,
         occupation: String,
+        role: {
+          type: String,
+          enum: ['Project Owner', 'Admin', 'Moderator', 'Member'], // Define your role options here
+          default: 'Member', // Default role for members
+        },
       },
     ],
     pendingRequests: [

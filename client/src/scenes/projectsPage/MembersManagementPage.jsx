@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import UserImage from 'components/UserImage';
 import Navbar from "scenes/navbar";
+import NavigationBreadcrumbsMemberManagementPage from 'components/NavigationBreadcrumbsMemberManagementPage';
 
 const MembersManagementPage = () => {
   const { projectId } = useParams(); // Get projectId from URL params
@@ -83,9 +84,11 @@ const MembersManagementPage = () => {
   return (
     <Box>
       <Navbar />
-      <Typography variant="h4" gutterBottom>
+      <div style={{ textAlign: 'center', margin: '40px 0' }}>
+      <Typography variant="h4" gutterBottom style={{ fontWeight: 'bold' }}>
         Members Management
       </Typography>
+    </div>
 
       <Box sx={{ maxWidth: '800px', margin: '0 auto' }}>
         <TableContainer component={Paper}>
@@ -121,6 +124,8 @@ const MembersManagementPage = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Box m="2rem 0" />
+          <NavigationBreadcrumbsMemberManagementPage projectId={projectId} projectName={project.name} />
       </Box>
     </Box>
   );

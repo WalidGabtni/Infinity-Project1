@@ -169,8 +169,6 @@ export const refuseJoinRequest = async (req, res) => {
 
 
 
-
-
 export const getNotifications = async (req, res) => {
   try {
     // Ensure that only notifications for the logged-in user are fetched

@@ -33,6 +33,9 @@ export const createProject = async (req, res) => {
       // Save the public/assets image path to the project
     }
 
+        // Define the role for the user creating the project
+        const creatorRole = 'Project Owner';
+
     // Create the project
     const project = await Project.create({
       userId: user._id,
@@ -49,7 +52,8 @@ export const createProject = async (req, res) => {
         userId: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
-        picturePath: user.picturePath
+        picturePath: user.picturePath,
+        role: creatorRole,
       }] // Add the user who created the project to the members list with picturePath
       // Add other fields as needed
     });
@@ -241,6 +245,7 @@ export const getProjectMembers = async (req, res) => {
         picturePath: member.picturePath,
         userPicturePath: member.userPicturePath,
         occupation: member.occupation,
+        role: member.role,
       };
 
       members.push(memberWithEmail);
