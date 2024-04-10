@@ -364,3 +364,42 @@ export const removeMemberFromProject = async (req, res) => {
     res.status(500).json({ message: 'Failed to remove member from project.' });
   }
 };
+
+
+// Controller to update a member's role in a project by the project owner
+export const updateMemberRoleInProject = async (req, res) => {
+  const { projectId, memberId } = req.params;
+  const { newRole } = req.body;
+
+  try {
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found.' });
+    }
+
+    // Check if the user making the request is the project owner
+    const userIdFromToken = req.user && req.user.id;
+
+    if (!userIdFromToken || String(project.userId) !== String(userIdFromToken)) {
+      return res.status(403).json({ message: 'Unauthorized: Only the project owner can change member roles.' });
+    }
+
+    // Find the member in the project's members array
+    const memberToUpdate = project.members.find(member => member.userId.toString() === memberId);
+
+    if (!memberToUpdate) {
+      return res.status(404).json({ message: 'Member not found in the project.' });
+    }
+
+    // Update the member's role
+    memberToUpdate.role = newRole;
+    await project.save();
+
+    res.status(200).json({ message: 'Member role updated successfully.', updatedMember: memberToUpdate });
+  } catch (error) {
+    console.error('Error updating member role in project:', error);
+    res.status(500).json({ message: 'Failed to update member role in project.' });
+  }
+};

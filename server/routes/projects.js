@@ -1,5 +1,5 @@
 import express from "express";
-import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers, getUserProjects, getProjectDescription, leaveProject, removeMemberFromProject} from "../controllers/projects.js";
+import { createProject, getAllProjects, updateProject, deleteProject, searchProjects, joinProject, getProjectMembers, getUserProjects, getProjectDescription, leaveProject, removeMemberFromProject, updateMemberRoleInProject} from "../controllers/projects.js";
 import { verifyToken } from "../middleware/auth.js";
 import { createPublicTopic, getPublicTopics, updatePublicTopic, deletePublicTopic, getPublicTopicDetails, addCommentToTopic, getTopicComments, lockTopic, unlockTopic, pinOrUnpinTopic, hideOrUnhideTopic, moveTopicWithinProject} from '../controllers/publicTopics.js';
 import { createPrivateTopic, getPrivateTopics, updatePrivateTopic, deletePrivateTopic ,getPrivateTopicDetails,addCommentToPrivateTopic,getPrivateTopicComments,lockPrivateTopic,unlockPrivateTopic,pinOrUnpinPrivateTopic,hideOrUnhidePrivateTopic } from '../controllers/privateTopics.js';
@@ -30,6 +30,9 @@ router.get('/:projectId/members', verifyToken, getProjectMembers);
 
 // DELETE request to remove a member from a project
 router.delete('/:projectId/members/:memberId', verifyToken, removeMemberFromProject);
+
+// Route to update a member's role in a project by the project owner
+router.put('/:projectId/members/:memberId/updateRole', verifyToken,updateMemberRoleInProject);
 
 // Fetch projects for a user
 router.get('/projects/user/:userId', getUserProjects);
