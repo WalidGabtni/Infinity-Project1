@@ -379,11 +379,18 @@ export const updateMemberRoleInProject = async (req, res) => {
       return res.status(404).json({ message: 'Project not found.' });
     }
 
-    // Check if the user making the request is the project owner
+    // Check if the user making the request is the project owner or an admin
     const userIdFromToken = req.user && req.user.id;
 
-    if (!userIdFromToken || String(project.userId) !== String(userIdFromToken)) {
-      return res.status(403).json({ message: 'Unauthorized: Only the project owner can change member roles.' });
+    if (!userIdFromToken) {
+      return res.status(403).json({ message: 'Unauthorized: User not authenticated.' });
+    }
+
+    const isAdmin = project.members.some(member => member.userId.toString() === userIdFromToken && member.role === 'Admin');
+    const isOwner = String(project.userId) === String(userIdFromToken);
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ message: 'Unauthorized: Only the project owner or an admin can change member roles.' });
     }
 
     // Find the member in the project's members array

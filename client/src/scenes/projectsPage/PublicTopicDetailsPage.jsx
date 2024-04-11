@@ -1,32 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button, Grid } from '@mui/material';
-import WidgetWrapper from 'components/WidgetWrapper';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import Navbar from 'scenes/navbar';
 import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
 import PublicTopicTitleWidget from 'scenes/widgets/PublicTopicTitleWidget';
-import { useSelector } from 'react-redux';
-import UserImage from 'components/UserImage';
-import TopicPostForm from 'components/TopicPostForm';
-import TopicDetailsWidget from 'scenes/widgets/TopicDetailsWidget';
+import TopicModerationActions from 'components/TopicModerationActions';
 import CustomPagination from 'components/ProjectPagination';
 import NavigationBreadcrumbs from 'components/NavigationBreadcrumbs';
 import CommentWidget from 'scenes/widgets/CommentWidget';
 import GetCommentsWidget from 'scenes/widgets/GetCommentsWidget';
-import TopicModerationActions from 'components/TopicModerationActions';
+import TopicPostForm from 'components/TopicPostForm';
+import TopicDetailsWidget from 'scenes/widgets/TopicDetailsWidget';
 
 const PublicTopicDetailsPage = () => {
   const { projectId, topicId } = useParams();
   const [topicDetails, setTopicDetails] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isTopicLocked, setIsTopicLocked] = useState(false); // State to track the lock status of the topic
-  const [isTopicPinned, setIsTopicPinned] = useState(false); // State to track the pinned status of the topic
   const userId = useSelector((state) => state.user?._id);
   const token = useSelector((state) => state.token);
   const projects = useSelector((state) => state.projects);
-  const project = projects.find((project) => project._id === projectId);
+  const project = projects.find((proj) => proj._id === projectId);
   const navigate = useNavigate();
-  const projectOwnerId = project?.userId; // Fetch project owner's ID
+  const projectOwnerId = project?.userId;
 
   useEffect(() => {
     const fetchTopicDetails = async () => {
@@ -38,9 +34,6 @@ const PublicTopicDetailsPage = () => {
       
         const data = await response.json();
         setTopicDetails(data);
-        setIsTopicLocked(data.locked === true); // Update isTopicLocked only if data.locked exists
-        setIsTopicPinned(data.pinned === true); // Update isTopicPinned only if data.pinned exists
-        console.log('Topic Details:', data);
       } catch (error) {
         console.error('Error fetching topic details:', error);
       }
@@ -48,8 +41,6 @@ const PublicTopicDetailsPage = () => {
 
     fetchTopicDetails();
   }, [projectId, topicId]);
-
-  
 
   const handleNewTopicClick = () => {
     setIsFormOpen(true);
@@ -63,11 +54,6 @@ const PublicTopicDetailsPage = () => {
     try {
       if (!userId) {
         throw new Error('User is not authenticated');
-      }
-
-      // Check if the topic is locked, if yes, prevent topic creation
-      if (isTopicLocked) {
-        throw new Error('Topic is locked');
       }
 
       const response = await fetch(`http://localhost:3001/projects/${projectId}/topics/public`, {
@@ -103,27 +89,25 @@ const PublicTopicDetailsPage = () => {
   const totalItems = topicDetails ? topicDetails.totalTopics : 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+  const userRole = useSelector((state) => state.user?.role);
+
   return (
     <div>
       <Navbar />
-      <Box
-        width="100%"
-        padding="2rem 6%"
-        display="flex"
-        gap="0.5rem"
-        justifyContent="space-between"
-      >
+      <Box width="100%" padding="2rem 6%" display="flex" gap="0.5rem" justifyContent="space-between">
         <Box flexBasis="100%">
-          <NavigationBreadcrumbs projectId={projectId} projectName={project.name} topicName={topicDetails?.title} topicId={topicId}  />
+          <NavigationBreadcrumbs projectId={projectId} projectName={project?.name} topicName={topicDetails?.title} topicId={topicId} />
           <Box m="2rem 0" />
           <ProjectProfileWidget project={project} userId={userId} />
           <Box m="2rem 0" />
-          <PublicTopicTitleWidget project={project} userId={userId}/>
+          <PublicTopicTitleWidget project={project} userId={userId} />
           <Box m="1rem 0" />
-          <Grid container spacing={2} justifyContent="flex-end" >
-            <Grid item >
-              {/* Conditionally render TopicModerationActions only if the user is the project owner */}
-              {userId === projectOwnerId && <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={true} />}
+          <Grid container spacing={2} justifyContent="flex-end">
+            <Grid item>
+              {/* Render TopicModerationActions if user role is not "Member" */}
+              {userRole !== 'Member' && (
+                <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={true} />
+              )}
             </Grid>
             <Grid item>
               <Button onClick={handleNewTopicClick} variant="contained" color="primary" size="large">
@@ -138,20 +122,19 @@ const PublicTopicDetailsPage = () => {
             currentPage={currentPage}
             onPageChange={handlePageChange}
           />
-          {isFormOpen && <TopicPostForm onClose={handleFormClose} onPost={createTopic} userId={userId}/>}
+          {isFormOpen && <TopicPostForm onClose={handleFormClose} onPost={createTopic} userId={userId} />}
           <Box m="1rem 0" />
           <TopicDetailsWidget topicDetails={topicDetails} />
           <Box m="2rem 0" />
-          <GetCommentsWidget projectId={projectId} topicId={topicId} isPrivate={false}/>
+          <GetCommentsWidget projectId={projectId} topicId={topicId} isPrivate={false} />
           <Box m="2rem 0" />
-          {topicDetails && console.log('Topic locked status:', topicDetails.locked)}
-          {userId === projectOwnerId || !topicDetails?.locked ? (
-            <Box width="100%" p="1rem"> 
-              <CommentWidget projectId={projectId} topicId={topicId} topicDetails={topicDetails} isPrivate={false}/>
-            </Box>
-          ) : (
-            <Box width="100%" p="1rem"> 
-              <Typography variant="body2" color="textSecondary">This topic is locked. Comments are disabled.</Typography>
+          {topicDetails && (
+            <Box width="100%" p="1rem">
+              {topicDetails.locked ? (
+                <Typography variant="body2" color="textSecondary">This topic is locked. Comments are disabled.</Typography>
+              ) : (
+                <CommentWidget projectId={projectId} topicId={topicId} topicDetails={topicDetails} isPrivate={false} />
+              )}
             </Box>
           )}
         </Box>

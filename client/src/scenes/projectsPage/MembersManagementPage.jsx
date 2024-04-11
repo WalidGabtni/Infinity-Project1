@@ -21,22 +21,21 @@ import NavigationBreadcrumbsMemberManagementPage from 'components/NavigationBrea
 import ProjectProfileWidget from 'scenes/widgets/ProjectProfileWidget';
 
 const MembersManagementPage = () => {
-  const { projectId } = useParams(); // Get projectId from URL params
+  const { projectId } = useParams();
   const token = useSelector((state) => state.token);
   const [members, setMembers] = useState([]);
   const projects = useSelector((state) => state.projects);
   const project = projects.find((project) => project._id === projectId);
-  const projectOwnerId = project?.userId; // Fetch project owner's ID
-  const userId = useSelector((state) => state.user?._id);
+  const projectOwnerId = project?.userId;
+  const loggedInUserId = useSelector((state) => state.user?._id);
+  const userRole = useSelector((state) => state.user?.role);
 
-  const [anchorEl, setAnchorEl] = useState(null); // For controlling menu anchor
-  const [currentUserId, setCurrentUserId] = useState(''); // State to hold the current user's ID
-  const [currentMemberRole, setCurrentMemberRole] = useState(''); // State to hold the current member's role
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState('');
+  const [currentMemberRole, setCurrentMemberRole] = useState('');
 
-  // Fetch project members data
   const fetchMembers = async () => {
     try {
-      console.log('Fetching project members...');
       const response = await fetch(`http://localhost:3001/projects/${projectId}/members`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -48,96 +47,107 @@ const MembersManagementPage = () => {
       }
 
       const data = await response.json();
-      console.log('Received API response:', data);
-
-      // Set the members state with the array from the response
       setMembers(data || []);
     } catch (error) {
       console.error('Error fetching project members:', error);
-      // Handle error state or display error message
     }
   };
 
   useEffect(() => {
     fetchMembers();
-  }, []); // Fetch members data on component mount
+  }, [projectId, token]);
 
-  // Define handleRemoveMember function
+  const isAdmin = members.find((member) => member.userId === loggedInUserId && member.role === 'Admin');
+  const isOwner = loggedInUserId === projectOwnerId;
+
   const handleRemoveMember = async (userId) => {
     try {
-      console.log(`Removing member with ID: ${userId}`);
-
-      const deleteUrl = `http://localhost:3001/projects/${projectId}/members/${userId}`;
-      const requestOptions = {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      console.log('Sending DELETE request to:', deleteUrl);
-      const response = await fetch(deleteUrl, requestOptions);
-
-      if (!response.ok) {
-        const errorData = await response.json(); // Parse the response body as JSON
-        const errorMessage = errorData.message || 'Member not found in the project.';
-        throw new Error(`Failed to remove member: ${errorMessage}`);
+      const memberToRemove = members.find((member) => member.userId === userId);
+  
+      if (!memberToRemove) {
+        throw new Error('Member not found in the project.');
       }
-
-      // Update members list after removal
-      setMembers((prevMembers) => prevMembers.filter((member) => member.userId !== userId));
-
-      console.log(`Member with ID ${userId} successfully removed.`);
+  
+      // Check if current user is removing another member (not themselves)
+      const canRemoveMember = userId !== loggedInUserId;
+  
+      if (canRemoveMember) {
+        const deleteUrl = `http://localhost:3001/projects/${projectId}/members/${userId}`;
+        const requestOptions = {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+  
+        const response = await fetch(deleteUrl, requestOptions);
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          const errorMessage = errorData.message || 'Failed to remove member.';
+          throw new Error(`Failed to remove member: ${errorMessage}`);
+        }
+  
+        // Update frontend state after successful removal
+        setMembers((prevMembers) => prevMembers.filter((member) => member.userId !== userId));
+        console.log(`Member with ID ${userId} successfully removed.`);
+      } else {
+        console.log('Unauthorized to remove this member.');
+      }
     } catch (error) {
       console.error('Error removing member:', error.message);
-      // Display an error message to the user or handle the error appropriately
     }
   };
+  
+  
 
-  // Handle click on Role button to open menu
   const handleRoleButtonClick = (userId, memberRole) => (event) => {
-    setCurrentUserId(userId); // Set the current user's ID
-    setCurrentMemberRole(memberRole); // Set the current member's role
-    setAnchorEl(event.currentTarget); // Set anchor element for the menu
+    setCurrentUserId(userId);
+    setCurrentMemberRole(memberRole);
+    setAnchorEl(event.currentTarget);
   };
 
-  // Handle role menu item selection based on current member's role
   const handleRoleMenuItemClick = async (role) => {
     try {
-      const updateRoleUrl = `http://localhost:3001/projects/${projectId}/members/${currentUserId}/updateRole`;
-      const requestOptions = {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ newRole: role }), // Send the selected role in the request body
-      };
-
-      const response = await fetch(updateRoleUrl, requestOptions);
-
-      if (!response.ok) {
-        const errorData = await response.json(); // Parse the response body as JSON
-        throw new Error(`Failed to update member role: ${errorData.message}`);
+      // Check if the logged-in user is an admin or project owner
+      if (isAdmin || isOwner) {
+        const memberToUpdate = members.find((member) => member.userId === currentUserId);
+  
+        // Ensure the member to update exists and is not the project owner
+        if (memberToUpdate && memberToUpdate.userId !== projectOwnerId) {
+          const updateRoleUrl = `http://localhost:3001/projects/${projectId}/members/${currentUserId}/updateRole`;
+          const requestOptions = {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ newRole: role }),
+          };
+  
+          const response = await fetch(updateRoleUrl, requestOptions);
+  
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Failed to update member role: ${errorData.message}`);
+          }
+  
+          // Refresh the member list after successful role update
+          fetchMembers();
+          setAnchorEl(null);
+  
+          console.log(`Member role updated successfully. Member ID: ${currentUserId}, New Role: ${role}`);
+        } else {
+          console.log('Cannot update role for project owner.');
+        }
+      } else {
+        console.log('Unauthorized to change role.');
       }
-
-      // Fetch updated members data after role update
-      fetchMembers();
-
-      // Close the menu
-      setAnchorEl(null);
-
-      console.log(`Member role updated successfully. Member ID: ${currentUserId}, New Role: ${role}`);
     } catch (error) {
       console.error('Error updating member role:', error.message);
-      // Handle error state or display error message
     }
   };
-
-  // Close the role menu
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-  };
+  
 
   return (
     <Box>
@@ -145,7 +155,7 @@ const MembersManagementPage = () => {
       <Box m="2rem 0" />
       <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
         <Box sx={{ width: '100%', minWidth: '500px', maxWidth: '1000px', marginBottom: '20px' }}>
-          <ProjectProfileWidget project={project} userId={userId} />
+          <ProjectProfileWidget project={project} userId={loggedInUserId} />
         </Box>
       </Box>
 
@@ -172,32 +182,53 @@ const MembersManagementPage = () => {
                   <TableCell>{member.email}</TableCell>
                   <TableCell>{member.role}</TableCell>
                   <TableCell>
-                    {member.userId !== projectOwnerId && ( // Display buttons if member is not the project owner
-                      <>
-                        <Button variant="contained" color="error" onClick={() => handleRemoveMember(member.userId)}>
-                          Remove
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          style={{ marginLeft: '10px' }}
-                          onClick={handleRoleButtonClick(member.userId, member.role)}
-                        >
-                          Role
-                        </Button>
-                        <Menu anchorEl={anchorEl} open={currentUserId === member.userId && Boolean(anchorEl)} onClose={handleCloseMenu}>
-                          {member.role !== 'Admin' && (
+                  {((isOwner && member.userId !== projectOwnerId) || (isAdmin && member.userId !== projectOwnerId && member.role !== 'Admin')) && (
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleRemoveMember(member.userId)}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                    {((isOwner && member.userId !== projectOwnerId) || (isAdmin && member.userId !== projectOwnerId && member.role !== 'Admin')) && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        style={{ marginLeft: '10px' }}
+                        onClick={handleRoleButtonClick(member.userId, member.role)}
+                      >
+                        Role
+                      </Button>
+                    )}
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={currentUserId === member.userId && Boolean(anchorEl)}
+                      onClose={() => setAnchorEl(null)}
+                    >
+                      {/* Display role change options based on user permissions */}
+                      {((isAdmin || isOwner) && member.userId !== loggedInUserId && member.userId !== projectOwnerId) && (
+                        <div>
+                          {/* Display "Admin" option if user is admin or project owner and member is not already an admin */}
+                          {(isAdmin || isOwner) && member.role !== 'Admin' && (
                             <MenuItem onClick={() => handleRoleMenuItemClick('Admin')}>Admin</MenuItem>
                           )}
-                          {member.role !== 'Moderator' && (
+
+                          {/* Display "Moderator" option if user is admin or project owner and member is not already a moderator */}
+                          {(isAdmin || isOwner) && member.role !== 'Moderator' && (
                             <MenuItem onClick={() => handleRoleMenuItemClick('Moderator')}>Moderator</MenuItem>
                           )}
-                          {member.role !== 'Member' && (
+
+                          {/* Display "Member" option if user is admin or project owner and member is not already a member */}
+                          {(isAdmin || isOwner) && member.role !== 'Member' && (
                             <MenuItem onClick={() => handleRoleMenuItemClick('Member')}>Member</MenuItem>
                           )}
-                        </Menu>
-                      </>
-                    )}
+                        </div>
+                      )}
+
+                      
+                    </Menu>
+
                   </TableCell>
                 </TableRow>
               ))}

@@ -5,20 +5,18 @@ import { useSelector } from 'react-redux';
 import ProjectImage from 'components/ProjectImage';
 import ProjectCover from 'components/ProjectCover';
 import WidgetWrapper from 'components/WidgetWrapper';
-import { useDispatch } from 'react-redux';
-import { leaveProject } from 'state'; // Import the leaveProject action
+import { leaveProject } from 'state';
 
 const ProjectProfileWidget = ({ project }) => {
   const [openDialog, setOpenDialog] = useState(false);
-  const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const user = useSelector((state) => state.user);
-  const projectOwnerId = project?.userId; // Fetch project owner's ID
+  const projectOwnerId = project?.userId;
 
   const handleLeaveProject = async () => {
     try {
       const { _id: projectId } = project;
-      const userId = user._id; // Assuming user contains the current user's information
+      const userId = user._id;
       const response = await fetch(`http://localhost:3001/projects/${projectId}/leave`, {
         method: 'POST',
         headers: {
@@ -32,8 +30,8 @@ const ProjectProfileWidget = ({ project }) => {
         throw new Error('Failed to leave the project');
       }
 
-      setOpenDialog(false); // Close the dialog upon success
-      window.location.reload(); // Reload the page
+      setOpenDialog(false);
+      window.location.reload();
     } catch (error) {
       console.error('Error leaving the project:', error);
       // Handle error
@@ -41,7 +39,7 @@ const ProjectProfileWidget = ({ project }) => {
   };
 
   const handleCloseDialog = () => {
-    setOpenDialog(false); // Close the dialog
+    setOpenDialog(false);
   };
 
   if (!project) {
@@ -56,10 +54,8 @@ const ProjectProfileWidget = ({ project }) => {
 
   const { _id: projectId, projectImage, projectCover, name, members } = project;
 
-  // Check if the user is a member of the project
   const isMember = members.some((member) => member.userId === user._id);
-
-  // Check if the current user is the owner of the project
+  const isAdmin = members.find((member) => member.userId === user._id && member.role === 'Admin');
   const isOwner = user._id === projectOwnerId;
 
   return (
@@ -76,13 +72,12 @@ const ProjectProfileWidget = ({ project }) => {
         </Box>
 
         <Box m="1rem 0" />
-        {/* PAGE Buttons */}
         <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            width: '100%', // Ensure buttons fill the entire width of the container
+            width: '100%',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -103,22 +98,19 @@ const ProjectProfileWidget = ({ project }) => {
             </Button>
           </div>
 
-          {isMember && (
+          {isMember && (isAdmin || isOwner) && (
             <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
-              {/* Members Management button */}
-              {isOwner && (
+              {(isAdmin || isOwner) && ( // Show button if user is admin or owner
                 <Button
                   variant="text"
                   size="medium"
                   component={Link}
                   to={`/projects/${projectId}/members-management`}
-                  style={{ marginRight: '10px' }} // Adjust margin for spacing
+                  style={{ marginRight: '10px' }}
                 >
                   Members Management
                 </Button>
               )}
-
-              {/* Leave Project button */}
               <Button variant="contained" color="error" size="medium" onClick={() => setOpenDialog(true)}>
                 Leave Project
               </Button>
@@ -127,7 +119,6 @@ const ProjectProfileWidget = ({ project }) => {
         </Box>
       </Box>
 
-      {/* Leave Project Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Leave Project</DialogTitle>
         <DialogContent>
