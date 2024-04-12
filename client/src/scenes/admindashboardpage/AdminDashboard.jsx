@@ -13,6 +13,7 @@ import {
   Menu,
   MenuItem,
   TextField,
+  Pagination,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import Navbar from 'scenes/navbar';
@@ -27,7 +28,7 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
 
-  const usersPerPage = 2; // Number of users per page
+  const usersPerPage = 30; // Number of users per page
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -79,8 +80,8 @@ const AdminDashboard = () => {
 
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
+  const handlePageChange = (event, value) => {
+    setPage(value);
   };
 
   const startIndex = (page - 1) * usersPerPage;
@@ -90,6 +91,7 @@ const AdminDashboard = () => {
     <Box>
       <Navbar />
       <Box m="2rem 0" />
+      
       <Box sx={{ maxWidth: '1500px', margin: '0 auto' }}>
         {/* Container for search bar and filter button */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '20px' }}>
@@ -101,6 +103,16 @@ const AdminDashboard = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             sx={{ width: '300px' }}
           />
+          <Box mt="20px" sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ mr: '180px' }}> {/* Adjust the left margin */}
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </Box>
+        </Box>
           {/* Filter button on the top left */}
           <Button
             variant="contained"
@@ -119,6 +131,7 @@ const AdminDashboard = () => {
             <MenuItem onClick={() => handleRoleMenuItemClick('user')}>Users</MenuItem>
           </Menu>
         </Box>
+        
 
         {/* User table */}
         <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
@@ -177,17 +190,13 @@ const AdminDashboard = () => {
 
         {/* Pagination controls */}
         <Box mt="20px" sx={{ display: 'flex', justifyContent: 'center' }}>
-          {Array.from({ length: totalPages }, (_, index) => (
-            <Button
-              key={index + 1}
-              variant={page === index + 1 ? 'contained' : 'outlined'}
-              color="primary"
-              onClick={() => handlePageChange(index + 1)}
-              sx={{ margin: '0 5px' }}
-            >
-              {index + 1}
-            </Button>
-          ))}
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+          />
+          <Box m="2rem 0" />
         </Box>
       </Box>
     </Box>
