@@ -15,6 +15,7 @@ const initialState = {
   publicTopics: [], // Add publicTopics to initialState
   currentTopic: null,
   commenterDetails: null,
+  role: null,
 };
 
 export const authSlice = createSlice({
@@ -28,6 +29,7 @@ export const authSlice = createSlice({
       const { user, token } = action.payload;
       state.user = user;
       state.token = token;
+      state.role = user ? user.role : null; // Set the role if user exists, otherwise null
       state.bookmarkedPosts = user ? user.bookmarks : [];
     },
     setLogout: (state) => {

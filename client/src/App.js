@@ -17,6 +17,7 @@ import MembersManagementPage from 'scenes/projectsPage/MembersManagementPage'; /
 import ArchivePage from 'scenes/projectsPage/ArchivePage';
 import PublicTopicDetailsPage from 'scenes/projectsPage/PublicTopicDetailsPage';
 import PrivateTopicDetailsPage from 'scenes/projectsPage/PrivateTopicDetailsPage';
+import AdminDashboard from 'scenes/admindashboardpage/AdminDashboard';
 
 function App() {
   const mode = useSelector((state) => state.mode);
@@ -42,6 +43,7 @@ function App() {
             <Route path="/projects/:projectId/archive" element={isAuth ? <ArchivePage /> : <Navigate to="/" />} />
             <Route path="/projects/:projectId/public-topics/:topicId" element={isAuth ? <PublicTopicDetailsPage /> : <Navigate to="/" />} />
             <Route path="/projects/:projectId/private-topics/:topicId" element={isAuth ? <PrivateTopicDetailsPage /> : <Navigate to="/" />} />
+            <Route path="/admindashboard" element={isAuth ? <AdminDashboard /> : <Navigate to="/" />} />
           </Routes>
         </ThemeProvider>
       </BrowserRouter>

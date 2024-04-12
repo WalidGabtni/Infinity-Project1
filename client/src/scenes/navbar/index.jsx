@@ -56,6 +56,8 @@ const Navbar = ({ updateSearchResults }) => {
     const notificationButtonRef = useRef(null);
     const [rejectedNotificationId, setRejectedNotificationId] = useState(null);
 
+    const userRole = useSelector((state) => state.role);
+
     /*SEARCH*/
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -410,6 +412,13 @@ const Navbar = ({ updateSearchResults }) => {
                 <MenuItem value ={fullName}>
                     <Typography>{fullName}</Typography>
                 </MenuItem>
+                <MenuItem>
+                    {userRole === 'admin' && (
+                      <Typography onClick={() => navigate("/admindashboard")}>
+                        Admin Dashboard
+                      </Typography>
+                    )}
+                  </MenuItem>
                 <MenuItem>
                     <Typography onClick={()=> navigate("/bookmarks")}>Bookmarks</Typography>
                 </MenuItem>
