@@ -12,6 +12,7 @@ import {
   Button,
   Menu,
   MenuItem,
+  TextField,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import Navbar from 'scenes/navbar';
@@ -22,6 +23,11 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentUserId, setCurrentUserId] = useState('');
+  const [filterRole, setFilterRole] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+
+  const usersPerPage = 2; // Number of users per page
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -39,45 +45,84 @@ const AdminDashboard = () => {
         }
 
         const data = await response.json();
-        setUsers(data); // Update the local state with fetched users
+        setUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
     };
 
-    fetchUsers(); // Trigger the fetchUsers function when the component mounts or token changes
+    fetchUsers();
   }, [token]);
 
   const handleRemoveUser = async (userId) => {
     try {
-      // Implement logic to remove the user with the specified userId
       console.log(`Removing user with ID ${userId}`);
     } catch (error) {
       console.error('Error removing user:', error.message);
     }
   };
 
-  const handleRoleButtonClick = (userId) => (event) => {
-    setCurrentUserId(userId);
+  const handleRoleButtonClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleRoleMenuItemClick = async (role) => {
-    try {
-      // Implement logic to update the role of the user with the specified userId
-      console.log(`Updating role for user with ID ${currentUserId} to ${role}`);
-    } catch (error) {
-      console.error('Error updating user role:', error.message);
-    }
+  const handleRoleMenuItemClick = (role) => {
+    setFilterRole(role);
+    setAnchorEl(null);
   };
+
+  const filteredUsers = users.filter((user) => {
+    const roleMatch = filterRole ? user.role === filterRole : true;
+    const nameMatch = user.firstName.toLowerCase().includes(searchQuery.toLowerCase());
+    return roleMatch && nameMatch;
+  });
+
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const startIndex = (page - 1) * usersPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + usersPerPage);
 
   return (
     <Box>
       <Navbar />
       <Box m="2rem 0" />
       <Box sx={{ maxWidth: '1500px', margin: '0 auto' }}>
-        <TableContainer component={Paper}>
-          <Table size="medium">
+        {/* Container for search bar and filter button */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '20px' }}>
+          {/* Search bar on the top right */}
+          <TextField
+            label="Search..."
+            variant="outlined"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ width: '300px' }}
+          />
+          {/* Filter button on the top left */}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleRoleButtonClick}
+          >
+            Filter By Role
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+          >
+            <MenuItem onClick={() => handleRoleMenuItemClick('')}>All</MenuItem>
+            <MenuItem onClick={() => handleRoleMenuItemClick('admin')}>Admins</MenuItem>
+            <MenuItem onClick={() => handleRoleMenuItemClick('user')}>Users</MenuItem>
+          </Menu>
+        </Box>
+
+        {/* User table */}
+        <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
+          <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
                 <TableCell>First Name</TableCell>
@@ -92,7 +137,7 @@ const AdminDashboard = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((user) => (
+              {paginatedUsers.map((user) => (
                 <TableRow key={user._id}>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -119,24 +164,31 @@ const AdminDashboard = () => {
                       variant="contained"
                       color="primary"
                       style={{ marginLeft: '10px' }}
-                      onClick={handleRoleButtonClick(user._id)}
+                      onClick={() => setCurrentUserId(user._id)}
                     >
                       Role
                     </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      open={Boolean(anchorEl) && currentUserId === user._id}
-                      onClose={() => setAnchorEl(null)}
-                    >
-                      <MenuItem onClick={() => handleRoleMenuItemClick('admin')}>Admin</MenuItem>
-                      <MenuItem onClick={() => handleRoleMenuItemClick('user')}>User</MenuItem>
-                    </Menu>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Pagination controls */}
+        <Box mt="20px" sx={{ display: 'flex', justifyContent: 'center' }}>
+          {Array.from({ length: totalPages }, (_, index) => (
+            <Button
+              key={index + 1}
+              variant={page === index + 1 ? 'contained' : 'outlined'}
+              color="primary"
+              onClick={() => handlePageChange(index + 1)}
+              sx={{ margin: '0 5px' }}
+            >
+              {index + 1}
+            </Button>
+          ))}
+        </Box>
       </Box>
     </Box>
   );

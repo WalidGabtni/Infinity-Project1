@@ -7,7 +7,7 @@ export const getAllUsers = async (req, res) => {
 
     const users = await User.find();
     
-    console.log("Users fetched successfully:", users);
+    
 
     res.status(200).json(users);
   } catch (error) {
