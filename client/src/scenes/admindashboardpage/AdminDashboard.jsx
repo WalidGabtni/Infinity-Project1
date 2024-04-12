@@ -74,9 +74,15 @@ const AdminDashboard = () => {
 
   const filteredUsers = users.filter((user) => {
     const roleMatch = filterRole ? user.role === filterRole : true;
-    const nameMatch = user.firstName.toLowerCase().includes(searchQuery.toLowerCase());
+    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+    const query = searchQuery.toLowerCase().trim(); // Trim and convert search query to lowercase
+  
+    // Check if either first name or last name matches the search query
+    const nameMatch = fullName.includes(query);
+  
     return roleMatch && nameMatch;
   });
+  
 
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
