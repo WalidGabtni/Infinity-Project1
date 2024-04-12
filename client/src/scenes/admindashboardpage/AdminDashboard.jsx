@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import Navbar from 'scenes/navbar';
+import UserImage from 'components/UserImage';
 
 const AdminDashboard = () => {
   const token = useSelector((state) => state.token);
@@ -25,32 +26,26 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        console.log('Request made to fetch users');
-
-        const response = await fetch('http://localhost:3001/getallusers', {
+        const response = await fetch('http://localhost:3001/users/getallusers', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
         });
-  
-        console.log('Response:', response);
 
         if (!response.ok) {
-          console.error('Failed to fetch users');
           throw new Error('Failed to fetch users');
         }
-  
+
         const data = await response.json();
-        console.log('Users fetched successfully:', data);
-        setUsers(data);
+        setUsers(data); // Update the local state with fetched users
       } catch (error) {
         console.error('Error fetching users:', error);
       }
     };
-  
-    fetchUsers();
+
+    fetchUsers(); // Trigger the fetchUsers function when the component mounts or token changes
   }, [token]);
 
   const handleRemoveUser = async (userId) => {
@@ -79,7 +74,6 @@ const AdminDashboard = () => {
   return (
     <Box>
       <Navbar />
-      {/* Your Navbar component */}
       <Box m="2rem 0" />
       <Box sx={{ maxWidth: '1500px', margin: '0 auto' }}>
         <TableContainer component={Paper}>
@@ -100,7 +94,12 @@ const AdminDashboard = () => {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user._id}>
-                  <TableCell>{user.firstName}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <UserImage image={user.picturePath} size="40px" userId={user.userId} />
+                      <Typography sx={{ marginLeft: '8px' }}>{`${user.firstName} `}</Typography>
+                    </Box>
+                  </TableCell>
                   <TableCell>{user.lastName}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.location}</TableCell>
@@ -131,7 +130,6 @@ const AdminDashboard = () => {
                     >
                       <MenuItem onClick={() => handleRoleMenuItemClick('admin')}>Admin</MenuItem>
                       <MenuItem onClick={() => handleRoleMenuItemClick('user')}>User</MenuItem>
-                      {/* Add more role options as needed */}
                     </Menu>
                   </TableCell>
                 </TableRow>

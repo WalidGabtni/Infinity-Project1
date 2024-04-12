@@ -15,7 +15,7 @@ import { verifyToken, adminAuth } from "../middleware/auth.js";
 const router = express.Router();
 
 // Fetch all users (for admin dashboard)
-router.get("/getallusers", verifyToken, adminAuth, getAllUsers);
+router.get("/getallusers", verifyToken, getAllUsers);
 
 /* READ */
 router.get("/:id", verifyToken, getUser);
