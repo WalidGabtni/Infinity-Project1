@@ -5,7 +5,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   mode: "light",
   user: null,
-  token: null,
+  token: localStorage.getItem("token") || null,
   posts: [],
   bookmarkedPosts: [],
   projects: [],
@@ -29,8 +29,9 @@ export const authSlice = createSlice({
       const { user, token } = action.payload;
       state.user = user;
       state.token = token;
-      state.role = user ? user.role : null; // Set the role if user exists, otherwise null
+      state.role = user ? user.role : null;
       state.bookmarkedPosts = user ? user.bookmarks : [];
+      localStorage.setItem("token", token); // Store token in local storage
     },
     setLogout: (state) => {
       state.user = null;
@@ -38,7 +39,8 @@ export const authSlice = createSlice({
       state.bookmarkedPosts = [];
       state.projects = [];
       state.notifications = [];
-      state.publicTopics = []; // Reset publicTopics on logout
+      state.publicTopics = [];
+      localStorage.removeItem("token"); // Remove token from local storage
     },
     setFriends: (state, action) => {
       if (state.user) {
@@ -61,8 +63,11 @@ export const authSlice = createSlice({
       state.posts = updatedPosts;
     },
     setBookmarkedPosts: (state, action) => {
-      state.bookmarkedPosts = action.payload.bookmarkedPosts;
-    },
+      return {
+        ...state,
+        bookmarkedPosts: action.payload.bookmarkedPosts
+      };
+    },    
     setProjects: (state, action) => {
       state.projects = action.payload.projects;
     },

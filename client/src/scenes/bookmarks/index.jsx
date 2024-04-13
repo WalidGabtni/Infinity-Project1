@@ -1,50 +1,48 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, useMediaQuery } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import Navbar from "scenes/navbar";
 import UserWidget from "scenes/widgets/UserWidget";
-import PostsWidget from "scenes/widgets/PostsWidget"; // Update the import
+import PostsWidget from "scenes/widgets/PostsWidget";
 import AdvertWidget from "scenes/widgets/AdvertWidget";
 import FriendListWidget from "scenes/widgets/FriendListWidget";
-import { useEffect } from "react";
 import { setBookmarkedPosts } from "state";
 
 const BookmarkPage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
   const { _id, picturePath } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
-  const bookmarkedPosts = useSelector((state) => state.user.bookmarkedPosts) || [];
   const loggedInUserId = useSelector((state) => state.user._id);
   const dispatch = useDispatch();
 
-  // Fetch bookmarked posts on component mount
   useEffect(() => {
     const fetchBookmarkedPosts = async () => {
-      console.log("User ID:", _id);
+      if (!_id) {
+        console.error("User ID is not defined.");
+        return;
+      }
+
       try {
-        // Check if _id is defined before making the request
-        if (!_id) {
-          console.error("User ID is not defined.");
-          return;
-        }
-  
         const response = await fetch(`http://localhost:3001/users/${_id}/bookmarks`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-  
+
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-  
+
         const data = await response.json();
+        console.log("Bookmarked Posts Data:", data);
+
+        // Dispatch action to update bookmarked posts in Redux state
         dispatch(setBookmarkedPosts({ bookmarkedPosts: data }));
       } catch (error) {
         console.error("Error fetching bookmarked posts:", error.message);
       }
     };
-  
+
     fetchBookmarkedPosts();
   }, [_id, token, dispatch]);
 
@@ -65,7 +63,6 @@ const BookmarkPage = () => {
           flexBasis={isNonMobileScreens ? "42%" : undefined}
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
-          {/* Pass bookmarked posts to PostsWidget and set isBookmarkPage to true */}
           <PostsWidget isBookmarkPage={true} userId={loggedInUserId} />
         </Box>
         <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
