@@ -38,3 +38,53 @@ export const getUserById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+// Controller to delete a user by ID
+export const deleteUserById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Find user by ID and delete it from the database
+    const deletedUser = await User.findOneAndDelete({ _id: userId });
+
+    if (!deletedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+// Controller to update the role of a user by ID
+export const updateUserRoleById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { role } = req.body; // Assuming the new role is sent in the request body
+
+    // Validate if the role is either "admin" or "user"
+    if (role !== 'moderator' && role !== 'user') {
+      return res.status(400).json({ error: "Invalid role. Role must be either 'admin' or 'user'." });
+    }
+
+    // Find user by ID and update its role in the database
+    const updatedUser = await User.findByIdAndUpdate(userId, { role }, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+

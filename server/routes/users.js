@@ -7,7 +7,7 @@ import {
     getBookmarkedPosts,
 } from "../controllers/users.js";
 import {
-    getAllUsers
+    getAllUsers, deleteUserById, updateUserRoleById
 } from "../controllers/adminDashboard.js";
 import { verifyToken, adminAuth } from "../middleware/auth.js";
 
@@ -16,6 +16,12 @@ const router = express.Router();
 
 // Fetch all users (for admin dashboard)
 router.get("/getallusers", verifyToken, getAllUsers);
+
+// Delete user by ID
+router.delete("/:id", verifyToken, deleteUserById);
+
+// Update the role of a user by ID
+router.patch("/:id/role", verifyToken, updateUserRoleById);
 
 /* READ */
 router.get("/:id", verifyToken, getUser);
