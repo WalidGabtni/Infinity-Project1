@@ -188,6 +188,12 @@ const AdminDashboard = () => {
             <MenuItem onClick={() => handleRoleMenuItemClick('user')}>Users</MenuItem>
           </Menu>
         </Box>
+                  
+          <Box sx={{ marginBottom: '20px' }}>
+            <Typography variant="h6" gutterBottom>
+              Total: {filteredUsers.length}
+            </Typography>
+          </Box>
 
         {/* User table */}
         <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
@@ -222,19 +228,23 @@ const AdminDashboard = () => {
                   <TableCell>{user.impressions}</TableCell>
                   <TableCell>{user.role}</TableCell>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      {user._id !== loggedInUserId && user.role !== 'admin' && ( // Check if it's not the logged-in user and not an admin
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => handleRemoveUser(user._id)}
-                          sx={{ marginRight: '8px' }} // Add a slight margin to separate the buttons
-                        >
-                          Remove
-                        </Button>
+                  {user._id !== loggedInUserId && user.role !== 'admin' && ( // Check if it's not the logged-in user and not an admin
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => handleRemoveUser(user._id)}
+                            sx={{ marginRight: '15px' }} // Add a slight margin to separate the buttons
+                          >
+                            Remove
+                          </Button>
+                          {/* Only render the role menu if the user is not the logged-in user */}
+                          {user._id !== loggedInUserId && (
+                            <RoleMenu onSelectRole={(role) => updateRole(user._id, role)} />
+                          )}
+                        </Box>
                       )}
-                      <RoleMenu onSelectRole={(role) => updateRole(user._id, role)} />
-                    </Box>
+
                   </TableCell>
                 </TableRow>
               ))}
