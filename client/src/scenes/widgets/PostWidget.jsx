@@ -140,31 +140,32 @@ const PostWidget = ({
   };
 
   const handleEditComment = async (index, updatedText) => {
-    try {
-      const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${index}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: updatedText }),
-      });
+  try {
+    const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${index}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text: updatedText }),
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to update comment: ${response.status} - ${response.statusText}`);
-      }
-
-      const updatedPost = await response.json();
-
-      if (updatedPost && updatedPost.comments) {
-        setPostComments(updatedPost.comments);
-      } else {
-        console.error("Unexpected server response:", updatedPost);
-      }
-    } catch (error) {
-      console.error("Error updating comment:", error.message);
+    if (!response.ok) {
+      throw new Error(`Failed to update comment: ${response.status} - ${response.statusText}`);
     }
-  };
+
+    const updatedPost = await response.json();
+
+    if (updatedPost && updatedPost.comments) {
+      setPostComments(updatedPost.comments);
+    } else {
+      console.error("Unexpected server response:", updatedPost);
+    }
+  } catch (error) {
+    console.error("Error updating comment:", error.message);
+  }
+};
+
 
   const handleShare = async () => {
     try {
@@ -471,22 +472,26 @@ const PostWidget = ({
         )}
       </FlexBetween>
 
-
+          
       {isComments && postComments && (
         <Box mt="1rem">
           {postComments.map((comment, i) => (
             <React.Fragment key={`${postId}-${i}`}>
-              <Typography dangerouslySetInnerHTML={{ __html: comment.text}} />
               <Comment
                 key={`${postId}-${i}`}
                 color={main}
                 userPicturePath={comment.userPicturePath}
-                onDelete={() => handleDeleteComment(i)}
-                onEdit={(updatedText) => handleEditComment(i, updatedText)}
+                userId={comment.userId}
+                loggedInUserId={loggedInUserId}
+                comment={comment} // Pass the comment text as a prop
+                onDelete={() => handleDeleteComment(comment._id)}
+                onEdit={(updatedText) => handleEditComment(comment._id, updatedText)}
               />
+              
               <Divider /> 
             </React.Fragment>
           ))}
+          <Box mt="1rem"/>
           <FlexBetween gap="1.5rem" onClick={() => openForm()}>
             <InputBase
               type="text"

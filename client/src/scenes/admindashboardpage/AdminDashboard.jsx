@@ -16,21 +16,23 @@ import {
   Pagination,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import Navbar from 'scenes/navbar';
 import UserImage from 'components/UserImage';
 import RoleMenu from 'components/RoleMenu';
 
 const AdminDashboard = () => {
   const token = useSelector((state) => state.token);
-  const loggedInUserId = useSelector((state) => state.userId); // Assuming you have userId in your Redux state
+  const loggedInUserId = useSelector((state) => state.userId);
   const [users, setUsers] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentUserId, setCurrentUserId] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
+  const navigate = useNavigate();
 
-  const usersPerPage = 30; // Number of users per page
+  const usersPerPage = 30;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -59,10 +61,9 @@ const AdminDashboard = () => {
 
   const handleRemoveUser = async (userId) => {
     try {
-      // Check if the user to be removed is not the logged-in user and is not an admin
       const userToRemove = users.find(user => user._id === userId);
       if (!userToRemove || userToRemove._id === loggedInUserId || userToRemove.role === 'admin') {
-        return; // Do not remove the user
+        return;
       }
 
       const response = await fetch(`http://localhost:3001/users/${userId}`, {
@@ -77,7 +78,6 @@ const AdminDashboard = () => {
         throw new Error('Failed to remove user');
       }
 
-      // If user is successfully removed from the backend, update the users state to reflect the change
       setUsers(users.filter(user => user._id !== userId));
       console.log(`User with ID ${userId} removed successfully`);
     } catch (error) {
@@ -93,14 +93,13 @@ const AdminDashboard = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ role: newRole }), // Sending the new role in the request body
+        body: JSON.stringify({ role: newRole }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to update user role');
       }
 
-      // Update the user role in the existing user list
       const updatedUserIndex = users.findIndex(user => user._id === userId);
       if (updatedUserIndex !== -1) {
         const updatedUser = { ...users[updatedUserIndex], role: newRole };
@@ -126,9 +125,8 @@ const AdminDashboard = () => {
   const filteredUsers = users.filter((user) => {
     const roleMatch = filterRole ? user.role === filterRole : true;
     const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-    const query = searchQuery.toLowerCase().trim(); // Trim and convert search query to lowercase
+    const query = searchQuery.toLowerCase().trim();
 
-    // Check if either first name or last name matches the search query
     const nameMatch = fullName.includes(query);
 
     return roleMatch && nameMatch;
@@ -149,9 +147,7 @@ const AdminDashboard = () => {
       <Box m="2rem 0" />
 
       <Box sx={{ maxWidth: '1500px', margin: '0 auto' }}>
-        {/* Container for search bar and filter button */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: '20px' }}>
-          {/* Search bar on the top right */}
           <TextField
             label="Search..."
             variant="outlined"
@@ -159,43 +155,39 @@ const AdminDashboard = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             sx={{ width: '300px' }}
           />
-          <Box mt="20px" sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Box sx={{ mr: '180px' }}> {/* Adjust the left margin */}
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={handlePageChange}
-                color="primary"
-              />
-            </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleRoleButtonClick}
+            >
+              Filter By Role
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={() => setAnchorEl(null)}
+            >
+              <MenuItem onClick={() => handleRoleMenuItemClick('')}>All</MenuItem>
+              <MenuItem onClick={() => handleRoleMenuItemClick('admin')}>Admins</MenuItem>
+              <MenuItem onClick={() => handleRoleMenuItemClick('moderator')}>Moderators</MenuItem>
+              <MenuItem onClick={() => handleRoleMenuItemClick('user')}>Users</MenuItem>
+            </Menu>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate('/dashboard')}
+              sx={{ marginLeft: '10px' }}
+            >
+              Go to Dashboard
+            </Button>
           </Box>
-          {/* Filter button on the top left */}
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleRoleButtonClick}
-          >
-            Filter By Role
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={() => setAnchorEl(null)}
-          >
-            <MenuItem onClick={() => handleRoleMenuItemClick('')}>All</MenuItem>
-            <MenuItem onClick={() => handleRoleMenuItemClick('admin')}>Admins</MenuItem>
-            <MenuItem onClick={() => handleRoleMenuItemClick('moderator')}>Moderators</MenuItem>
-            <MenuItem onClick={() => handleRoleMenuItemClick('user')}>Users</MenuItem>
-          </Menu>
         </Box>
-                  
-          <Box sx={{ marginBottom: '20px' }}>
-            <Typography variant="h6" gutterBottom>
-              Total: {filteredUsers.length}
-            </Typography>
-          </Box>
-
-        {/* User table */}
+        <Box sx={{ marginBottom: '20px' }}>
+          <Typography variant="h6" gutterBottom>
+            Total: {filteredUsers.length}
+          </Typography>
+        </Box>
         <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
@@ -228,31 +220,27 @@ const AdminDashboard = () => {
                   <TableCell>{user.impressions}</TableCell>
                   <TableCell>{user.role}</TableCell>
                   <TableCell>
-                  {user._id !== loggedInUserId && user.role !== 'admin' && ( // Check if it's not the logged-in user and not an admin
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            onClick={() => handleRemoveUser(user._id)}
-                            sx={{ marginRight: '15px' }} // Add a slight margin to separate the buttons
-                          >
-                            Remove
-                          </Button>
-                          {/* Only render the role menu if the user is not the logged-in user */}
-                          {user._id !== loggedInUserId && (
-                            <RoleMenu onSelectRole={(role) => updateRole(user._id, role)} />
-                          )}
-                        </Box>
-                      )}
-
+                    {user._id !== loggedInUserId && user.role !== 'admin' && (
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => handleRemoveUser(user._id)}
+                          sx={{ marginRight: '15px' }}
+                        >
+                          Remove
+                        </Button>
+                        {user._id !== loggedInUserId && (
+                          <RoleMenu onSelectRole={(role) => updateRole(user._id, role)} />
+                        )}
+                      </Box>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-
-        {/* Pagination controls */}
         <Box mt="20px" sx={{ display: 'flex', justifyContent: 'center' }}>
           <Pagination
             count={totalPages}
