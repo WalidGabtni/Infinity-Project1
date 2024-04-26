@@ -12,7 +12,7 @@ const Dashboard = () => {
           title="pfe"
           width="1500"
           height="700"
-          src="https://app.powerbi.com/reportEmbed?reportId=58cc7e78-bf44-458c-bd11-3e99e1d6253e&autoAuth=true&ctid=d247c568-e781-4cd0-a593-1d0d689bc8ac"
+          src="https://app.powerbi.com/view?r=eyJrIjoiNGU2MzdhMWMtYTRkYS00NzdiLWIyYzctZDI0N2VkMWMzNDdlIiwidCI6IjJiMDg1MTdlLWM0MDYtNGM5MS05ODZkLWQ1MTNlM2Q0MWE2ZiJ9"
           frameBorder="0"
           allowFullScreen={true}
         ></iframe>
