@@ -150,12 +150,18 @@ const PublicTopicsClickWidget = ({ projectId }) => {
     }
   };
 
+  const isMemberAdminOrModerator = () => {
+    const member = project?.members.find(member => member.role === 'Admin' || member.role === 'Moderator' );
+    return member !== undefined;
+  };
+
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>
-      {publicTopics.map((topic, index) => (
-        <React.Fragment key={topic._id}>
-          {!topic.hidden || loggedInUserId === projectOwnerId ? (
-            <Box sx={{ position: 'relative', mb: '1rem' }}>
+    {publicTopics.map((topic, index) => (
+      <React.Fragment key={topic._id}>
+        {/* Check if the topic is hidden and the user is not an admin or moderator */}
+        {!topic.hidden || loggedInUserId === projectOwnerId || isMemberAdminOrModerator() ? (
+          <Box sx={{ position: 'relative', mb: '1rem' }}>
               {loggedInUserId === topic.createdBy.userId && (
                 <IconButton
                   sx={{ position: 'absolute', top: -20, right: -20 }}
@@ -179,7 +185,7 @@ const PublicTopicsClickWidget = ({ projectId }) => {
                         </Tooltip>
                       )}
                       {topic.title}
-                      {topic.hidden && loggedInUserId === projectOwnerId && (
+                      {topic.hidden && (
                         <Typography variant="body2" sx={{ color: 'white', marginLeft: '0.5rem' }}>
                           (Hidden Topic)
                         </Typography>

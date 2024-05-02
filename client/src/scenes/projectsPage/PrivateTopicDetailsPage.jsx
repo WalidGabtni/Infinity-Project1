@@ -94,6 +94,11 @@ const PrivateTopicDetailsPage = () => {
   const totalItems = topicDetails ? topicDetails.totalTopics : 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+  const isMemberAdminOrModerator = () => {
+    const member = project?.members.find(member => member.role === 'Admin' || member.role === 'Moderator');
+    return member !== undefined;
+  };
+
   return (
     <div>
       <Navbar />
@@ -114,7 +119,9 @@ const PrivateTopicDetailsPage = () => {
           <Grid container spacing={2} justifyContent="flex-end" >
             <Grid item >
               {/* Conditionally render TopicModerationActions only if the user is the project owner */}
-              {userId === projectOwnerId && <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={false} />}
+              {isMemberAdminOrModerator() && (
+                  <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={false} />
+                )}
             </Grid>
             <Grid item>
               <Button onClick={handleNewTopicClick} variant="contained" color="primary" size="large">

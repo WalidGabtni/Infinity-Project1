@@ -23,6 +23,8 @@ const PublicTopicDetailsPage = () => {
   const project = projects.find((proj) => proj._id === projectId);
   const navigate = useNavigate();
   const projectOwnerId = project?.userId;
+  const projectAdminId = project?.userId;
+  const projectModeratorId = project?.userId;
 
   useEffect(() => {
     const fetchTopicDetails = async () => {
@@ -89,7 +91,11 @@ const PublicTopicDetailsPage = () => {
   const totalItems = topicDetails ? topicDetails.totalTopics : 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const userRole = useSelector((state) => state.user?.role);
+  const isMemberAdminOrModerator = () => {
+    const member = project?.members.find(member => member.role === 'Admin' || member.role === 'Moderator');
+    return member !== undefined;
+  };
+
 
   return (
     <div>
@@ -105,9 +111,9 @@ const PublicTopicDetailsPage = () => {
           <Grid container spacing={2} justifyContent="flex-end">
             <Grid item>
               {/* Render TopicModerationActions if user role is not "Member" */}
-              {userRole !== 'Member' && (
-                <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={true} />
-              )}
+              {isMemberAdminOrModerator() && (
+                  <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={true} />
+                )}
             </Grid>
             <Grid item>
               <Button onClick={handleNewTopicClick} variant="contained" color="primary" size="large">

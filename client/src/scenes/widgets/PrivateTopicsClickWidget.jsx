@@ -163,11 +163,16 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
     );
   }
 
+  const isMemberAdminOrModerator = () => {
+    const member = project?.members.find(member => member.role === 'Admin' || member.role === 'Moderator' );
+    return member !== undefined;
+  };
+
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>
       {privateTopics.map((topic, index) => {
-        if (topic.hidden && loggedInUserId !== projectOwnerId) {
-          return null; // Skip rendering for hidden topics if not the project owner
+        if (topic.hidden && loggedInUserId !== projectOwnerId && !isMemberAdminOrModerator()) {
+          return null; // Skip rendering for hidden topics if not the project owner or admin/moderator
         }
 
         return (
@@ -195,11 +200,13 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
                       </Tooltip>
                     )}
                     {topic.title}
-                    {topic.hidden && loggedInUserId === projectOwnerId && (
-                      <Typography variant="body2" sx={{ color: 'white', marginLeft: '0.5rem' }}>
-                        (Hidden Topic)
-                      </Typography>
-                    )}
+                    {topic.hidden && (
+                        <Typography variant="body2" sx={{ color: 'white', marginLeft: '0.5rem' }}>
+                          (Hidden Topic)
+                        </Typography>
+                      )}
+
+
                   </Typography>
                 </Link>
                 <Typography variant="body1" sx={{ color: 'neutral.main', mb: '0.5rem' }} dangerouslySetInnerHTML={{ __html: topic.content }} />
