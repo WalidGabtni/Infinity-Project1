@@ -25,6 +25,9 @@ const PrivateTopicDetailsPage = () => {
   const project = projects.find((project) => project._id === projectId);
   const navigate = useNavigate();
   const projectOwnerId = project?.userId; // Fetch project owner's ID
+  const user = useSelector((state) => state.user);
+  const { members } = project;
+
 
   useEffect(() => {
     const fetchTopicDetails = async () => {
@@ -99,6 +102,11 @@ const PrivateTopicDetailsPage = () => {
     return member !== undefined;
   };
 
+  const isMember = members.some((member) => member.userId === user._id);
+  const isAdmin = members.find((member) => member.userId === user._id && member.role === 'Admin');
+  const isModerator = members.find((member) => member.userId === user._id && member.role === 'Moderator');
+  const isOwner = user._id === projectOwnerId;
+
   return (
     <div>
       <Navbar />
@@ -119,7 +127,7 @@ const PrivateTopicDetailsPage = () => {
           <Grid container spacing={2} justifyContent="flex-end" >
             <Grid item >
               {/* Conditionally render TopicModerationActions only if the user is the project owner */}
-              {isMemberAdminOrModerator() && (
+              {(isAdmin || isOwner || isModerator) && (
                   <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={false} />
                 )}
             </Grid>

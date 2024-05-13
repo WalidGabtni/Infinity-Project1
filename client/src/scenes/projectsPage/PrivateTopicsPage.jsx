@@ -72,8 +72,6 @@ const PrivateTopicsPage = () => {
     }
 };
 
-  
-  
 
   const handleNewTopicClick = () => {
     setIsFormOpen(!isFormOpen); // Toggle the form visibility

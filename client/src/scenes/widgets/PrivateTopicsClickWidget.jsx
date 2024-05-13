@@ -20,6 +20,9 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
   const token = useSelector((state) => state.token);
   const project = useSelector((state) => state.projects.find((project) => project._id === projectId));
   const projectOwnerId = project?.userId;
+  const { members } = project;
+  const user = useSelector((state) => state.user);
+  const loggedInUser = useSelector((state) => state.user);
 
   const fetchPrivateTopics = async () => {
     try {
@@ -155,92 +158,94 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
     }
   };
 
-  if (!loggedInUserId || !project || !projectOwnerId || !projectOwnerId === loggedInUserId) {
-    return (
+  {loggedInUser && project && project.members.some(member => member.userId === loggedInUser._id) && (
       <WidgetWrapper>
         <Typography variant="body1">You have to be a member or the owner to access this page.</Typography>
       </WidgetWrapper>
-    );
-  }
+  )}
 
-  const isMemberAdminOrModerator = () => {
-    const member = project?.members.find(member => member.role === 'Admin' || member.role === 'Moderator' );
-    return member !== undefined;
-  };
+  const isMember = members.some((member) => member.userId === user._id);
+  const isAdmin = members.find((member) => member.userId === user._id && member.role === 'Admin');
+  const isModerator = members.find((member) => member.userId === user._id && member.role === 'Moderator');
+  const isOwner = user._id === projectOwnerId;
 
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>
-      {privateTopics.map((topic, index) => {
-        if (topic.hidden && loggedInUserId !== projectOwnerId && !isMemberAdminOrModerator()) {
-          return null; // Skip rendering for hidden topics if not the project owner or admin/moderator
-        }
-
-        return (
-          <Box key={topic._id} sx={{ position: 'relative', mb: '1rem' }}>
-            {loggedInUserId === topic.createdBy.userId && (
-              <IconButton
-                sx={{ position: 'absolute', top: -20, right: -20 }}
-                onClick={(event) => handleMenuOpen(event, topic._id)}
-              >
-                <MoreVertIcon />
-              </IconButton>
-            )}
-            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Link to={`/projects/${projectId}/private-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
-                  <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem', display: 'flex', alignItems: 'center' }}>
-                    {topic.pinned && (
-                      <Tooltip title="Pinned Topic" arrow>
-                        <PinIcon sx={{ marginRight: '0.3rem', color: 'green', borderRadius: '50%' }} />
-                      </Tooltip>
-                    )}
-                    {topic.locked && (
-                      <Tooltip title="Locked Topic" arrow>
-                        <LockIcon sx={{ marginRight: '0.3rem', borderRadius: '50%' }} />
-                      </Tooltip>
-                    )}
-                    {topic.title}
-                    {topic.hidden && (
-                        <Typography variant="body2" sx={{ color: 'white', marginLeft: '0.5rem' }}>
-                          (Hidden Topic)
-                        </Typography>
+      {loggedInUser && project && project.members.some(member => member.userId === loggedInUser._id) ? (
+        privateTopics.map((topic, index) => {
+          if (topic.hidden && !(isAdmin || isOwner || isModerator)) {
+            return null; // Skip rendering for hidden topics if not the project owner or admin/moderator
+          }
+  
+          return (
+            <Box key={topic._id} sx={{ position: 'relative', mb: '1rem' }}>
+              {loggedInUserId === topic.createdBy.userId && (
+                <IconButton
+                  sx={{ position: 'absolute', top: -20, right: -20 }}
+                  onClick={(event) => handleMenuOpen(event, topic._id)}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              )}
+              <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Link to={`/projects/${projectId}/private-topics/${topic._id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
+                    <Typography variant="h3" sx={{ color: 'primary.main', mb: '0.5rem', display: 'flex', alignItems: 'center' }}>
+                      {topic.pinned && (
+                        <Tooltip title="Pinned Topic" arrow>
+                          <PinIcon sx={{ marginRight: '0.3rem', color: 'green', borderRadius: '50%' }} />
+                        </Tooltip>
                       )}
-
-
-                  </Typography>
-                </Link>
-                <Typography variant="body1" sx={{ color: 'neutral.main', mb: '0.5rem' }} dangerouslySetInnerHTML={{ __html: topic.content }} />
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none' }}>
-                      <UserImage image={topic.createdBy.picturePath} size="50px" />
-                    </Link>
-                    <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none', display: 'inline-block', marginLeft: '0.5rem' }}>
-                      <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem', fontSize: '1.1rem' }}>
-                        <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.firstName}</span> <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.lastName}</span>
-                      </Typography>
-                    </Link>
+                      {topic.locked && (
+                        <Tooltip title="Locked Topic" arrow>
+                          <LockIcon sx={{ marginRight: '0.3rem', borderRadius: '50%' }} />
+                        </Tooltip>
+                      )}
+                      {topic.title}
+                      {topic.hidden && (
+                          <Typography variant="body2" sx={{ color: 'white', marginLeft: '0.5rem' }}>
+                            (Hidden Topic)
+                          </Typography>
+                        )}
+  
+  
+                    </Typography>
+                  </Link>
+                  <Typography variant="body1" sx={{ color: 'neutral.main', mb: '0.5rem' }} dangerouslySetInnerHTML={{ __html: topic.content }} />
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none' }}>
+                        <UserImage image={topic.createdBy.picturePath} size="50px" />
+                      </Link>
+                      <Link to={`/profile/${topic.createdBy.userId}`} style={{ textDecoration: 'none', display: 'inline-block', marginLeft: '0.5rem' }}>
+                        <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem', fontSize: '1.1rem' }}>
+                          <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.firstName}</span> <span style={{ color: 'white', fontSize: '1.1rem' }}>{topic.createdBy.lastName}</span>
+                        </Typography>
+                      </Link>
+                    </Box>
+                    <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem' }}>
+                      {getTimeElapsed(topic.createdAt)}
+                    </Typography>
                   </Box>
-                  <Typography variant="body2" sx={{ color: 'white', mt: '0.5rem' }}>
-                    {getTimeElapsed(topic.createdAt)}
-                  </Typography>
                 </Box>
               </Box>
+              {index !== privateTopics.length - 1 && <Divider variant="middle" />}
+              <Menu
+                anchorEl={anchorEl}
+                open={selectedTopicId === topic._id}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'delete')}>Delete</MenuItem>
+                <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'edit')}>Edit</MenuItem>
+              </Menu>
             </Box>
-            {index !== privateTopics.length - 1 && <Divider variant="middle" />}
-            <Menu
-              anchorEl={anchorEl}
-              open={selectedTopicId === topic._id}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'delete')}>Delete</MenuItem>
-              <MenuItem onClick={() => handleMenuItemClick(projectId, topic._id, loggedInUserId, 'edit')}>Edit</MenuItem>
-            </Menu>
-          </Box>
-        );
-      })}
+          );
+        })
+      ) : (
+        <Typography variant="body1">You have to be a member or the owner to access this page.</Typography>
+      )}
       <Dialog open={isConfirmationOpen} onClose={() => setIsConfirmationOpen(false)}>
         <DialogTitle>Confirmation</DialogTitle>
         <DialogContent>
@@ -262,6 +267,7 @@ const PrivateTopicsClickWidget = ({ projectId }) => {
       )}
     </WidgetWrapper>
   );
+  
 };
 
 export default PrivateTopicsClickWidget;

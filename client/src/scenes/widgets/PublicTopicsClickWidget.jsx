@@ -21,6 +21,8 @@ const PublicTopicsClickWidget = ({ projectId }) => {
   const projects = useSelector((state) => state.projects);
   const project = projects.find((project) => project._id === projectId);
   const projectOwnerId = project?.userId;
+  const { members } = project;
+  const user = useSelector((state) => state.user);
 
   const fetchPublicTopics = async () => {
     try {
@@ -150,17 +152,17 @@ const PublicTopicsClickWidget = ({ projectId }) => {
     }
   };
 
-  const isMemberAdminOrModerator = () => {
-    const member = project?.members.find(member => member.role === 'Admin' || member.role === 'Moderator' );
-    return member !== undefined;
-  };
+  const isMember = members.some((member) => member.userId === user._id);
+  const isAdmin = members.find((member) => member.userId === user._id && member.role === 'Admin');
+  const isModerator = members.find((member) => member.userId === user._id && member.role === 'Moderator');
+  const isOwner = user._id === projectOwnerId;
 
   return (
     <WidgetWrapper sx={{ padding: '1.5rem' }}>
     {publicTopics.map((topic, index) => (
       <React.Fragment key={topic._id}>
         {/* Check if the topic is hidden and the user is not an admin or moderator */}
-        {!topic.hidden || loggedInUserId === projectOwnerId || isMemberAdminOrModerator() ? (
+        {!topic.hidden || isOwner || isAdmin || isModerator ? (
           <Box sx={{ position: 'relative', mb: '1rem' }}>
               {loggedInUserId === topic.createdBy.userId && (
                 <IconButton

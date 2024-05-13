@@ -25,6 +25,8 @@ const PublicTopicDetailsPage = () => {
   const projectOwnerId = project?.userId;
   const projectAdminId = project?.userId;
   const projectModeratorId = project?.userId;
+  const user = useSelector((state) => state.user);
+  const { members } = project;
 
   useEffect(() => {
     const fetchTopicDetails = async () => {
@@ -91,10 +93,10 @@ const PublicTopicDetailsPage = () => {
   const totalItems = topicDetails ? topicDetails.totalTopics : 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const isMemberAdminOrModerator = () => {
-    const member = project?.members.find(member => member.role === 'Admin' || member.role === 'Moderator');
-    return member !== undefined;
-  };
+  const isMember = members.some((member) => member.userId === user._id);
+  const isAdmin = members.find((member) => member.userId === user._id && member.role === 'Admin');
+  const isModerator = members.find((member) => member.userId === user._id && member.role === 'Moderator');
+  const isOwner = user._id === projectOwnerId;
 
 
   return (
@@ -111,7 +113,7 @@ const PublicTopicDetailsPage = () => {
           <Grid container spacing={2} justifyContent="flex-end">
             <Grid item>
               {/* Render TopicModerationActions if user role is not "Member" */}
-              {isMemberAdminOrModerator() && (
+              {(isAdmin || isOwner || isModerator) && (
                   <TopicModerationActions projectId={projectId} topicId={topicId} token={token} isPublic={true} />
                 )}
             </Grid>

@@ -56,6 +56,7 @@ const ProjectProfileWidget = ({ project }) => {
 
   const isMember = members.some((member) => member.userId === user._id);
   const isAdmin = members.find((member) => member.userId === user._id && member.role === 'Admin');
+  const isModerator = members.find((member) => member.userId === user._id && member.role === 'Moderator');
   const isOwner = user._id === projectOwnerId;
 
   return (
@@ -98,7 +99,7 @@ const ProjectProfileWidget = ({ project }) => {
             </Button>
           </div>
 
-          {isMember && (isAdmin || isOwner) && (
+          {isMember && (isMember) && (
             <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
               {(isAdmin || isOwner) && ( // Show button if user is admin or owner
                 <Button
@@ -111,6 +112,7 @@ const ProjectProfileWidget = ({ project }) => {
                   Members Management
                 </Button>
               )}
+              
               <Button variant="contained" color="error" size="medium" onClick={() => setOpenDialog(true)}>
                 Leave Project
               </Button>
