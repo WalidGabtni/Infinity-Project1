@@ -19,13 +19,15 @@ import { verifyToken } from "./middleware/auth.js";
 import User from "./models/User.js";
 import Post from "./models/Post.js";
 import projectRoutes from "./routes/projects.js";
+import CalculController from "./controllers/calcul.js"; // Import CalculController
 
-/* CONFIGURATIONS */
+// CONFIGURATIONS
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
 const app = express();
 
+// Middleware setup
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -44,7 +46,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-/* FILE STORAGE */
+// FILE STORAGE
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "public/assets"));
@@ -56,35 +58,22 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-/* ROUTES WITH FILES */
+// ROUTES WITH FILES
 app.post("/auth/register", upload.single("picture"), register);
 app.post("/posts", verifyToken, upload.single("picture"), createPost);
-
-// Additional route for creating projects
 app.post("/projects", verifyToken, upload.fields([{ name: 'projectImage', maxCount: 1 }, { name: 'projectCover', maxCount: 1 }]), createProject);
-
-
-/* ROUTE FOR IMAGE UPLOAD */
 app.post("/upload-image", upload.single("projectImage"), (req, res) => {
   try {
-    // Access the uploaded file details
     const { filename } = req.file;
-
-    // Send a success response with the file details
     res.status(200).json({ message: 'Image uploaded successfully', filename });
   } catch (error) {
     console.error('Error uploading image:', error);
     res.status(500).json({ error: `Internal server error: ${error.message}` });
   }
 });
-
-/* ROUTE FOR COVER UPLOAD */
 app.post("/upload-cover", upload.single("projectCover"), (req, res) => {
   try {
-    // Access the uploaded file details
     const { filename } = req.file;
-
-    // Send a success response with the file details
     res.status(200).json({ message: 'Cover uploaded successfully', filename });
   } catch (error) {
     console.error('Error uploading cover:', error);
@@ -92,20 +81,36 @@ app.post("/upload-cover", upload.single("projectCover"), (req, res) => {
   }
 });
 
-/* ROUTES */
+// ROUTES
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
 app.use("/projects", projectRoutes);
-// Notification routes
 app.use('/notifications', notificationRoutes);
 
-/* MONGOOSE SETUP */
+// MONGOOSE SETUP
 const PORT = process.env.PORT || 6001;
 
-mongoose
-  .connect(process.env.MONGO_URL)
-  .then(() => {
+mongoose.connect(process.env.MONGO_URL)
+  .then(async () => {
+    // Update counts for all users when the application starts
+    await updateCountsForAllUsers();
+    // Start the server
     app.listen(PORT, () => console.log(`Server port: ${PORT}`));
   })
   .catch((error) => console.error("Error connecting to MongoDB:", error));
+
+// Function to update counts for all users
+async function updateCountsForAllUsers() {
+  try {
+    // Find all users in the database
+    const users = await User.find();
+    // Iterate over each user and update counts
+    for (const user of users) {
+      await CalculController.updateCounts(user._id);
+    }
+    console.log("Counts updated for all users");
+  } catch (error) {
+    console.error("Error updating counts for all users:", error);
+  }
+}

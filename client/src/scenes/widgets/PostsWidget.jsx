@@ -18,6 +18,18 @@ const PostsWidget = ({ userId, isProfile = false, searchResults, isBookmarkPage 
     dispatch(setPosts({ posts: data }));
   };
 
+  const getUserPosts = async () => {
+    const response = await fetch(
+      `http://localhost:3001/posts/${userId}/posts`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    const data = await response.json();
+    dispatch(setPosts({ posts: data }));
+  };
+
   const getBookmarkedPosts = async () => {
     try {
       const response = await fetch(`http://localhost:3001/users/${userId}/bookmarks`, {
@@ -38,16 +50,14 @@ const PostsWidget = ({ userId, isProfile = false, searchResults, isBookmarkPage 
 
   useEffect(() => {
     if (isProfile) {
-      // Fetch user-specific posts
-      // Example: getUserPosts();
+      getUserPosts();
     } else if (isBookmarkPage) {
-      // Fetch bookmarked posts
       getBookmarkedPosts();
     } else {
-      // Fetch all posts
       getPosts();
     }
-  }, [userId, token, isProfile, isBookmarkPage, dispatch]);
+}, [userId, token, isProfile, isBookmarkPage, dispatch]);
+
 
   const postsToRender = isBookmarkPage
     ? posts.filter((post) => bookmarkedPosts.includes(post._id))
