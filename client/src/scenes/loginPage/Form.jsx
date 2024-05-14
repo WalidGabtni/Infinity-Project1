@@ -48,6 +48,7 @@ const initialValuesLogin = {
 
 const Form = () => {
   const [pageType, setPageType] = useState("login");
+  const [errorMessage, setErrorMessage] = useState("");
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -56,7 +57,6 @@ const Form = () => {
   const isRegister = pageType === "register";
 
   const register = async (values, onSubmitProps) => {
-    // this allows us to send form info with image
     const formData = new FormData();
     for (let value in values) {
       formData.append(value, values[value]);
@@ -86,7 +86,9 @@ const Form = () => {
     });
     const loggedIn = await loggedInResponse.json();
     onSubmitProps.resetForm();
-    if (loggedIn) {
+  
+    if (loggedInResponse.status >= 200 && loggedInResponse.status < 300) {
+      // Successful login
       dispatch(
         setLogin({
           user: loggedIn.user,
@@ -94,10 +96,14 @@ const Form = () => {
         })
       );
       navigate("/home");
+    } else {
+      // Failed login
+      setErrorMessage("Email or password is incorrect");
     }
   };
 
   const handleFormSubmit = async (values, onSubmitProps) => {
+    setErrorMessage(""); 
     if (isLogin) await login(values, onSubmitProps);
     if (isRegister) await register(values, onSubmitProps);
   };
@@ -119,6 +125,11 @@ const Form = () => {
         resetForm,
       }) => (
         <form onSubmit={handleSubmit}>
+          {errorMessage && (
+            <Typography variant="body2" color="error">
+              {errorMessage}
+            </Typography>
+          )}
           <Box
             display="grid"
             gap="30px"
@@ -272,4 +283,4 @@ const Form = () => {
   );
 };
 
-export default Form; 
+export default Form;
