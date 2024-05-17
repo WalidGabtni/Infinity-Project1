@@ -35,7 +35,7 @@ const FriendListWidget = ({ userId }) => {
         fontWeight="500"
         sx={{ mb: "1.5rem" }}
       >
-        Liste d'ami(e)s
+        Friend(s) list
       </Typography>
       <Box display="flex" flexDirection="column" gap="1.5rem">
         {Array.isArray(friends) && friends.map((friend) => (

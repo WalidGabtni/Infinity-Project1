@@ -261,13 +261,13 @@ const Navbar = ({ updateSearchResults }) => {
         
         <FlexBetween gap="2rem">
                             <Link to="/about-us" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <Typography sx={{ fontSize: '18px' }}>À propos de nous</Typography>
+                    <Typography sx={{ fontSize: '18px' }}>About Us</Typography>
                 </Link>
                 <Link to="/support" style={{ textDecoration: 'none', color: 'inherit' }}>
                     <Typography sx={{ fontSize: '18px' }}>Support</Typography>
                 </Link>
                 <Link to="/events" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <Typography sx={{ fontSize: '18px' }}>Événements</Typography>
+                    <Typography sx={{ fontSize: '18px' }}>Events</Typography>
                 </Link>
 
         { /* BROWSE MENU */} 
@@ -282,7 +282,7 @@ const Navbar = ({ updateSearchResults }) => {
         }}
         {...bindTrigger(popupState)}
       >
-        Parcourir
+        Browse
       </Typography>
         <Popover
             {...bindPopover(popupState)}
@@ -319,31 +319,7 @@ const Navbar = ({ updateSearchResults }) => {
                 },
                 }}
             >
-                Projets
-            </MenuItem>
-            <MenuItem
-                onClick={popupState.close}
-                sx={{
-                fontSize: '16px',
-                padding: '10px 50px',
-                '&:hover': {
-                    backgroundColor: primaryLight,
-                },
-                }}
-            >
-                Nouvelles et Annonces
-            </MenuItem>
-            <MenuItem
-                onClick={popupState.close}
-                sx={{
-                fontSize: '16px',
-                padding: '10px 50px',
-                '&:hover': {
-                    backgroundColor: primaryLight,
-                },
-                }}
-            >
-                Statistiques Web
+                Projects
             </MenuItem>
             </Box>
         </Popover>

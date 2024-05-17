@@ -67,7 +67,7 @@ const MyPostWidget = ({ picturePath }) => {
       <FlexBetween gap="1.5rem" onClick={openForm}>
         <UserImage image={picturePath} />
         <InputBase
-          placeholder="Qu'est-ce qui préoccupe votre esprit..."
+          placeholder="What's on your mind?"
           sx={{
             width: "100%",
             backgroundColor: palette.neutral.light,
