@@ -49,6 +49,7 @@ const initialValuesLogin = {
 const Form = () => {
   const [pageType, setPageType] = useState("login");
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -73,8 +74,11 @@ const Form = () => {
     const savedUser = await savedUserResponse.json();
     onSubmitProps.resetForm();
 
-    if (savedUser) {
+    if (savedUserResponse.status >= 200 && savedUserResponse.status < 300) {
+      setSuccessMessage("Account created successfully. Please log in.");
       setPageType("login");
+    } else {
+      setErrorMessage("Registration failed. Please try again.");
     }
   };
 
@@ -103,7 +107,8 @@ const Form = () => {
   };
 
   const handleFormSubmit = async (values, onSubmitProps) => {
-    setErrorMessage(""); 
+    setErrorMessage("");
+    setSuccessMessage("");
     if (isLogin) await login(values, onSubmitProps);
     if (isRegister) await register(values, onSubmitProps);
   };
@@ -128,6 +133,11 @@ const Form = () => {
           {errorMessage && (
             <Typography variant="body2" color="error">
               {errorMessage}
+            </Typography>
+          )}
+          {successMessage && (
+            <Typography variant="body2" style={{ color: 'green' }}>
+              {successMessage}
             </Typography>
           )}
           <Box
