@@ -19,7 +19,8 @@ import { verifyToken } from "./middleware/auth.js";
 import User from "./models/User.js";
 import Post from "./models/Post.js";
 import projectRoutes from "./routes/projects.js";
-import CalculController from "./controllers/calcul.js"; // Import CalculController
+import { etl } from "./etl.js"; // Import the etl function
+
 
 // CONFIGURATIONS
 const __filename = fileURLToPath(import.meta.url);
@@ -81,6 +82,19 @@ app.post("/upload-cover", upload.single("projectCover"), (req, res) => {
   }
 });
 
+app.get('/transformed-data', async (req, res) => {
+  try {
+      // Call the etl function to perform ETL and get the transformed data
+      const transformedData = await etl();
+
+      // Send the transformed data as a JSON response
+      res.json(transformedData);
+  } catch (error) {
+      console.error('Error fetching transformed data:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // ROUTES
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
@@ -88,29 +102,12 @@ app.use("/posts", postRoutes);
 app.use("/projects", projectRoutes);
 app.use('/notifications', notificationRoutes);
 
-// MONGOOSE SETUP
+/* MONGOOSE SETUP */
 const PORT = process.env.PORT || 6001;
 
-mongoose.connect(process.env.MONGO_URL)
-  .then(async () => {
-    // Update counts for all users when the application starts
-    await updateCountsForAllUsers();
-    // Start the server
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => {
     app.listen(PORT, () => console.log(`Server port: ${PORT}`));
   })
   .catch((error) => console.error("Error connecting to MongoDB:", error));
-
-// Function to update counts for all users
-async function updateCountsForAllUsers() {
-  try {
-    // Find all users in the database
-    const users = await User.find();
-    // Iterate over each user and update counts
-    for (const user of users) {
-      await CalculController.updateCounts(user._id);
-    }
-    console.log("Counts updated for all users");
-  } catch (error) {
-    console.error("Error updating counts for all users:", error);
-  }
-}
