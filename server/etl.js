@@ -38,7 +38,8 @@ function transformPosts(posts) {
             userId: comment.userId,
             text: comment.text
         })),
-        sharedBy: post.sharedBy
+        sharedBy: post.sharedBy,
+        createdAt: post.createdAt // Include the createdAt field
         // Add more transformations as needed
     }));
 }
