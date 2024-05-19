@@ -106,8 +106,8 @@ function transformProjects(projects) {
                 comment: comment.comment,
                 createdBy: comment.createdBy
             }))
-        }))
-        // Add more transformations as needed
+        })),
+        createdAt: project.createdAt
     }));
 }
 
