@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bar, Pie, Line } from 'react-chartjs-2';
+import { Bar, Pie, Line, Doughnut } from 'react-chartjs-2';
 import Navbar from 'scenes/navbar';
 import 'chart.js/auto';
 import 'components/Dashboard.css'; // Make sure to create this file for custom styles
@@ -67,6 +67,8 @@ const projectsOverTimeData = transformedData.projects.reduce((acc, project) => {
   return acc;
 }, {});
 
+
+
 // Combine posts and projects data for line chart
 const combinedOverTimeData = {};
 Object.entries(postsOverTimeData).forEach(([date, postCount]) => {
@@ -116,39 +118,60 @@ const lineChartData = {
 const postsPerUser = transformedData.posts.reduce((acc, post) => {
   const userId = post.userId;
   if (!acc[userId]) {
-    acc[userId] = 0;
+    acc[userId] = { posts: 0, projects: 0 };
   }
-  acc[userId]++;
+  acc[userId].posts++;
   return acc;
 }, {});
 
-// Map user IDs to first name and last name
-const postsPerUserWithNames = Object.entries(postsPerUser).map(([userId, postCount]) => {
-  const user = transformedData.users.find(user => user.id === userId);
-  const userName = `${user.firstName} ${user.lastName}`;
-  return { userName, postCount };
+// Calculate number of projects for each user
+transformedData.projects.forEach(project => {
+  const userId = project.userId;
+  if (!postsPerUser[userId]) {
+    postsPerUser[userId] = { posts: 0, projects: 0 };
+  }
+  postsPerUser[userId].projects++;
 });
 
-// Sort the data by number of posts
-const sortedPostsPerUser = postsPerUserWithNames.sort((a, b) => b.postCount - a.postCount);
+// Map user IDs to first name and last name and create the combined dataset
+const combinedUserData = Object.entries(postsPerUser).map(([userId, counts]) => {
+  const user = transformedData.users.find(user => user.id === userId);
+  const userName = `${user.firstName} ${user.lastName}`;
+  return { userName, ...counts };
+});
 
-// Extract user names and post counts
-const userNames = sortedPostsPerUser.map(({ userName }) => userName);
-const postCounts = sortedPostsPerUser.map(({ postCount }) => postCount);
+// Sort the data by user name
+const sortedUserData = combinedUserData.sort((a, b) => a.userName.localeCompare(b.userName));
 
-// Bar chart data for posts per user
-const postsPerUserData = {
+// Extract user names and counts
+const userNames = sortedUserData.map(({ userName }) => userName);
+const postCounts = sortedUserData.map(({ posts }) => posts);
+const projectCounts = sortedUserData.map(({ projects }) => projects);
+
+// Bar chart data for posts and projects per user
+const userData = {
   labels: userNames,
-  datasets: [{
-    label: 'Number of Posts',
-    data: postCounts,
-    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-    borderColor: 'rgba(255, 99, 132, 1)',
-    borderWidth: 1
-  }]
+  datasets: [
+    {
+      label: 'Number of Posts',
+      data: postCounts,
+      backgroundColor: 'rgba(255, 99, 132, 0.2)',
+      borderColor: 'rgba(255, 99, 132, 1)',
+      borderWidth: 1,
+      barPercentage: 1, // Adjust the width of the bars for posts
+      categoryPercentage: 0.3 // Adjust the spacing between the bars
+    },
+    {
+      label: 'Number of Projects',
+      data: projectCounts,
+      backgroundColor: 'rgba(60, 179, 113, 0.2)',
+      borderColor: 'rgba(60, 179, 113, 1)',
+      borderWidth: 1,
+      barPercentage: 1, // Adjust the width of the bars for projects
+      categoryPercentage: 0.3 // Adjust the spacing between the bars
+    }
+  ]
 };
-
-
 
   // Pie chart data
   const pieData = {
@@ -163,6 +186,40 @@ const postsPerUserData = {
       borderWidth: 1
     }]
   };
+
+  // Calculate members count for each project
+const projectMembersCount = transformedData.projects.map(project => ({
+  projectName: project.name,
+  membersCount: project.members.length
+}));
+
+// Extract project names and members count
+const projectNames = projectMembersCount.map(({ projectName }) => projectName);
+const membersCount = projectMembersCount.map(({ membersCount }) => membersCount);
+
+// Function to generate random colors
+function generateRandomColor() {
+  return `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.6)`;
+}
+
+// Doughnut chart data for members count per project
+const doughnutData = {
+  labels: projectNames,
+  datasets: [{
+    label: 'Members Count',
+    data: membersCount,
+    backgroundColor: projectNames.map(() => generateRandomColor()), // Generate colors dynamically
+    borderWidth: 1
+  }]
+};
+
+// Doughnut chart options
+const doughnutOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+};
+
+
 
   return (
     <>
@@ -230,6 +287,11 @@ const postsPerUserData = {
             <Line
               data={lineChartData}
               options={{
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  },
+                },
                 responsive: true,
                 maintainAspectRatio: false
               }}
@@ -238,15 +300,16 @@ const postsPerUserData = {
                 <div className="chart-container bar-chart">
                   <h2 className="chart-title">Number of Posts for Each User</h2>
                   <Bar
-                    data={postsPerUserData}
+                    data={userData}
                     options={{
                       responsive: true,
+                      indexAxis: 'x', // Display bars horizontally
                       maintainAspectRatio: false,
                       scales: {
                         x: {
-                          stacked: true,
-                          barPercentage: 0.5, // Adjust the width of the bars
-                          categoryPercentage: 0.8 // Adjust the spacing between the bars
+                          stacked: false,
+                          barPercentage: 0.3, // Adjust the width of the bars
+                          categoryPercentage: 0.6 // Adjust the spacing between the bars
                         },
                         y: {
                           beginAtZero: true
@@ -254,6 +317,10 @@ const postsPerUserData = {
                       }
                     }}
                   />
+                </div>
+                <div className="chart-container doughnut-chart"> {/* <-- Adjusted class name */}
+                  <h2 className="chart-title">Doughnut Chart for Members Count per Project</h2>
+                  <Doughnut data={doughnutData} options={doughnutOptions} />
                 </div>
         </div>
       </div>

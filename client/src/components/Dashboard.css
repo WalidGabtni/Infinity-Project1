@@ -16,15 +16,16 @@
 .chart-container {
   width: 45%;
   margin: 20px;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 100px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgb(4, 197, 204);
 }
 
 .bar-chart,
 .pie-chart,
+.doughnut-chart,
 .line-chart {
-  height: 400px; /* Set a fixed height for consistency */
+  height: 600px; /* Set a fixed height for consistency */
 }
 
 .chart-title {
