@@ -216,7 +216,7 @@ const Form = () => {
                       >
                         <input {...getInputProps()} />
                         {!values.picture ? (
-                          <p>Ajouter une image ici (.jpg .jpeg .png)</p>
+                          <p>Add an image here. (.jpg .jpeg .png)</p>
                         ) : (
                           <FlexBetween>
                             <Typography>{values.picture.name}</Typography>
@@ -241,7 +241,7 @@ const Form = () => {
               sx={{ gridColumn: "span 4" }}
             />
             <TextField
-              label="Mot de passe"
+              label="password"
               type="password"
               onBlur={handleBlur}
               onChange={handleChange}
@@ -283,8 +283,8 @@ const Form = () => {
               }}
             >
               {isLogin
-                ? "Vous n'avez pas de compte? inscrivez-vous ici."
-                : "Déjà inscrit(e) ? Connectez-vous ici."}
+                ? "Don't have an account? Sign up here."
+                : "Already registered? Log in here."}
             </Typography>
           </Box>
         </form>
