@@ -151,7 +151,7 @@ const Form = () => {
             {isRegister && (
               <>
                 <TextField
-                  label="Prénom"
+                  label="first Name"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.firstName}
@@ -163,7 +163,7 @@ const Form = () => {
                   sx={{ gridColumn: "span 2" }}
                 />
                 <TextField
-                  label="Nom"
+                  label="last Name"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.lastName}
@@ -173,7 +173,7 @@ const Form = () => {
                   sx={{ gridColumn: "span 2" }}
                 />
                 <TextField
-                  label="Emplacement"
+                  label="location"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.location}
@@ -183,7 +183,7 @@ const Form = () => {
                   sx={{ gridColumn: "span 4" }}
                 />
                 <TextField
-                  label="Profession"
+                  label="occupation"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.occupation}
@@ -266,7 +266,7 @@ const Form = () => {
                 "&:hover": { color: palette.primary.main },
               }}
             >
-              {isLogin ? "Connexion" : "S'inscrire"}
+              {isLogin ? "Connexion" : "Register"}
             </Button>
             <Typography
               onClick={() => {
