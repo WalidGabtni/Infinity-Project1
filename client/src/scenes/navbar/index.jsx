@@ -103,7 +103,7 @@ const Navbar = ({ updateSearchResults }) => {
 
       const handleAccept = async (notificationId, projectId) => {
         try {
-            // Check if the notification recipient ID matches the logged-in user ID
+            
             if (notifications.some(notification => notification._id === notificationId && notification.recipient === user._id)) {
                 const response = await fetch(`http://localhost:3001/notifications/${notificationId}/accept`, {
                     method: 'POST',
@@ -111,7 +111,7 @@ const Navbar = ({ updateSearchResults }) => {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ projectId }), // Assuming projectId needs to be sent in the body
+                    body: JSON.stringify({ projectId }), 
                 });
     
                 if (response.ok) {
@@ -155,18 +155,18 @@ const Navbar = ({ updateSearchResults }) => {
 
 
       const handleNotificationClick = async () => {
-        // Call handleNotification to fetch notifications
+        
         await handleNotification();
       
-        // Get the DOM element of the notification button using the ref
+        
         const buttonEl = notificationButtonRef.current;
       
-        // Check if the button element exists before updating the anchorEl state
+        
         if (buttonEl) {
-          // Set the anchor element for the popover to the notification button element
+          
           setAnchorEl(buttonEl);
       
-          // Open the popover
+          
           setIsPopoverOpen(true);
         }
       };
@@ -174,7 +174,7 @@ const Navbar = ({ updateSearchResults }) => {
 
     const handleClose = () => {
       setAnchorEl(null);
-      setIsPopoverOpen(false); // Set 'isPopoverOpen' to false when the popover is closed
+      setIsPopoverOpen(false); 
   };
 
     const handleLogout = () => {
@@ -339,7 +339,7 @@ const Navbar = ({ updateSearchResults }) => {
             <Message sx={{ fontSize: "25px" }} />
             {/* Notification icon */}
             <IconButton
-              ref={notificationButtonRef} // Assign the ref to the IconButton
+              ref={notificationButtonRef} 
               onClick={handleNotificationClick}
             >
               <Notifications sx={{ fontSize: '25px' }} />
@@ -361,7 +361,7 @@ const Navbar = ({ updateSearchResults }) => {
                 notifications={notifications}
                 setNotifications={setNotifications}
                 handleAccept={handleAccept}
-                handleRefuse={handleRefuse} // Add handleRefuse prop
+                handleRefuse={handleRefuse} 
                 loggedInUserId={user._id}
               />
             </Popover>

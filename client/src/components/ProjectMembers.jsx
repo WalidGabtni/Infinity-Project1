@@ -15,11 +15,11 @@ const ProjectMembers = ({ userId, firstName, lastName, picturePath }) => {
         maxWidth: 800, 
         margin: '0 auto', 
         border: '1px solid black', 
-        borderRadius: '4px', // Optional: if you want rounded corners
+        borderRadius: '4px', 
         position: 'relative', 
-        backgroundColor: 'transparent', // Ensure no background color
-        boxShadow: 'none', // Ensure no box shadow
-        height: '150px', // Adjust height as needed
+        backgroundColor: 'transparent', 
+        boxShadow: 'none', 
+        height: '150px', 
       }}
     >
       <FlexBetween 
@@ -27,7 +27,7 @@ const ProjectMembers = ({ userId, firstName, lastName, picturePath }) => {
         style={{ cursor: 'pointer' }} 
         flexDirection="column" 
         alignItems="center"
-        p={2} // Optional: Add padding if needed
+        p={2} 
       >
         <UserImage image={picturePath} size="55px" userId={userId} />
         <Typography
@@ -44,7 +44,7 @@ const ProjectMembers = ({ userId, firstName, lastName, picturePath }) => {
             {lastName}
           </span>
         </Typography>
-        <Divider sx={{ width: '100%', margin: '0 auto' }} /> {/* Add a divider */}
+        <Divider sx={{ width: '100%', margin: '0 auto' }} />
       </FlexBetween>
     </Card>
   );

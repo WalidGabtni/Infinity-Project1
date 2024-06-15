@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import Modal from '@mui/material/Modal'; // Import Modal from Material-UI
-import { FormControl, InputLabel, Select } from '@mui/material'; // Import form components
+import Modal from '@mui/material/Modal'; 
+import { FormControl, InputLabel, Select } from '@mui/material'; 
 
 
 
@@ -242,7 +242,7 @@ function TopicModerationActions({ projectId, topicId, token, isPublic }) {
               {/* Populate dropdown with destination options */}
               <MenuItem value="private">Private Topic</MenuItem>
               <MenuItem value="public">Public Topic</MenuItem>
-              {/* Add more options as needed */}
+              
             </Select>
           </FormControl>
           <Button onClick={handleMoveTopic}>Move</Button>

@@ -1,10 +1,9 @@
-// Import necessary modules and dependencies
 import User from './models/User.js';
 import Post from './models/Post.js';
 import Project from './models/Project.js';
 import Notification from './models/Notification.js';
 
-// Define transformation functions
+
 function transformUsers(users) {
     return users.map(user => ({
         id: user._id,
@@ -18,7 +17,7 @@ function transformUsers(users) {
         impressions: user.impressions,
         bookmarks: user.bookmarks,
         role: user.role
-        // Add more transformations as needed
+        
     }));
 }
 
@@ -39,8 +38,7 @@ function transformPosts(posts) {
             text: comment.text
         })),
         sharedBy: post.sharedBy,
-        createdAt: post.createdAt // Include the createdAt field
-        // Add more transformations as needed
+        createdAt: post.createdAt 
     }));
 }
 
@@ -120,14 +118,14 @@ function transformNotifications(notifications) {
         status: notification.status,
         createdAt: notification.createdAt,
         updatedAt: notification.updatedAt
-        // Add more transformations as needed
+        
     }));
 }
 
-// Define the ETL function to perform ETL
+
 async function etl() {
     try {
-        // Extract data from MongoDB
+        
         const [users, posts, projects, notifications] = await Promise.all([
             User.find(),
             Post.find(),
@@ -135,18 +133,18 @@ async function etl() {
             Notification.find()
         ]);
 
-        // Check if data is extracted successfully
+        
         if (!users || !posts || !projects || !notifications) {
             throw new Error('Data not found');
         }
 
-        // Transform data
+        
         const transformedUsers = transformUsers(users);
         const transformedPosts = transformPosts(posts);
         const transformedProjects = transformProjects(projects);
         const transformedNotifications = transformNotifications(notifications);
 
-        // Return the transformed data
+        
         return {
             users: transformedUsers,
             posts: transformedPosts,
@@ -160,5 +158,5 @@ async function etl() {
     }
 }
 
-// Export the ETL function
+
 export { etl };

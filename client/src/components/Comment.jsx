@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { IconButton, Typography, Box } from '@mui/material';
 import { DeleteOutlineOutlined as DeleteIcon, EditOutlined as EditIcon, Done as SaveIcon, Close as CancelIcon } from '@mui/icons-material';
-import UserImage from './UserImage'; // Import the UserImage component
+import UserImage from './UserImage';
 import { useNavigate } from 'react-router-dom';
 
 const Comment = ({ color, onDelete, onEdit, userId, loggedInUserId, comment }) => {
@@ -51,7 +51,7 @@ const Comment = ({ color, onDelete, onEdit, userId, loggedInUserId, comment }) =
 
   const navigateToUserProfile = () => {
     navigate(`/profile/${userId}`);
-    // You can add additional navigation logic here if needed
+    
   };
 
   return (
@@ -66,7 +66,7 @@ const Comment = ({ color, onDelete, onEdit, userId, loggedInUserId, comment }) =
           sx={{
             cursor: 'pointer',
             '&:hover': {
-              color: 'primary.light', // Use primary.light from MUI palette
+              color: 'primary.light',
             },
           }}
           onClick={navigateToUserProfile}
