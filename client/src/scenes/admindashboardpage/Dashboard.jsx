@@ -228,7 +228,7 @@ const doughnutOptions = {
         <h1 className="dashboard-title">Dashboard</h1>
         <div className="dashboard-content">
           <div className="chart-container bar-chart">
-            <h2 className="chart-title">Bar Chart for Post Counts</h2>
+            <h2 className="chart-title">Bar Chart for Total Posts, Projects & Users</h2>
             <Bar
               data={{
                 labels: ['Total Posts', 'Total Projects', 'Total Users'],
@@ -298,7 +298,7 @@ const doughnutOptions = {
             />
           </div>
                 <div className="chart-container bar-chart">
-                  <h2 className="chart-title">Number of Posts for Each User</h2>
+                  <h2 className="chart-title">Number of Posts & Projects for Each User</h2>
                   <Bar
                     data={userData}
                     options={{
