@@ -9,7 +9,7 @@ const commentSchema = new Schema({
   },
   createdBy: {
     type: Schema.Types.ObjectId,
-    ref: 'User', // Reference to the User model
+    ref: 'User', 
     required: true,
   },
 });
@@ -39,15 +39,15 @@ const topicSchema = new Schema({
   },
   pinned: {
     type: Boolean,
-    default: false, // Default value is false
+    default: false, 
   },
   hidden: {
     type: Boolean,
-    default: false, // Default value is false (topic is not hidden)
+    default: false, 
   },
   destination: {
-    type: String, // or any other relevant type for representing the destination
-    required: false, // or adjust as per your requirements
+    type: String, 
+    required: false, 
   },
   createdAt: {
     type: Date,
@@ -116,8 +116,8 @@ const ProjectSchema = new Schema(
         occupation: String,
         role: {
           type: String,
-          enum: ['Project Owner', 'Admin', 'Moderator', 'Member'], // Define your role options here
-          default: 'Member', // Default role for members
+          enum: ['Project Owner', 'Admin', 'Moderator', 'Member'], 
+          default: 'Member', 
         },
       },
     ],
@@ -145,8 +145,8 @@ const ProjectSchema = new Schema(
         occupation: String,
       },
     ],
-    topics: [topicSchema], // Array of public topic objects
-    privateTopics: [topicSchema], // Array of private topic objects
+    topics: [topicSchema], 
+    privateTopics: [topicSchema], 
   },
   {
     timestamps: true,

@@ -41,12 +41,12 @@ export const createPrivateTopic = async (req, res) => {
 
     // Create a new topic object with the required fields
     const newTopic = {
-      userId: user._id, // Use the ObjectId of the user
+      userId: user._id, 
       title,
       content,
-      createdBy: user._id, // Use the ObjectId of the user for createdBy field
+      createdBy: user._id, 
       createdAt: new Date(),
-      // Add other properties as needed
+      
     };
 
     console.log('New Private Topic:', newTopic);
@@ -93,7 +93,7 @@ export const getPrivateTopics = async (req, res) => {
           picturePath: createdByUser.picturePath
         },
         locked: topic.locked === true, 
-        pinned: topic.pinned === true, // Check if pinned is true
+        pinned: topic.pinned === true, 
         hidden: topic.hidden === true
       };
     }));
@@ -101,11 +101,11 @@ export const getPrivateTopics = async (req, res) => {
     // Sort privateTopics so that pinned topics appear first
     privateTopics.sort((a, b) => {
       if (a.pinned && !b.pinned) {
-        return -1; // a should come before b
+        return -1; 
       } else if (!a.pinned && b.pinned) {
-        return 1; // b should come before a
+        return 1; 
       } else {
-        return 0; // leave the order unchanged
+        return 0; 
       }
     });
     
@@ -135,27 +135,27 @@ export const getPrivateTopicDetails = async (req, res) => {
       return res.status(404).json({ message: 'Private topic not found' });
     }
 
-    // Fetch the user who created the topic
+    
     const createdByUser = await User.findById(privateTopic.createdBy);
 
-    // Construct the response object with populated createdBy details, createdAt, userId, locked, and pinned
+    
     const privateTopicDetails = {
       _id: privateTopic._id,
       title: privateTopic.title,
       content: privateTopic.content,
-      createdAt: privateTopic.createdAt, // Add createdAt field
+      createdAt: privateTopic.createdAt, 
       createdBy: {
-        userId: privateTopic.createdBy, // Add userId field
+        userId: privateTopic.createdBy, 
         firstName: createdByUser.firstName,
         lastName: createdByUser.lastName,
         picturePath: createdByUser.picturePath
       },
-      locked: privateTopic.locked, // Add locked field
-      pinned: privateTopic.pinned, // Add pinned field
+      locked: privateTopic.locked, 
+      pinned: privateTopic.pinned, 
       hidden: privateTopic.hidden
     };
 
-    // Send the response
+   
     res.status(200).json(privateTopicDetails);
   } catch (error) {
     console.error('Error getting private topic details:', error);

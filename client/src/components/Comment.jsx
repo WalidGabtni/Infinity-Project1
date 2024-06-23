@@ -60,7 +60,7 @@ const Comment = ({ color, onDelete, onEdit, userId, loggedInUserId, comment }) =
       {userData && <UserImage image={userData.picturePath} size="40px" />}
 
       <div style={{ marginLeft: 16 }}>
-        {/* User's first name and last name with hover effect */}
+        {/* User's first name and last name */}
         <Typography
           variant="subtitle1"
           sx={{
@@ -77,7 +77,7 @@ const Comment = ({ color, onDelete, onEdit, userId, loggedInUserId, comment }) =
         {/* Display the comment text */}
         <Typography variant="body1" color={color} dangerouslySetInnerHTML={{ __html: comment.text }} />
 
-        {/* Edit and delete buttons (visible to the comment owner) */}
+        {/* Edit and delete buttons  */}
         {canEditOrDelete && (
           <Box mt={1}>
             {!isEditing ? (

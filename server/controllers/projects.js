@@ -23,14 +23,14 @@ export const createProject = async (req, res) => {
     let projectImagePath = null;
     if (req.files && req.files['projectImage']) {
       projectImagePath = `/assets/${req.files['projectImage'][0].originalname}`;
-      // Save the public/assets image path to the project
+      
     }
 
     // Handle the public/assets image upload for projectCover
     let projectCoverPath = null;
     if (req.files && req.files['projectCover']) {
       projectCoverPath = `/assets/${req.files['projectCover'][0].originalname}`;
-      // Save the public/assets image path to the project
+      
     }
 
         // Define the role for the user creating the project
@@ -54,8 +54,8 @@ export const createProject = async (req, res) => {
         lastName: user.lastName,
         picturePath: user.picturePath,
         role: creatorRole,
-      }] // Add the user who created the project to the members list with picturePath
-      // Add other fields as needed
+      }] 
+      
     });
 
     // Respond with the created project
@@ -84,12 +84,11 @@ export const updateProject = async (req, res) => {
     const { id } = req.params;
     const { name, description, startDate, endDate, projectImage, projectCover } = req.body;
 
-    // Update the project in the database based on the provided ID
-    // Example code to update project in the database
+    
     const updatedProject = await Project.findByIdAndUpdate(
       id,
       { name, description, startDate, endDate, projectImage, projectCover },
-      { new: true } // Return the updated project
+      { new: true }
     );
 
     // Check if the project was found and updated
@@ -188,7 +187,7 @@ export const joinProject = async (req, res) => {
     // Create a new notification for the project owner
     const notification = await Notification.create({
       sender: userId,
-      recipient: project.userId, // Assuming project.userId is the owner's userId
+      recipient: project.userId, 
       project: projectId,
     });
 
@@ -234,14 +233,14 @@ export const getProjectMembers = async (req, res) => {
 
       if (!user) {
         console.log(`User not found for userId: ${member.userId}`);
-        continue; // Skip if user not found (handle as per your requirement)
+        continue; 
       }
 
       const memberWithEmail = {
         userId: member.userId,
         firstName: member.firstName,
         lastName: member.lastName,
-        email: user.email, // Include email from the User model
+        email: user.email, 
         picturePath: member.picturePath,
         userPicturePath: member.userPicturePath,
         occupation: member.occupation,

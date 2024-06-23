@@ -19,7 +19,7 @@ import { verifyToken } from "./middleware/auth.js";
 import User from "./models/User.js";
 import Post from "./models/Post.js";
 import projectRoutes from "./routes/projects.js";
-import { etl } from "./etl.js"; // Import the etl function
+import { etl } from "./etl.js"; 
 
 
 // CONFIGURATIONS

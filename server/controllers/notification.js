@@ -17,7 +17,7 @@ export const sendJoinRequest = async (req, res) => {
     // Create a new notification for the project owner
     const notification = await Notification.create({
       sender: userId,
-      recipient: project.userId, // Use the owner's userId from the project
+      recipient: project.userId, 
       project: projectId,
     });
 
@@ -72,7 +72,7 @@ export const acceptJoinRequest = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         picturePath: user.picturePath,
-        // Add any other required user details
+        
       });
       await project.save();
     } else {
@@ -95,7 +95,6 @@ export const acceptJoinRequest = async (req, res) => {
         status: 'accepted',
       });
       
-      // Handle acceptance notification sending (optional)
     }
 
     return res.status(200).json({ message: 'Join request accepted successfully.' });
@@ -154,7 +153,7 @@ export const refuseJoinRequest = async (req, res) => {
         status: 'rejected',
       });
       
-      // Handle refusal notification sending (optional)
+      
     }
 
     return res.status(200).json({ message: 'Join request refused successfully.' });
@@ -171,16 +170,16 @@ export const refuseJoinRequest = async (req, res) => {
 
 export const getNotifications = async (req, res) => {
   try {
-    // Ensure that only notifications for the logged-in user are fetched
+    
     const notifications = await Notification.find({ recipient: req.user.id })
       .populate({
-        path: 'sender', // Populate the sender's information
+        path: 'sender', 
         model: 'User',
-        select: 'firstName lastName picturePath', // Select the fields you want to populate
+        select: 'firstName lastName picturePath', 
       })
-      .populate('project'); // Populate the project information
+      .populate('project'); 
 
-    console.log('Notifications:', notifications); // Add this line to log notifications
+    console.log('Notifications:', notifications); 
 
     res.status(200).json(notifications);
   } catch (error) {

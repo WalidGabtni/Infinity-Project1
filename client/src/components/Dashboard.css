@@ -25,7 +25,7 @@
 .pie-chart,
 .doughnut-chart,
 .line-chart {
-  height: 600px; /* Set a fixed height for consistency */
+  height: 600px; 
 }
 
 .chart-title {

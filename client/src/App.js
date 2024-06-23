@@ -13,7 +13,7 @@ import IndividualProjectPage from 'scenes/projectsPage/IndividualProjectPage';
 import PublicTopicsPage from 'scenes/projectsPage/PublicTopicsPage';
 import PrivateTopicsPage from 'scenes/projectsPage/PrivateTopicsPage';
 import MembersPage from 'scenes/projectsPage/MembersPage';
-import MembersManagementPage from 'scenes/projectsPage/MembersManagementPage'; // Import MembersManagementPage
+import MembersManagementPage from 'scenes/projectsPage/MembersManagementPage'; 
 import ArchivePage from 'scenes/projectsPage/ArchivePage';
 import PublicTopicDetailsPage from 'scenes/projectsPage/PublicTopicDetailsPage';
 import PrivateTopicDetailsPage from 'scenes/projectsPage/PrivateTopicDetailsPage';

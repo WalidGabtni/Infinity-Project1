@@ -96,7 +96,7 @@ export const addComment = async (req, res) => {
     try {
       const { postId } = req.params;
       const { userId, text } = req.body;
-      const post = await Post.findById(postId); // Use the Post model
+      const post = await Post.findById(postId); 
   
       if (!post) {
         return res.status(404).json({ error: "Post not found" });
@@ -136,7 +136,7 @@ export const deleteComment = async (req, res) => {
     // Save the updated post
     const updatedPost = await post.save();
 
-    res.json(updatedPost); // Optionally, you can respond with the updated post
+    res.json(updatedPost); 
   } catch (error) {
     console.error("Error deleting comment:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -183,7 +183,7 @@ export const sharePost = async (req, res) => {
     const { id } = req.params;
     const { userId } = req.body;
 
-    // Check if the user exists
+   
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -196,15 +196,15 @@ export const sharePost = async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    // Check if the post is already shared by the user
+    
     if (post.sharedBy.includes(userId)) {
       return res.status(400).json({ error: 'Post already shared by the user' });
     }
 
-    // Log firstName and lastName
+    
     console.log('Shared by:', user.firstName, user.lastName);
 
-    // Save the userId in the post document
+    
     post.sharedBy.push(userId);
 
     const updatedPost = await post.save();

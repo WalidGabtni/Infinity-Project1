@@ -12,7 +12,6 @@ export const getAllUsers = async (req, res) => {
     res.status(200).json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
-    // Display all fields of the error object for better understanding
     console.error("Error details:", JSON.stringify(error, null, 2));
     res.status(500).json({ error: error.message });
   }
@@ -21,7 +20,7 @@ export const getAllUsers = async (req, res) => {
 // Controller to get user by ID
 export const getUserById = async (req, res) => {
   try {
-    const userId = req.params.id; // Assuming the user ID is passed as a URL parameter
+    const userId = req.params.id; 
 
     // Find user by ID in the database
     const user = await User.findById(userId);
@@ -65,7 +64,7 @@ export const deleteUserById = async (req, res) => {
 export const updateUserRoleById = async (req, res) => {
   try {
     const userId = req.params.id;
-    const { role } = req.body; // Assuming the new role is sent in the request body
+    const { role } = req.body; 
 
     // Validate if the role is either "admin" or "user"
     if (role !== 'moderator' && role !== 'user') {

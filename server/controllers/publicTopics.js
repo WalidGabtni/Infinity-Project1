@@ -35,12 +35,12 @@ export const createPublicTopic = async (req, res) => {
 
     // Create a new topic object with the required fields
     const newTopic = {
-      userId: user._id, // Use the ObjectId of the user
+      userId: user._id, 
       title,
       content,
-      createdBy: user._id, // Use the ObjectId of the user for createdBy field
+      createdBy: user._id, 
       createdAt: new Date(),
-      // Add other properties as needed
+      
     };
 
     console.log('New Topic:', newTopic);
@@ -88,8 +88,8 @@ export const getPublicTopics = async (req, res) => {
           picturePath: createdByUser.picturePath
         },
         locked: topic.locked === true,
-        pinned: topic.pinned === true, // Check if pinned is true
-        hidden: topic.hidden === true, // Include hidden status
+        pinned: topic.pinned === true, 
+        hidden: topic.hidden === true, 
         destination: topic.destination === true,
         
         
@@ -99,11 +99,11 @@ export const getPublicTopics = async (req, res) => {
     // Sort publicTopics so that pinned topics appear first
     publicTopics.sort((a, b) => {
       if (a.pinned && !b.pinned) {
-        return -1; // a should come before b
+        return -1; 
       } else if (!a.pinned && b.pinned) {
-        return 1; // b should come before a
+        return 1; 
       } else {
-        return 0; // leave the order unchanged
+        return 0; 
       }
     });
     

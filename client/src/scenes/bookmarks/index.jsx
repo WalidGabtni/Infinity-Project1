@@ -36,7 +36,7 @@ const BookmarkPage = () => {
         const data = await response.json();
         console.log("Bookmarked Posts Data:", data);
 
-        // Dispatch action to update bookmarked posts in Redux state
+        
         dispatch(setBookmarkedPosts({ bookmarkedPosts: data }));
       } catch (error) {
         console.error("Error fetching bookmarked posts:", error.message);
