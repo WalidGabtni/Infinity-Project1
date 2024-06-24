@@ -20,7 +20,10 @@ const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
   lastName: yup.string().required("required"),
   email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
+  password: yup
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .required("required"),
   location: yup.string().required("required"),
   occupation: yup.string().required("required"),
   picture: yup.string().required("required"),
@@ -90,7 +93,7 @@ const Form = () => {
     });
     const loggedIn = await loggedInResponse.json();
     onSubmitProps.resetForm();
-  
+
     if (loggedInResponse.status >= 200 && loggedInResponse.status < 300) {
       // Successful login
       dispatch(
