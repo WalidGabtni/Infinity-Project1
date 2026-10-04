@@ -2,8 +2,6 @@
 
 Infinity Project is a full-stack collaboration platform for communities and teams, built for the startup **IT Grow**. Users share posts, build a friend network and bookmark content, and can create or join **projects** that have members with roles, public and private discussion topics, moderation tools and an archive. An admin area manages users and roles, and an **ETL pipeline feeds an analytics dashboard**. Built with the MERN stack (MongoDB, Express, React, Node.js) for my Business Intelligence diploma at the Higher Institute of Management of Bizerte (ISG Bizerte).
 
-> The complete application lives on the **`third`** branch. `main` holds an earlier version.
-
 ## Features
 
 **Social network**
@@ -60,7 +58,7 @@ flowchart LR
 **Prerequisites:** Node.js 18+ and a MongoDB database (a free [MongoDB Atlas](https://www.mongodb.com/atlas) cluster works).
 
 ```bash
-git clone -b third https://github.com/WalidGabtni/Infinity-Project1.git
+git clone https://github.com/WalidGabtni/Infinity-Project1.git
 cd Infinity-Project1
 ```
 
