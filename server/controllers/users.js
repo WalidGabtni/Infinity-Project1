@@ -95,7 +95,7 @@ export const addRemoveBookmark = async (req, res) => {
 /* READ - Get all bookmarked posts of the logged-in user */
 export const getBookmarkedPosts = async (req, res) => {
     try {
-        const userId = req.params.id; // Assuming the user's ID is in the URL parameters
+        const userId = req.params.id; 
         const user = await User.findById(userId);
 
         const bookmarkedPosts = user.bookmarks || [];

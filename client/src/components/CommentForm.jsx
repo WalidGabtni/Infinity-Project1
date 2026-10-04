@@ -29,7 +29,7 @@ const CommentForm = ({ onClose, onComment }) => {
     if (formData.comment.trim()) {
       onComment({ text: formData.comment });
       setFormData({ comment: "" });
-      closeOverlay(); // Close the overlay after adding the comment
+      closeOverlay(); 
     } else {
       console.error('Comment cannot be empty');
     }

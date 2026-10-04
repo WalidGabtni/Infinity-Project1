@@ -4,11 +4,24 @@ import {
     getUserfriends,
     addRemovefriend,
     addRemoveBookmark,
-    getBookmarkedPosts, // Import the new function
+    getBookmarkedPosts,
 } from "../controllers/users.js";
-import { verifyToken } from "../middleware/auth.js";
+import {
+    getAllUsers, deleteUserById, updateUserRoleById
+} from "../controllers/adminDashboard.js";
+import { verifyToken, adminAuth } from "../middleware/auth.js";
+
 
 const router = express.Router();
+
+// Fetch all users (for admin dashboard)
+router.get("/getallusers", verifyToken, getAllUsers);
+
+// Delete user by ID
+router.delete("/:id", verifyToken, deleteUserById);
+
+// Update the role of a user by ID
+router.patch("/:id/role", verifyToken, updateUserRoleById);
 
 /* READ */
 router.get("/:id", verifyToken, getUser);
@@ -19,5 +32,6 @@ router.get("/:id/bookmarks", verifyToken, getBookmarkedPosts);
 router.patch("/:id/:friendId", verifyToken, addRemovefriend);
 // Add or remove bookmark for the given user and post IDs
 router.patch("/:id/bookmarks/:postId", verifyToken, addRemoveBookmark);
+
 
 export default router;

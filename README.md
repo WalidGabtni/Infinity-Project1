@@ -1,21 +1,45 @@
 # Infinity Project
 
-Infinity Project is a full-stack social and collaboration network where users share posts, build a friend network, bookmark content and track their projects. Built with the MERN stack (MongoDB, Express, React, Node.js) as a project for my Business Intelligence diploma at the Higher Institute of Management of Bizerte (ISG Bizerte).
+Infinity Project is a full-stack collaboration platform for communities and teams, built for the startup **IT Grow**. Users share posts, build a friend network and bookmark content, and can create or join **projects** that have members with roles, public and private discussion topics, moderation tools and an archive. An admin area manages users and roles, and an **ETL pipeline feeds an analytics dashboard**. Built with the MERN stack (MongoDB, Express, React, Node.js) for my Business Intelligence diploma at the Higher Institute of Management of Bizerte (ISG Bizerte).
+
+> The complete application lives on the **`third`** branch. `main` holds an earlier version.
 
 ## Features
 
-- **Authentication**: registration with profile picture upload, login with JWT, passwords hashed with bcrypt, protected routes on both client and server.
-- **Feed and posts**: create posts with an optional picture, like, comment (add, edit, delete) and share.
-- **Social graph**: add or remove friends, browse friend lists and user profiles.
-- **Bookmarks**: save posts and browse them on a dedicated page.
-- **Search**: search posts and projects from the navigation bar.
-- **Projects tracker**: create, edit and delete projects with start and end dates and a status (`Not Started`, `In Progress`, `Completed`).
+**Social network**
+- Registration with profile picture, JWT login, bcrypt-hashed passwords.
+- Feed with posts (rich-text editor and picture), likes, comments, sharing, edit and delete.
+- Friends, user profiles and bookmarks; search across posts and projects.
+
+**Projects and topics**
+- Create projects with a profile image and cover, status and dates.
+- Join requests with accept and refuse, delivered as notifications.
+- Member roles: Project Owner, Admin, Moderator, Member; member management and removal.
+- Public and private topics per project, with comments, plus pin, lock, hide and move moderation actions.
+- Archive section for finished topics.
+
+**Admin and analytics**
+- Admin dashboard to browse, filter and delete users and change their role.
+- `GET /transformed-data` runs an **ETL step** (`server/etl.js`) that extracts users, posts, projects and notifications from MongoDB and returns a cleaned, flattened dataset.
+- Dashboard built with Chart.js: totals of posts, projects and users, members per project, posts and projects over time, per-user activity, and likes / comments / bookmarks distribution.
+
+## Screenshots
+
+![Analytics dashboard](docs/images/dashboard.png)
+
+| | |
+|---|---|
+| ![Members per project](docs/images/chart-members.png) | ![Totals](docs/images/chart-totals.png) |
+
+![Rich-text post editor](docs/images/post-editor.png)
+
+<!-- Add more, e.g. docs/images/feed.png and docs/images/project-topics.png -->
 
 ## Tech stack
 
 | Layer | Technologies |
 |-------|--------------|
-| Client | React 18 (Create React App), Redux Toolkit + redux-persist, React Router 6, Material UI, Formik + Yup, react-dropzone |
+| Client | React 18 (Create React App), Redux Toolkit + redux-persist, React Router 6, Material UI, Formik + Yup, React Quill, Chart.js (react-chartjs-2), react-dropzone, react-avatar-editor |
 | Server | Node.js, Express, Mongoose, JSON Web Tokens, bcrypt, multer, helmet, morgan, cors |
 | Database | MongoDB (Atlas or local) |
 
@@ -24,26 +48,23 @@ Infinity Project is a full-stack social and collaboration network where users sh
 ```mermaid
 flowchart LR
     U[Browser<br/>React + Redux + MUI] -->|REST + JWT| A[Express API]
-    A --> R[/auth /users /posts /projects/]
-    R --> M[(MongoDB<br/>Mongoose models:<br/>User, Post, Project)]
-    A --> F[Static uploads<br/>server/public/assets]
-    F --> U
+    A --> R[/auth /users /posts /projects /notifications/]
+    R --> M[(MongoDB<br/>User, Post, Project, Notification)]
+    M -->|extract + transform| E[ETL<br/>server/etl.js]
+    E -->|/transformed-data| D[Chart.js<br/>analytics dashboard]
+    D --> U
 ```
-
-## Screenshots
-
-<!-- Add screenshots to docs/images/ and link them here, e.g. ![Feed](docs/images/feed.png) -->
-
-| | |
-|---|---|
-| *Login / register* → `docs/images/login.png` | *Home feed* → `docs/images/feed.png` |
-| *Profile* → `docs/images/profile.png` | *Projects page* → `docs/images/projects.png` |
 
 ## Getting started
 
 **Prerequisites:** Node.js 18+ and a MongoDB database (a free [MongoDB Atlas](https://www.mongodb.com/atlas) cluster works).
 
-### 1. Server
+```bash
+git clone -b third https://github.com/WalidGabtni/Infinity-Project1.git
+cd Infinity-Project1
+```
+
+**Server**
 
 ```bash
 cd server
@@ -52,7 +73,7 @@ cp .env.example .env     # set MONGO_URL and JWT_SECRET, keep PORT=3001
 npm start
 ```
 
-### 2. Client
+**Client**
 
 ```bash
 cd client
@@ -60,19 +81,18 @@ npm install
 npm start                # http://localhost:3000
 ```
 
-The client calls the API at `http://localhost:3001`, so start the server first. Create an account on the login page to get started.
+The client calls the API at `http://localhost:3001`, so start the server first. Register an account on the login page. To use the admin area, set a user's `role` to `admin` in the database.
 
 ## API overview
 
-| Route | Description |
-|-------|-------------|
-| `POST /auth/register`, `POST /auth/login` | Create an account, sign in |
-| `GET /users/:id`, `/users/:id/friends`, `/users/:id/bookmarks` | Profile, friends, bookmarks |
-| `PATCH /users/:id/:friendId` | Add or remove a friend |
-| `GET/POST /posts`, `GET /posts/:userId/posts` | Feed, create post, user posts |
-| `PATCH /posts/:id/like`, `POST /posts/:id/share` | Like, share |
-| `POST/PATCH/DELETE /posts/:postId/comments…` | Comments |
-| `GET/POST /projects`, `PATCH/DELETE /projects/:id` | Projects tracker |
+| Route group | Description |
+|-------------|-------------|
+| `/auth` | Register, login |
+| `/users` | Profiles, friends, bookmarks, admin: list users, change role, delete |
+| `/posts` | Feed, create, like, share, comments, search |
+| `/projects` | Create, join and leave, members and roles, public / private / archive topics and moderation |
+| `/notifications` | Join requests, accept, refuse, list |
+| `GET /transformed-data` | ETL output used by the dashboard |
 
 All routes except login and registration require an `Authorization: Bearer <token>` header.
 
@@ -80,13 +100,17 @@ All routes except login and registration require an `Authorization: Bearer <toke
 
 ```
 .
-├── client/          React app (src/scenes, src/components, src/state)
+├── client/src/
+│   ├── scenes/       pages: login, home, profile, bookmarks, projects, admin dashboard
+│   ├── components/   shared UI: breadcrumbs, notifications, member and topic components
+│   └── state/        Redux store
 └── server/
-    ├── controllers/ route handlers
-    ├── models/      Mongoose schemas (User, Post, Project)
-    ├── routes/      Express routers
-    ├── middleware/  JWT verification
-    └── index.js     server entry point
+    ├── controllers/  route handlers
+    ├── models/       User, Post, Project, Notification
+    ├── routes/       Express routers
+    ├── middleware/   JWT verification
+    ├── etl.js        extract-transform step for analytics
+    └── index.js      server entry point
 ```
 
 ## Author

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -12,7 +12,7 @@ import Overlay from "./Overlay";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
-const PostForm = ({ onClose, onPost, onImageChange }) => {
+const PostForm = ({ onClose, onPost, postData }) => {
   const { palette } = useTheme();
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [formData, setFormData] = useState({ title: "", description: "" });
@@ -22,13 +22,33 @@ const PostForm = ({ onClose, onPost, onImageChange }) => {
     onClose();
   };
 
+  useEffect(() => {
+    // If postData is provided, set the form data
+    if (postData) {
+      setFormData({
+        title: postData.title || '',
+        description: postData.description || '',
+        // Map other properties accordingly
+      });
+    }
+  }, [postData]);
+
+
   const handleInputChange = (field, value) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
   };
 
   const handlePostClick = () => {
-    onPost(formData);
-    closeOverlay();
+    // Check if postData is provided to determine the mode (create or edit)
+    const isEditMode = !!postData;
+
+    // Call onPost with the appropriate data based on the mode
+    onPost({
+      ...formData,
+      postId: isEditMode ? postData.postId : undefined,  // Include postId for edit mode
+    });
+
+    onClose();
   };
 
   const modules = {

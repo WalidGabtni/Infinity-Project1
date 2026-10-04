@@ -25,7 +25,7 @@ const LoginPage = () => {
         backgroundColor={theme.palette.background.alt}
       >
         <Typography fontWeight="500" variant="h5" sx={{ mb: "1.5rem" }}>
-        Bienvenue dans Infinity, votre meilleur espace de collaboration !
+        Welcome to Infinity, your best collaboration space!
         </Typography>
         <Form />
       </Box>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import React from 'react';
+import React, { useRef } from 'react';
 import {
     Box,
     IconButton,
@@ -22,6 +22,7 @@ import {
 } from "@mui/icons-material"
 
 import SearchIcon from "@mui/icons-material/Search";
+import NotificationMenu from 'components/NotificationMenu';
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout} from "state";
 import { useNavigate } from "react-router-dom";
@@ -49,6 +50,13 @@ const Navbar = ({ updateSearchResults }) => {
     const token = useSelector((state) => state.token);
     
     const [popoverAnchor, setPopoverAnchor] = React.useState(null);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const notificationButtonRef = useRef(null);
+    const [rejectedNotificationId, setRejectedNotificationId] = useState(null);
+
+    const userRole = useSelector((state) => state.role);
 
     /*SEARCH*/
     const [searchTerm, setSearchTerm] = useState('');
@@ -69,6 +77,105 @@ const Navbar = ({ updateSearchResults }) => {
       const openPopover = Boolean(popoverAnchor);
 
     const fullName = user ? `${user.firstName} ${user.lastName}` : '';
+    const handleNotification = async () => {
+        try {
+          const response = await fetch(`http://localhost:3001/notifications/${user._id}/notifications`, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+    
+          if (response.ok) {
+            const result = await response.json();
+            setNotifications(result);
+          } else {
+            console.error(
+              'Failed to fetch notifications:',
+              response.status,
+              response.statusText
+            );
+          }
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+        }
+      };
+
+      const handleAccept = async (notificationId, projectId) => {
+        try {
+            
+            if (notifications.some(notification => notification._id === notificationId && notification.recipient === user._id)) {
+                const response = await fetch(`http://localhost:3001/notifications/${notificationId}/accept`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ projectId }), 
+                });
+    
+                if (response.ok) {
+                    // Handle success response
+                } else {
+                    console.error('Failed to accept notification request:', response.status, response.statusText);
+                }
+            } else {
+                console.error('User does not have permission to accept this notification.');
+            }
+        } catch (error) {
+            console.error('Failed to accept notification request:', error);
+        }
+    };
+
+    const handleRefuse = async (notificationId, projectId) => {
+      try {
+        const response = await fetch(`http://localhost:3001/notifications/${notificationId}/refuse`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+    
+        if (response.ok) {
+          // Handle success response
+          // For example, you can remove the notification from the UI
+          setNotifications(prevNotifications => prevNotifications.filter(notification => notification._id !== notificationId));
+          
+          // Show snackbar for rejected notification
+          setRejectedNotificationId(notificationId);
+        } else {
+          console.error('Failed to refuse notification request:', response.status, response.statusText);
+        }
+      } catch (error) {
+        console.error('Failed to refuse notification request:', error);
+      }
+    };
+    
+
+
+      const handleNotificationClick = async () => {
+        
+        await handleNotification();
+      
+        
+        const buttonEl = notificationButtonRef.current;
+      
+        
+        if (buttonEl) {
+          
+          setAnchorEl(buttonEl);
+      
+          
+          setIsPopoverOpen(true);
+        }
+      };
+
+
+    const handleClose = () => {
+      setAnchorEl(null);
+      setIsPopoverOpen(false); 
+  };
 
     const handleLogout = () => {
         dispatch(setLogout());
@@ -154,13 +261,13 @@ const Navbar = ({ updateSearchResults }) => {
         
         <FlexBetween gap="2rem">
                             <Link to="/about-us" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <Typography sx={{ fontSize: '18px' }}>À propos de nous</Typography>
+                    <Typography sx={{ fontSize: '18px' }}>About Us</Typography>
                 </Link>
                 <Link to="/support" style={{ textDecoration: 'none', color: 'inherit' }}>
                     <Typography sx={{ fontSize: '18px' }}>Support</Typography>
                 </Link>
                 <Link to="/events" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <Typography sx={{ fontSize: '18px' }}>Événements</Typography>
+                    <Typography sx={{ fontSize: '18px' }}>Events</Typography>
                 </Link>
 
         { /* BROWSE MENU */} 
@@ -175,7 +282,7 @@ const Navbar = ({ updateSearchResults }) => {
         }}
         {...bindTrigger(popupState)}
       >
-        Parcourir
+        Browse
       </Typography>
         <Popover
             {...bindPopover(popupState)}
@@ -212,31 +319,7 @@ const Navbar = ({ updateSearchResults }) => {
                 },
                 }}
             >
-                Projets
-            </MenuItem>
-            <MenuItem
-                onClick={popupState.close}
-                sx={{
-                fontSize: '16px',
-                padding: '10px 50px',
-                '&:hover': {
-                    backgroundColor: primaryLight,
-                },
-                }}
-            >
-                Nouvelles et Annonces
-            </MenuItem>
-            <MenuItem
-                onClick={popupState.close}
-                sx={{
-                fontSize: '16px',
-                padding: '10px 50px',
-                '&:hover': {
-                    backgroundColor: primaryLight,
-                },
-                }}
-            >
-                Statistiques Web
+                Projects
             </MenuItem>
             </Box>
         </Popover>
@@ -254,7 +337,34 @@ const Navbar = ({ updateSearchResults }) => {
                )} 
             </IconButton>
             <Message sx={{ fontSize: "25px" }} />
-            <Notifications sx={{ fontSize: "25px" }} />
+            {/* Notification icon */}
+            <IconButton
+              ref={notificationButtonRef} 
+              onClick={handleNotificationClick}
+            >
+              <Notifications sx={{ fontSize: '25px' }} />
+            </IconButton>
+            <Popover
+              open={isPopoverOpen}
+              anchorEl={anchorEl}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+               vertical: 'top',
+                horizontal: 'right',
+              }}
+              >
+              <NotificationMenu
+                notifications={notifications}
+                setNotifications={setNotifications}
+                handleAccept={handleAccept}
+                handleRefuse={handleRefuse} 
+                loggedInUserId={user._id}
+              />
+            </Popover>
             <Help sx={{ fontSize: "25px" }} />
             <FormControl variant="standard" value={fullName}>
                 <Select
@@ -278,6 +388,13 @@ const Navbar = ({ updateSearchResults }) => {
                 <MenuItem value ={fullName}>
                     <Typography>{fullName}</Typography>
                 </MenuItem>
+                <MenuItem>
+                    {userRole === 'admin' && (
+                      <Typography onClick={() => navigate("/admindashboard")}>
+                        Admin Dashboard
+                      </Typography>
+                    )}
+                  </MenuItem>
                 <MenuItem>
                     <Typography onClick={()=> navigate("/bookmarks")}>Bookmarks</Typography>
                 </MenuItem>

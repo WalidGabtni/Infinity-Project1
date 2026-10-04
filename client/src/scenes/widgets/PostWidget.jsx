@@ -1,17 +1,30 @@
-// Import MUI icons
 import {
   ChatBubbleOutlineOutlined,
   FavoriteBorderOutlined,
   FavoriteOutlined,
   ShareOutlined,
-  DeleteOutline,
   BookmarkBorder,
   Bookmark,
 } from "@mui/icons-material";
+import { MoreVert } from "@mui/icons-material"; // Add this import for the MoreVert icon
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
-import { Box, Divider, IconButton, InputBase, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Divider,
+  IconButton,
+  InputBase,
+  Typography,
+  useTheme,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
@@ -19,6 +32,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 import Comment from "components/Comment";
+import PostForm from 'components/PostForm';
 import React from 'react';
 import CommentForm from "components/CommentForm";
 
@@ -42,6 +56,12 @@ const PostWidget = ({
   const [newComment, setNewComment] = useState("");
   const [isShareClicked, setIsShareClicked] = useState(false); // New state for tracking share button click
   const [isShareHovered, setIsShareHovered] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [editPostData, setEditPostData] = useState(null);
+   // State variables for confirmation dialog
+   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
 
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
@@ -120,31 +140,32 @@ const PostWidget = ({
   };
 
   const handleEditComment = async (index, updatedText) => {
-    try {
-      const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${index}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: updatedText }),
-      });
+  try {
+    const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${index}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text: updatedText }),
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to update comment: ${response.status} - ${response.statusText}`);
-      }
-
-      const updatedPost = await response.json();
-
-      if (updatedPost && updatedPost.comments) {
-        setPostComments(updatedPost.comments);
-      } else {
-        console.error("Unexpected server response:", updatedPost);
-      }
-    } catch (error) {
-      console.error("Error updating comment:", error.message);
+    if (!response.ok) {
+      throw new Error(`Failed to update comment: ${response.status} - ${response.statusText}`);
     }
-  };
+
+    const updatedPost = await response.json();
+
+    if (updatedPost && updatedPost.comments) {
+      setPostComments(updatedPost.comments);
+    } else {
+      console.error("Unexpected server response:", updatedPost);
+    }
+  } catch (error) {
+    console.error("Error updating comment:", error.message);
+  }
+};
+
 
   const handleShare = async () => {
     try {
@@ -176,39 +197,111 @@ const PostWidget = ({
     setIsCommentFormOpen(true);
   };
 
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(false);
+  };
+
+  const openConfirmationDialog = () => {
+    setIsConfirmationOpen(true);
+  };
+
+  // Function to close confirmation dialog
+  const closeConfirmationDialog = () => {
+    setIsConfirmationOpen(false);
+  };
+
+  // Function to handle deletion confirmation
+  const handleDeleteConfirmation = () => {
+    // Close the confirmation dialog
+    closeConfirmationDialog();
+
+    // Call the function to delete the post
+    handleDeletePost();
+  };
+
   const handleDeletePost = async () => {
     try {
-      // Make a request to delete the post
       const postDeleteResponse = await fetch(`http://localhost:3001/posts/${postId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (postDeleteResponse.ok) {
         console.log('Post deleted successfully');
-        
-        // Make a separate request to remove the post from the bookmark lists of all users
+
         const bookmarkDeleteResponse = await fetch(`http://localhost:3001/posts/${postId}/delete-bookmark`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-  
+
         if (bookmarkDeleteResponse.ok) {
           console.log('Post removed from bookmark lists successfully');
-          // Perform any additional actions after successful deletion
-          // For example, redirect to a different page or update the state.
         } else {
           console.error('Failed to remove post from bookmark lists:', bookmarkDeleteResponse.status, bookmarkDeleteResponse.statusText);
         }
+
+        // Set a flag in localStorage to show the success alert after reload
+        localStorage.setItem('showDeleteAlertAfterReload', 'true');
+        // Reload the page
+        window.location.reload();
       } else {
         console.error('Failed to delete post:', postDeleteResponse.status, postDeleteResponse.statusText);
       }
     } catch (error) {
       console.error('Error deleting post:', error);
+    }
+  };
+
+ 
+
+  const handleEditPost = () => {
+    handleMenuClose();
+    // Set the post data to edit
+    setEditPostData({
+      title,
+      description,
+      // Include other post properties as needed
+    });
+
+    // Open the edit form
+    setIsEditFormOpen(true);
+  };
+
+  const handleUpdatePost = async (updatedPostData) => {
+    handleMenuClose();
+    try {
+      // Make a PATCH request to update the post
+      const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedPostData),
+      });
+
+      if (!response.ok) {
+        console.error(`Failed to update post. Server returned ${response.status}: ${response.statusText}`);
+        const errorResponse = await response.json();
+        console.error('Error details:', errorResponse);
+        return;
+      }
+
+      // Handle the updated post data as needed
+      const updatedPost = await response.json();
+      // Dispatch an action or update the local state as needed
+      console.log('Post updated successfully:', updatedPost);
+      window.location.reload();
+    } catch (error) {
+      console.error('An unexpected error occurred:', error);
     }
   };
   
@@ -222,33 +315,51 @@ const PostWidget = ({
           "Content-Type": "application/json",
         },
       });
-
+  
       if (response.ok) {
         // Toggle the bookmark state
-        const newIsBookmarked = !isBookmarked;
-        setIsBookmarked(newIsBookmarked);
-
-        // Remove the localStorage logic for debugging purposes
-        // localStorage.setItem(`bookmark_${postId}`, JSON.stringify(newIsBookmarked));
+        setIsBookmarked(prevState => !prevState);
       } else {
-        console.error("Failed to update bookmark:", response.status, response.statusText);
+        // Handle the error if the request fails
+        const errorMessage = await response.text();
+        console.error("Failed to update bookmark:", response.status, errorMessage);
       }
     } catch (error) {
       console.error("Error updating bookmark:", error.message);
     }
   };
 
+  
+
   return (
     <Box position="relative">
     {/* Move the delete icon inside the container */}
     {loggedInUserId === postUserId && (
-      <IconButton
-        style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
-        onClick={handleDeletePost}
-      >
-        <DeleteOutline />
-      </IconButton>
-    )}
+        <FlexBetween style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
+          <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
+            <MoreVert />
+          </IconButton>
+          <Menu
+            id="post-menu"
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+          >
+            <MenuItem onClick={handleEditPost}>Edit</MenuItem>
+            <MenuItem onClick={openConfirmationDialog}>Delete</MenuItem>
+          </Menu>
+        </FlexBetween>
+      )}
+      <Dialog open={isConfirmationOpen} onClose={closeConfirmationDialog}>
+        <DialogTitle>Confirmation</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this post?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeConfirmationDialog}>Cancel</Button>
+          <Button onClick={handleDeleteConfirmation} color="error">Delete</Button>
+        </DialogActions>
+      </Dialog>
     <WidgetWrapper m="2rem 0">
       <Friend
         friendId={postUserId}
@@ -256,6 +367,8 @@ const PostWidget = ({
         subtitle={location}
         userPicturePath={userPicturePath}
       />
+      
+      
 
       <Typography variant="h2" sx={{ mt: "1rem" }}>
         {title}
@@ -359,22 +472,26 @@ const PostWidget = ({
         )}
       </FlexBetween>
 
-
+          
       {isComments && postComments && (
         <Box mt="1rem">
           {postComments.map((comment, i) => (
             <React.Fragment key={`${postId}-${i}`}>
-              <Typography dangerouslySetInnerHTML={{ __html: comment.text}} />
               <Comment
                 key={`${postId}-${i}`}
                 color={main}
                 userPicturePath={comment.userPicturePath}
-                onDelete={() => handleDeleteComment(i)}
-                onEdit={(updatedText) => handleEditComment(i, updatedText)}
+                userId={comment.userId}
+                loggedInUserId={loggedInUserId}
+                comment={comment} // Pass the comment text as a prop
+                onDelete={() => handleDeleteComment(comment._id)}
+                onEdit={(updatedText) => handleEditComment(comment._id, updatedText)}
               />
+              
               <Divider /> 
             </React.Fragment>
           ))}
+          <Box mt="1rem"/>
           <FlexBetween gap="1.5rem" onClick={() => openForm()}>
             <InputBase
               type="text"
@@ -393,6 +510,13 @@ const PostWidget = ({
 
       )}
     </WidgetWrapper>
+    {isEditFormOpen && (
+        <PostForm
+          onClose={() => setIsEditFormOpen(false)}
+          onPost={(postData) => handleUpdatePost(postData)}  // Use a different handler for updating the post
+          postData={editPostData}  // Pass the post data to the PostForm
+        />
+      )}
     </Box>
   );
 };

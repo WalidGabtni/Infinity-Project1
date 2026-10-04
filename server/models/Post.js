@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const CommentSchema = mongoose.Schema(
   {
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User', 
       required: true,
     },
     text: {
@@ -48,7 +49,7 @@ const PostSchema = mongoose.Schema(
     comments: [CommentSchema],
     sharedBy: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // Assuming you have a User model
+      ref: 'User', 
     }],
   },
   {

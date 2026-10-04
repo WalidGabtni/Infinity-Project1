@@ -48,6 +48,7 @@ const MyPostWidget = ({ picturePath }) => {
       const posts = await response.json();
       dispatch(setPosts({ posts }));
       setImage(null);
+
     } catch (error) {
       console.error("An unexpected error occurred:", error);
     }
@@ -66,7 +67,7 @@ const MyPostWidget = ({ picturePath }) => {
       <FlexBetween gap="1.5rem" onClick={openForm}>
         <UserImage image={picturePath} />
         <InputBase
-          placeholder="Qu'est-ce qui préoccupe votre esprit..."
+          placeholder="What's on your mind?"
           sx={{
             width: "100%",
             backgroundColor: palette.neutral.light,

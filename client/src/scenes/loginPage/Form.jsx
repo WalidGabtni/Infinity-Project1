@@ -20,7 +20,10 @@ const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
   lastName: yup.string().required("required"),
   email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
+  password: yup
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .required("required"),
   location: yup.string().required("required"),
   occupation: yup.string().required("required"),
   picture: yup.string().required("required"),
@@ -48,6 +51,8 @@ const initialValuesLogin = {
 
 const Form = () => {
   const [pageType, setPageType] = useState("login");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -56,7 +61,6 @@ const Form = () => {
   const isRegister = pageType === "register";
 
   const register = async (values, onSubmitProps) => {
-    // this allows us to send form info with image
     const formData = new FormData();
     for (let value in values) {
       formData.append(value, values[value]);
@@ -73,8 +77,11 @@ const Form = () => {
     const savedUser = await savedUserResponse.json();
     onSubmitProps.resetForm();
 
-    if (savedUser) {
+    if (savedUserResponse.status >= 200 && savedUserResponse.status < 300) {
+      setSuccessMessage("Account created successfully. Please log in.");
       setPageType("login");
+    } else {
+      setErrorMessage("Registration failed. Please try again.");
     }
   };
 
@@ -86,7 +93,9 @@ const Form = () => {
     });
     const loggedIn = await loggedInResponse.json();
     onSubmitProps.resetForm();
-    if (loggedIn) {
+
+    if (loggedInResponse.status >= 200 && loggedInResponse.status < 300) {
+      // Successful login
       dispatch(
         setLogin({
           user: loggedIn.user,
@@ -94,10 +103,15 @@ const Form = () => {
         })
       );
       navigate("/home");
+    } else {
+      // Failed login
+      setErrorMessage("Email or password is incorrect");
     }
   };
 
   const handleFormSubmit = async (values, onSubmitProps) => {
+    setErrorMessage("");
+    setSuccessMessage("");
     if (isLogin) await login(values, onSubmitProps);
     if (isRegister) await register(values, onSubmitProps);
   };
@@ -119,6 +133,16 @@ const Form = () => {
         resetForm,
       }) => (
         <form onSubmit={handleSubmit}>
+          {errorMessage && (
+            <Typography variant="body2" color="error">
+              {errorMessage}
+            </Typography>
+          )}
+          {successMessage && (
+            <Typography variant="body2" style={{ color: 'green' }}>
+              {successMessage}
+            </Typography>
+          )}
           <Box
             display="grid"
             gap="30px"
@@ -130,7 +154,7 @@ const Form = () => {
             {isRegister && (
               <>
                 <TextField
-                  label="Prénom"
+                  label="first Name"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.firstName}
@@ -142,7 +166,7 @@ const Form = () => {
                   sx={{ gridColumn: "span 2" }}
                 />
                 <TextField
-                  label="Nom"
+                  label="last Name"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.lastName}
@@ -152,7 +176,7 @@ const Form = () => {
                   sx={{ gridColumn: "span 2" }}
                 />
                 <TextField
-                  label="Emplacement"
+                  label="location"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.location}
@@ -162,7 +186,7 @@ const Form = () => {
                   sx={{ gridColumn: "span 4" }}
                 />
                 <TextField
-                  label="Profession"
+                  label="occupation"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.occupation}
@@ -195,7 +219,7 @@ const Form = () => {
                       >
                         <input {...getInputProps()} />
                         {!values.picture ? (
-                          <p>Ajouter une image ici (.jpg .jpeg .png)</p>
+                          <p>Add an image here. (.jpg .jpeg .png)</p>
                         ) : (
                           <FlexBetween>
                             <Typography>{values.picture.name}</Typography>
@@ -220,7 +244,7 @@ const Form = () => {
               sx={{ gridColumn: "span 4" }}
             />
             <TextField
-              label="Mot de passe"
+              label="password"
               type="password"
               onBlur={handleBlur}
               onChange={handleChange}
@@ -245,7 +269,7 @@ const Form = () => {
                 "&:hover": { color: palette.primary.main },
               }}
             >
-              {isLogin ? "Connexion" : "S'inscrire"}
+              {isLogin ? "Connexion" : "Register"}
             </Button>
             <Typography
               onClick={() => {
@@ -262,8 +286,8 @@ const Form = () => {
               }}
             >
               {isLogin
-                ? "Vous n'avez pas de compte? inscrivez-vous ici."
-                : "Déjà inscrit(e) ? Connectez-vous ici."}
+                ? "Don't have an account? Sign up here."
+                : "Already registered? Log in here."}
             </Typography>
           </Box>
         </form>
@@ -272,4 +296,4 @@ const Form = () => {
   );
 };
 
-export default Form; 
+export default Form;

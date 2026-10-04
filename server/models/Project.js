@@ -1,10 +1,66 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const ProjectSchema = mongoose.Schema(
+const { Schema } = mongoose;
+
+const commentSchema = new Schema({
+  comment: {
+    type: String,
+    required: true,
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User', 
+    required: true,
+  },
+});
+
+const topicSchema = new Schema({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: false,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  locked: {
+    type: Boolean,
+    default: false,
+  },
+  pinned: {
+    type: Boolean,
+    default: false, 
+  },
+  hidden: {
+    type: Boolean,
+    default: false, 
+  },
+  destination: {
+    type: String, 
+    required: false, 
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  comments: [commentSchema],
+});
+
+
+const ProjectSchema = new Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       required: true,
     },
     firstName: {
@@ -36,12 +92,67 @@ const ProjectSchema = mongoose.Schema(
       enum: ['Not Started', 'In Progress', 'Completed'],
       default: 'Not Started',
     },
+    picturePath: String,
+    userPicturePath: String,
+    projectImage: String,
+    projectCover: String,
+    members: [
+      {
+        userId: {
+          type: String,
+          required: true,
+        },
+        firstName: {
+          type: String,
+          required: true,
+        },
+        lastName: {
+          type: String,
+          required: true,
+        },
+        
+        picturePath: String,
+        userPicturePath: String,
+        occupation: String,
+        role: {
+          type: String,
+          enum: ['Project Owner', 'Admin', 'Moderator', 'Member'], 
+          default: 'Member', 
+        },
+      },
+    ],
+    pendingRequests: [
+      {
+        userId: {
+          type: String,
+          required: true,
+        },
+        notificationId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Notification',
+          required: true,
+        },
+        firstName: {
+          type: String,
+          required: true,
+        },
+        lastName: {
+          type: String,
+          required: true,
+        },
+        picturePath: String,
+        userPicturePath: String,
+        occupation: String,
+      },
+    ],
+    topics: [topicSchema], 
+    privateTopics: [topicSchema], 
   },
   {
     timestamps: true,
   }
 );
 
-const Project = mongoose.model("Project", ProjectSchema);
+const Project = mongoose.model('Project', ProjectSchema);
 
 export default Project;
